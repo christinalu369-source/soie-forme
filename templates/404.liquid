@@ -1,0 +1,57 @@
+<section class="error-404">
+  <p class="error-404__label">404</p>
+  <h1 class="error-404__title">Page not found</h1>
+  <p class="error-404__body">The page you're looking for doesn't exist or has been moved.</p>
+  <a href="{{ routes.root_url }}" class="error-404__link">Return home</a>
+</section>
+
+<style>
+.error-404 {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  gap: 16px;
+}
+.error-404__label {
+  font-family: var(--font-serif);
+  font-size: clamp(80px, 16vw, 160px);
+  font-weight: 800;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--linen);
+  user-select: none;
+}
+.error-404__title {
+  font-family: var(--font-serif);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 600;
+  color: var(--ink);
+}
+.error-404__body {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  max-width: 320px;
+  line-height: 2;
+}
+.error-404__link {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--linen);
+  padding-bottom: 2px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.error-404__link:hover {
+  color: var(--olive);
+  border-color: var(--olive);
+}
+</style>
