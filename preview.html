@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soie & Forme — Entry Page Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       BASE.CSS — Global design tokens, resets, and shared styles
+       ============================================================ */
+
+    :root {
+      --cream:       #FAF8F3;
+      --cream-mid:   #EDE8DE;
+      --cream-deep:  #D4CFC4;
+      --linen:       #C8C2B6;
+      --ink:         #2C2C2A;
+      --ink-soft:    #4A4A48;
+      --ink-faint:   #8C8878;
+      --olive:       #708238;
+      --olive-light: #8A9E45;
+      --olive-dim:   rgba(112, 130, 56, 0.10);
+
+      --font-serif: 'Shippori Mincho', serif;
+      --font-mono:  'DM Mono', monospace;
+
+      --space-xs:  8px;
+      --space-sm:  16px;
+      --space-md:  28px;
+      --space-lg:  48px;
+      --space-xl:  80px;
+      --space-2xl: 120px;
+      --space-3xl: 180px;
+
+      --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+      cursor: none;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    img, video { display: block; max-width: 100%; }
+
+    a { color: inherit; text-decoration: none; }
+
+    button {
+      background: none;
+      border: none;
+      cursor: none;
+      font: inherit;
+      color: inherit;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    .cursor {
+      width: 8px;
+      height: 8px;
+      background: var(--olive);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s var(--ease-snappy),
+                  height 0.2s var(--ease-snappy),
+                  opacity 0.2s ease;
+      mix-blend-mode: multiply;
+      opacity: 0;
+    }
+
+    .cursor-ring {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--olive);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: width 0.3s var(--ease-snappy),
+                  height 0.3s var(--ease-snappy),
+                  opacity 0.2s ease,
+                  border-color 0.2s ease;
+    }
+
+    body.cursor-visible .cursor,
+    body.cursor-visible .cursor-ring { opacity: 1; }
+
+    body.cursor-hover .cursor { width: 20px; height: 20px; }
+    body.cursor-hover .cursor-ring { width: 20px; height: 20px; opacity: 0.3; }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9000;
+      opacity: 0.25;
+    }
+
+    ::selection { background: var(--olive); color: var(--cream); }
+
+    ::-webkit-scrollbar        { width: 3px; }
+    ::-webkit-scrollbar-track  { background: var(--cream); }
+    ::-webkit-scrollbar-thumb  { background: var(--olive); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      html { scroll-behavior: auto; }
+    }
+
+
+    /* ============================================================
+       SECTION-ENTRY.CSS — Dimension-style entry page
+       ============================================================ */
+
+    .entry {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      background-color: var(--cream-mid);
+      background-image:
+        radial-gradient(ellipse at 25% 35%, rgba(250, 248, 243, 0.85) 0%, transparent 55%),
+        radial-gradient(ellipse at 75% 65%, rgba(200, 194, 182, 0.50) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(112, 130, 56, 0.06) 0%, transparent 50%),
+        linear-gradient(155deg, #EDE8DE 0%, #D4CFC4 45%, #C8C2B6 100%);
+
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .entry::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 30%,
+        rgba(44, 44, 42, 0.45) 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .entry-center {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+      animation: fadeIn 1.2s ease forwards;
+    }
+
+    .entry-logo {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+      margin-bottom: 12px;
+      line-height: 1;
+    }
+
+    .entry-logo .amp {
+      color: var(--olive);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .entry-tagline {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 36px;
+    }
+
+    .entry-rule {
+      width: 40px;
+      height: 1px;
+      background: var(--olive);
+      opacity: 0.5;
+      margin: 0 auto 36px;
+    }
+
+    .entry-nav {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      list-style: none;
+    }
+
+    .entry-nav-item {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--ink-soft);
+      padding: 10px 20px;
+      position: relative;
+      transition: color 0.3s ease, letter-spacing 0.4s ease;
+      cursor: none;
+      background: none;
+      border: none;
+      text-decoration: none;
+    }
+
+    .entry-nav-item::after {
+      content: '';
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 1px;
+      background: var(--olive);
+      transition: width 0.35s var(--ease-snappy);
+    }
+
+    .entry-nav-item:hover {
+      color: var(--ink);
+      letter-spacing: 0.40em;
+    }
+
+    .entry-nav-item:hover::after {
+      width: calc(100% - 40px);
+    }
+
+    .entry-nav-item--shop::before {
+      content: '→';
+      margin-right: 10px;
+      color: var(--olive);
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+
+    .entry-nav-item--shop:hover::before {
+      transform: translateX(4px);
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 44, 42, 0.65);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 100;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    .modal-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ── MODAL PANEL ── */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% + 20px));
+      z-index: 101;
+      width: calc(100% - 48px);
+      max-width: 540px;
+      max-height: 80vh;
+      overflow-y: auto;
+
+      background: var(--cream);
+      padding: 52px 52px 48px;
+
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.45s ease,
+        transform 0.45s var(--ease-out),
+        visibility 0.45s ease;
+    }
+
+    .modal.is-open {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%);
+    }
+
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 52px;
+      width: 32px;
+      height: 2px;
+      background: var(--olive);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 300;
+      color: var(--ink-faint);
+      transition: color 0.2s ease, transform 0.2s ease;
+      line-height: 1;
+      padding: 4px 8px;
+    }
+
+    .modal-close:hover {
+      color: var(--ink);
+      transform: rotate(90deg);
+    }
+
+    .modal-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 0.36em;
+      text-transform: uppercase;
+      color: var(--olive);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--olive);
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: clamp(26px, 4vw, 36px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      margin-bottom: 24px;
+    }
+
+    .modal-body {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 300;
+      line-height: 2.2;
+      letter-spacing: 0.04em;
+      color: var(--ink-faint);
+      margin-bottom: 36px;
+    }
+
+    .modal-body p + p { margin-top: 16px; }
+
+    .modal-cta {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 300;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--cream);
+      background: var(--ink);
+      padding: 14px 36px;
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: color 0.35s ease;
+    }
+
+    .modal-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--olive);
+      transform: translateX(-100%);
+      transition: transform 0.4s var(--ease-snappy);
+    }
+
+    .modal-cta:hover::before { transform: translateX(0); }
+
+    .modal-cta span { position: relative; z-index: 1; }
+
+    .modal-cta--ghost {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--ink);
+    }
+
+    .modal-cta--ghost::before { background: var(--olive); }
+
+    .modal-cta--ghost:hover {
+      color: var(--cream);
+      border-color: var(--olive);
+    }
+
+    @media (max-width: 600px) {
+      .entry-logo { font-size: clamp(24px, 7vw, 36px); }
+      .entry-nav-item { font-size: 10px; letter-spacing: 0.26em; padding: 10px 16px; }
+      .modal { padding: 40px 28px 36px; }
+      .modal::before { left: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Entry section -->
+  <div class="entry">
+
+    <div class="entry-center">
+      <div class="entry-logo">Soie <span class="amp">&amp;</span> Forme</div>
+      <p class="entry-tagline">quietly refined silk</p>
+      <div class="entry-rule" aria-hidden="true"></div>
+      <nav class="entry-nav" aria-label="Site navigation">
+        <a href="/collections" class="entry-nav-item entry-nav-item--shop">Shop</a>
+        <button class="entry-nav-item" data-opens-modal="story" aria-haspopup="dialog" aria-controls="modal-story">Our Story</button>
+        <button class="entry-nav-item" data-opens-modal="bespoke" aria-haspopup="dialog" aria-controls="modal-bespoke">Bespoke</button>
+        <button class="entry-nav-item" data-opens-modal="contact" aria-haspopup="dialog" aria-controls="modal-contact">Contact</button>
+      </nav>
+    </div>
+
+    <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
+
+    <!-- Modal: Our Story -->
+    <div class="modal" id="modal-story" data-modal-id="story" role="dialog" aria-modal="true" aria-labelledby="modal-story-title">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <p class="modal-eyebrow">Our Philosophy</p>
+      <h2 class="modal-title" id="modal-story-title">Where craft meets comfort</h2>
+      <div class="modal-body">
+        <p>At Soie &amp; Forme, we believe the finest things in life belong in your everyday. Inspired by China's centuries-old tradition of silk craftsmanship, we source and curate natural fibre products — from lustrous mulberry silk to breathable linen — each chosen for the quality of its making and the comfort it brings.</p>
+      </div>
+      <a href="/pages/about" class="modal-cta"><span>Read our story</span></a>
+    </div>
+
+    <!-- Modal: Bespoke -->
+    <div class="modal" id="modal-bespoke" data-modal-id="bespoke" role="dialog" aria-modal="true" aria-labelledby="modal-bespoke-title">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <p class="modal-eyebrow">Made to Order</p>
+      <h2 class="modal-title" id="modal-bespoke-title">Your vision, perfectly made</h2>
+      <div class="modal-body">
+        <p>Our bespoke service offers fully customised silk pieces — your dimensions, your weight, your finish. Every commission is made to order with the same quiet precision that defines everything we make.</p>
+        <p>Enquire to begin a conversation about what's possible.</p>
+      </div>
+      <a href="/pages/contact" class="modal-cta"><span>Begin an enquiry</span></a>
+    </div>
+
+    <!-- Modal: Contact -->
+    <div class="modal" id="modal-contact" data-modal-id="contact" role="dialog" aria-modal="true" aria-labelledby="modal-contact-title">
+      <button class="modal-close" aria-label="Close">&times;</button>
+      <p class="modal-eyebrow">Get in touch</p>
+      <h2 class="modal-title" id="modal-contact-title">We'd love to hear from you</h2>
+      <div class="modal-body">
+        <p>Whether you have a question about an order, a bespoke enquiry, or simply want to know more about our materials — reach out and we'll get back to you within one business day.</p>
+      </div>
+      <a href="mailto:hello@soieetforme.com" class="modal-cta modal-cta--ghost"><span>hello@soieetforme.com</span></a>
+    </div>
+
+  </div><!-- /entry -->
+
+  <script>
+    /* ── GLOBAL.JS: Custom cursor ── */
+    (function () {
+      'use strict';
+      const cursor     = document.getElementById('cursor');
+      const cursorRing = document.getElementById('cursor-ring');
+
+      if (cursor && cursorRing) {
+        let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+        document.addEventListener('mousemove', function (e) {
+          mouseX = e.clientX;
+          mouseY = e.clientY;
+          cursor.style.left = mouseX + 'px';
+          cursor.style.top  = mouseY + 'px';
+          if (!document.body.classList.contains('cursor-visible')) {
+            document.body.classList.add('cursor-visible');
+          }
+        });
+
+        (function animateRing() {
+          ringX += (mouseX - ringX) * 0.1;
+          ringY += (mouseY - ringY) * 0.1;
+          cursorRing.style.left = ringX + 'px';
+          cursorRing.style.top  = ringY + 'px';
+          requestAnimationFrame(animateRing);
+        })();
+
+        document.addEventListener('mouseover', function (e) {
+          if (e.target.closest('a, button, [role="button"]')) {
+            document.body.classList.add('cursor-hover');
+          }
+        });
+        document.addEventListener('mouseout', function (e) {
+          if (e.target.closest('a, button, [role="button"]')) {
+            document.body.classList.remove('cursor-hover');
+          }
+        });
+        document.addEventListener('mouseleave', function () { document.body.classList.remove('cursor-visible'); });
+        document.addEventListener('mouseenter', function () { document.body.classList.add('cursor-visible'); });
+      }
+    })();
+  </script>
+
+  <script>
+    /* ── SECTION-ENTRY.JS: Modal interactions ── */
+    (function () {
+      'use strict';
+
+      const overlay = document.getElementById('modal-overlay');
+      if (!overlay) return;
+
+      let current = null;
+
+      function openModal(id) {
+        const target = document.querySelector('.modal[data-modal-id="' + id + '"]');
+        if (!target) return;
+        if (current && current !== target) { current.classList.remove('is-open'); current = null; }
+        current = target;
+        overlay.classList.add('is-open');
+        target.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        const firstFocusable = target.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) { setTimeout(function () { firstFocusable.focus(); }, 50); }
+      }
+
+      function closeModal() {
+        if (!current) return;
+        overlay.classList.remove('is-open');
+        current.classList.remove('is-open');
+        current = null;
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('[data-opens-modal]').forEach(function (btn) {
+        btn.addEventListener('click', function () { openModal(btn.getAttribute('data-opens-modal')); });
+      });
+
+      document.querySelectorAll('.modal-close').forEach(function (btn) {
+        btn.addEventListener('click', closeModal);
+      });
+
+      overlay.addEventListener('click', closeModal);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && current) { closeModal(); }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Tab' || !current) return;
+        const focusable = Array.from(current.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+        if (focusable.length === 0) return;
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+        else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
+      });
+    })();
+  </script>
+
+</body>
+</html>
