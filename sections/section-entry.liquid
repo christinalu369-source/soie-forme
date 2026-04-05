@@ -1,0 +1,274 @@
+{%- liquid
+  assign bg_image = section.settings.background_image
+  assign tagline   = section.settings.tagline
+-%}
+
+<div
+  class="entry"
+  {%- if bg_image != blank -%}
+    style="background-image:
+      radial-gradient(ellipse at center, transparent 30%, rgba(44,44,42,0.45) 100%),
+      url('{{ bg_image | image_url: width: 2400 }}');"
+  {%- endif -%}
+>
+
+  <!-- ── CENTERED CONTENT ── -->
+  <div class="entry-center">
+
+    <div class="entry-logo">
+      Soie <span class="amp">&amp;</span> Forme
+    </div>
+
+    <p class="entry-tagline">{{ tagline }}</p>
+
+    <div class="entry-rule" aria-hidden="true"></div>
+
+    <nav class="entry-nav" aria-label="Site navigation">
+
+      <!-- Shop → navigates to collections -->
+      <a
+        href="{{ routes.collections_url }}"
+        class="entry-nav-item entry-nav-item--shop"
+      >
+        Shop
+      </a>
+
+      <!-- Our Story → opens modal -->
+      <button
+        class="entry-nav-item"
+        data-opens-modal="story"
+        aria-haspopup="dialog"
+        aria-controls="modal-story"
+      >
+        Our Story
+      </button>
+
+      <!-- Bespoke → opens modal -->
+      <button
+        class="entry-nav-item"
+        data-opens-modal="bespoke"
+        aria-haspopup="dialog"
+        aria-controls="modal-bespoke"
+      >
+        Bespoke
+      </button>
+
+      <!-- Contact → opens modal -->
+      <button
+        class="entry-nav-item"
+        data-opens-modal="contact"
+        aria-haspopup="dialog"
+        aria-controls="modal-contact"
+      >
+        Contact
+      </button>
+
+    </nav>
+  </div><!-- /entry-center -->
+
+
+  <!-- ── OVERLAY ── -->
+  <div class="modal-overlay" id="modal-overlay" aria-hidden="true"></div>
+
+
+  <!-- ── MODAL: OUR STORY ── -->
+  <div
+    class="modal"
+    id="modal-story"
+    data-modal-id="story"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-story-title"
+  >
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <p class="modal-eyebrow">{{ section.settings.story_eyebrow }}</p>
+    <h2 class="modal-title" id="modal-story-title">{{ section.settings.story_title }}</h2>
+    <div class="modal-body">{{ section.settings.story_body }}</div>
+    {%- if section.settings.story_cta_label != blank -%}
+      <a
+        href="{{ section.settings.story_cta_url | default: '/pages/about' }}"
+        class="modal-cta"
+      >
+        <span>{{ section.settings.story_cta_label }}</span>
+      </a>
+    {%- endif -%}
+  </div>
+
+
+  <!-- ── MODAL: BESPOKE ── -->
+  <div
+    class="modal"
+    id="modal-bespoke"
+    data-modal-id="bespoke"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-bespoke-title"
+  >
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <p class="modal-eyebrow">{{ section.settings.bespoke_eyebrow }}</p>
+    <h2 class="modal-title" id="modal-bespoke-title">{{ section.settings.bespoke_title }}</h2>
+    <div class="modal-body">{{ section.settings.bespoke_body }}</div>
+    {%- if section.settings.bespoke_cta_label != blank -%}
+      <a
+        href="{{ section.settings.bespoke_cta_url | default: '/pages/contact' }}"
+        class="modal-cta"
+      >
+        <span>{{ section.settings.bespoke_cta_label }}</span>
+      </a>
+    {%- endif -%}
+  </div>
+
+
+  <!-- ── MODAL: CONTACT ── -->
+  <div
+    class="modal"
+    id="modal-contact"
+    data-modal-id="contact"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-contact-title"
+  >
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <p class="modal-eyebrow">{{ section.settings.contact_eyebrow }}</p>
+    <h2 class="modal-title" id="modal-contact-title">{{ section.settings.contact_title }}</h2>
+    <div class="modal-body">{{ section.settings.contact_body }}</div>
+    {%- if section.settings.contact_email != blank -%}
+      <a
+        href="mailto:{{ section.settings.contact_email }}"
+        class="modal-cta modal-cta--ghost"
+      >
+        <span>{{ section.settings.contact_email }}</span>
+      </a>
+    {%- endif -%}
+  </div>
+
+</div><!-- /entry -->
+
+
+{% schema %}
+{
+  "name": "Entry Page",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image",
+      "info": "Recommended: 2400px wide, landscape. A beautiful fabric or silk photo works best. If left blank, the gradient background is used."
+    },
+    {
+      "type": "header",
+      "content": "Entry Page"
+    },
+    {
+      "type": "text",
+      "id": "tagline",
+      "label": "Tagline",
+      "default": "quietly refined silk"
+    },
+    {
+      "type": "header",
+      "content": "Our Story modal"
+    },
+    {
+      "type": "text",
+      "id": "story_eyebrow",
+      "label": "Eyebrow label",
+      "default": "Our Philosophy"
+    },
+    {
+      "type": "text",
+      "id": "story_title",
+      "label": "Title",
+      "default": "Where craft meets comfort"
+    },
+    {
+      "type": "richtext",
+      "id": "story_body",
+      "label": "Body",
+      "default": "<p>At Soie & Forme, we believe the finest things in life belong in your everyday. Inspired by China's centuries-old tradition of silk craftsmanship, we source and curate natural fibre products — from lustrous mulberry silk to breathable linen — each chosen for the quality of its making and the comfort it brings.</p>"
+    },
+    {
+      "type": "text",
+      "id": "story_cta_label",
+      "label": "Button label",
+      "default": "Read our story"
+    },
+    {
+      "type": "url",
+      "id": "story_cta_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Bespoke modal"
+    },
+    {
+      "type": "text",
+      "id": "bespoke_eyebrow",
+      "label": "Eyebrow label",
+      "default": "Made to Order"
+    },
+    {
+      "type": "text",
+      "id": "bespoke_title",
+      "label": "Title",
+      "default": "Your vision, perfectly made"
+    },
+    {
+      "type": "richtext",
+      "id": "bespoke_body",
+      "label": "Body",
+      "default": "<p>Our bespoke service offers fully customised silk pieces — your dimensions, your weight, your finish. Every commission is made to order with the same quiet precision that defines everything we make.</p><p>Enquire to begin a conversation about what's possible.</p>"
+    },
+    {
+      "type": "text",
+      "id": "bespoke_cta_label",
+      "label": "Button label",
+      "default": "Begin an enquiry"
+    },
+    {
+      "type": "url",
+      "id": "bespoke_cta_url",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Contact modal"
+    },
+    {
+      "type": "text",
+      "id": "contact_eyebrow",
+      "label": "Eyebrow label",
+      "default": "Get in touch"
+    },
+    {
+      "type": "text",
+      "id": "contact_title",
+      "label": "Title",
+      "default": "We'd love to hear from you"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_body",
+      "label": "Body",
+      "default": "<p>Whether you have a question about an order, a bespoke enquiry, or simply want to know more about our materials — reach out and we'll get back to you within one business day.</p>"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Email address",
+      "default": "hello@soieetforme.com"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Entry Page"
+    }
+  ]
+}
+{% endschema %}
