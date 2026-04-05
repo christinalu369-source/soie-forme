@@ -31,8 +31,12 @@
   --space-3xl: 180px;
 
   /* Transitions */
-  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
   --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Silk unfurl: builds momentum, decelerates to a whisper */
+  --ease-silk:   cubic-bezier(0.22, 1, 0.36, 1);
+  /* Gentle settle: smooth in/out, like fabric coming to rest */
+  --ease-settle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 /* ── RESET ── */

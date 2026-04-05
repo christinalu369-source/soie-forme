@@ -15,55 +15,82 @@
   <!-- ── CENTERED CONTENT ── -->
   <div class="entry-center">
 
-    <div class="entry-logo">
-      Soie <span class="amp">&amp;</span> Forme
+    <!-- Logo + tagline -->
+    <div class="entry-head">
+      <div class="entry-logo">
+        Soie <span class="amp">&amp;</span> Forme
+      </div>
+      <p class="entry-tagline">{{ tagline }}</p>
     </div>
 
-    <p class="entry-tagline">{{ tagline }}</p>
+    <!-- Animated structural diagram -->
+    <div class="entry-diagram">
 
-    <div class="entry-rule" aria-hidden="true"></div>
+      <!-- Vertical stem grows down from logo -->
+      <div class="diagram-stem"></div>
 
-    <nav class="entry-nav" aria-label="Site navigation">
+      <!-- Horizontal crossbar grows outward from center -->
+      <div class="diagram-crossbar">
+        <div class="crossbar-half crossbar-left"></div>
+        <div class="crossbar-half crossbar-right"></div>
+      </div>
 
-      <!-- Shop → navigates to collections -->
-      <a
-        href="{{ routes.collections_url }}"
-        class="entry-nav-item entry-nav-item--shop"
-      >
-        Shop
-      </a>
+      <!-- Four columns: drop line → box -->
+      <div class="diagram-nav">
 
-      <!-- Our Story → opens modal -->
-      <button
-        class="entry-nav-item"
-        data-opens-modal="story"
-        aria-haspopup="dialog"
-        aria-controls="modal-story"
-      >
-        Our Story
-      </button>
+        <!-- Shop → navigates to collections -->
+        <div class="nav-col">
+          <div class="nav-drop"></div>
+          <a
+            href="{{ routes.collections_url }}"
+            class="nav-box nav-box--shop"
+          >
+            <span class="shop-arrow">→</span>Shop
+          </a>
+        </div>
 
-      <!-- Bespoke → opens modal -->
-      <button
-        class="entry-nav-item"
-        data-opens-modal="bespoke"
-        aria-haspopup="dialog"
-        aria-controls="modal-bespoke"
-      >
-        Bespoke
-      </button>
+        <!-- Our Story → opens modal -->
+        <div class="nav-col">
+          <div class="nav-drop"></div>
+          <button
+            class="nav-box"
+            data-opens-modal="story"
+            aria-haspopup="dialog"
+            aria-controls="modal-story"
+          >
+            Our Story
+          </button>
+        </div>
 
-      <!-- Contact → opens modal -->
-      <button
-        class="entry-nav-item"
-        data-opens-modal="contact"
-        aria-haspopup="dialog"
-        aria-controls="modal-contact"
-      >
-        Contact
-      </button>
+        <!-- Bespoke → opens modal -->
+        <div class="nav-col">
+          <div class="nav-drop"></div>
+          <button
+            class="nav-box"
+            data-opens-modal="bespoke"
+            aria-haspopup="dialog"
+            aria-controls="modal-bespoke"
+          >
+            Bespoke
+          </button>
+        </div>
 
-    </nav>
+        <!-- Contact → opens modal -->
+        <div class="nav-col">
+          <div class="nav-drop"></div>
+          <button
+            class="nav-box"
+            data-opens-modal="contact"
+            aria-haspopup="dialog"
+            aria-controls="modal-contact"
+          >
+            Contact
+          </button>
+        </div>
+
+      </div><!-- /diagram-nav -->
+    </div><!-- /entry-diagram -->
+
   </div><!-- /entry-center -->
 
 
