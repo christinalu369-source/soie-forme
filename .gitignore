@@ -1,0 +1,27 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Shopify CLI auth cache
+.shopify/
+
+# Node (if Shopify CLI or tooling installed locally)
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Editor
+.vscode/settings.json
+.idea/
