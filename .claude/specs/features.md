@@ -33,9 +33,9 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| Theme scaffolding | `idea` | — | Create Shopify theme folder structure: `assets/`, `config/`, `layout/`, `sections/`, `snippets/`, `templates/`, `locales/`; base CSS with design tokens; global JS |
-| Design system | `idea` | — | `assets/base.css` — CSS custom properties for colors, typography, spacing, and animation variables; `prefers-reduced-motion` support |
-| Global layout | `idea` | — | `layout/theme.liquid` — outer HTML shell, font loading, global CSS/JS includes |
+| Theme scaffolding | `done` | `done-theme-scaffolding.md` | Shopify folder structure, base CSS, global JS, both layouts, entry page section + modals, config, locales |
+| Design system | `done` | `done-theme-scaffolding.md` | Included in scaffolding plan |
+| Global layout | `done` | `done-theme-scaffolding.md` | `layout/theme.liquid` (nav + footer) and `layout/entry.liquid` (full-screen) both built |
 
 ### Navigation & Chrome
 
@@ -51,8 +51,7 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| Hero section | `idea` | — | Full-viewport cinematic hero — large heading, eyebrow label, CTA; fade-in on load animation; olive accent details |
-| Entry page modals | `idea` | — | Dimension-inspired: clickable panels that fade in overlay content (brand story, fabric philosophy, etc.) |
+| Entry page (Dimension-style) | `done` | `done-theme-scaffolding.md` | Full-screen background, centered logo + nav, 3 modal panels (Story, Bespoke, Contact), Shop links to /collections |
 | Featured collection section | `idea` | — | Curated product grid on the homepage — links to collection page |
 | Editorial / material section | `idea` | — | Informational section about silk and fabrics — image + text, fade-in on scroll |
 
