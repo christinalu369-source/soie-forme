@@ -51,7 +51,7 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| Entry page (Dimension-style) | `done` | `done-theme-scaffolding.md` | Full-screen background, centered logo + nav, 3 modal panels (Story, Bespoke, Contact), Shop links to /collections |
+| Entry page (Dimension-style) | `done` | `done-theme-scaffolding.md` | Full-screen background, animated structural diagram nav (stem → crossbar → drops → boxes), 3 modal panels (Story, Bespoke, Contact), Shop links to /collections; silky ~5s build animation |
 | Featured collection section | `idea` | — | Curated product grid on the homepage — links to collection page |
 | Editorial / material section | `idea` | — | Informational section about silk and fabrics — image + text, fade-in on scroll |
 
