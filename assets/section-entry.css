@@ -1,0 +1,348 @@
+/* ============================================================
+   SECTION-ENTRY.CSS — Dimension-style entry page
+   Full-screen immersive landing with modal panels
+   ============================================================ */
+
+/* ── ENTRY WRAPPER ── */
+.entry {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Silk-textile gradient — luminous cream with soft depth */
+  background-color: var(--cream-mid);
+  background-image:
+    radial-gradient(ellipse at 25% 35%, rgba(250, 248, 243, 0.85) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 65%, rgba(200, 194, 182, 0.50) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(112, 130, 56, 0.06) 0%, transparent 50%),
+    linear-gradient(155deg, #EDE8DE 0%, #D4CFC4 45%, #C8C2B6 100%);
+
+  /* Merchant-supplied photo sits on top of the gradient */
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+/* Vignette: darkens edges so centered text reads clearly */
+.entry::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    rgba(44, 44, 42, 0.45) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── CENTER CONTENT ── */
+.entry-center {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+  animation: fadeIn 1.2s ease forwards;
+}
+
+/* ── LOGO ── */
+.entry-logo {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.entry-logo .amp {
+  color: var(--olive);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* ── TAGLINE ── */
+.entry-tagline {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 36px;
+}
+
+/* ── DIVIDER RULE ── */
+.entry-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--olive);
+  opacity: 0.5;
+  margin: 0 auto 36px;
+}
+
+/* ── NAV ITEMS ── */
+.entry-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  list-style: none;
+}
+
+.entry-nav-item {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  padding: 10px 20px;
+  position: relative;
+  transition: color 0.3s ease, letter-spacing 0.4s ease;
+  cursor: none;
+  background: none;
+  border: none;
+  text-decoration: none;
+}
+
+/* Underline reveal on hover */
+.entry-nav-item::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 1px;
+  background: var(--olive);
+  transition: width 0.35s var(--ease-snappy);
+}
+
+.entry-nav-item:hover {
+  color: var(--ink);
+  letter-spacing: 0.40em;
+}
+
+.entry-nav-item:hover::after {
+  width: calc(100% - 40px);
+}
+
+/* Shop item gets an arrow */
+.entry-nav-item--shop::before {
+  content: '→';
+  margin-right: 10px;
+  color: var(--olive);
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.entry-nav-item--shop:hover::before {
+  transform: translateX(4px);
+}
+
+
+/* ── MODAL OVERLAY ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(44, 44, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.modal-overlay.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+
+/* ── MODAL PANEL ── */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 20px));
+  z-index: 101;
+  width: calc(100% - 48px);
+  max-width: 540px;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  background: var(--cream);
+  padding: 52px 52px 48px;
+
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s var(--ease-out),
+    visibility 0.45s ease;
+}
+
+.modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+}
+
+/* Thin olive top border */
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 52px;
+  width: 32px;
+  height: 2px;
+  background: var(--olive);
+}
+
+/* ── MODAL CLOSE BUTTON ── */
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--ink-faint);
+  transition: color 0.2s ease, transform 0.2s ease;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.modal-close:hover {
+  color: var(--ink);
+  transform: rotate(90deg);
+}
+
+/* ── MODAL CONTENT ── */
+.modal-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.modal-eyebrow::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--olive);
+  flex-shrink: 0;
+}
+
+.modal-title {
+  font-family: var(--font-serif);
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.modal-body {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 2.2;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-bottom: 36px;
+}
+
+.modal-body p + p {
+  margin-top: 16px;
+}
+
+/* ── MODAL CTA BUTTON ── */
+.modal-cta {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--ink);
+  padding: 14px 36px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.35s ease;
+}
+
+.modal-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--olive);
+  transform: translateX(-100%);
+  transition: transform 0.4s var(--ease-snappy);
+}
+
+.modal-cta:hover::before {
+  transform: translateX(0);
+}
+
+.modal-cta span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ghost variant */
+.modal-cta--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.modal-cta--ghost::before {
+  background: var(--olive);
+}
+
+.modal-cta--ghost:hover {
+  color: var(--cream);
+  border-color: var(--olive);
+}
+
+
+/* ── MOBILE ── */
+@media (max-width: 600px) {
+  .entry-logo {
+    font-size: clamp(24px, 7vw, 36px);
+  }
+
+  .entry-nav-item {
+    font-size: 10px;
+    letter-spacing: 0.26em;
+    padding: 10px 16px;
+  }
+
+  .modal {
+    padding: 40px 28px 36px;
+  }
+
+  .modal::before {
+    left: 28px;
+  }
+}
