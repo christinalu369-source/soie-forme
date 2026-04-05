@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soie & Forme — Silk Essentials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream: #FAF8F3;
+  --cream-mid: #EDE8DE;
+  --cream-deep: #D4CFC4;
+  --linen: #C8C2B6;
+  --ink: #2C2C2A;
+  --ink-soft: #4A4A48;
+  --ink-faint: #8C8878;
+  --olive: #708238;
+  --olive-light: #8A9E45;
+  --olive-dim: rgba(112, 130, 56, 0.1);
+  --white: #FAF8F3;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor {
+  width: 8px;
+  height: 8px;
+  background: var(--olive);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s, height 0.2s, background 0.2s;
+  mix-blend-mode: multiply;
+}
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--olive);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  opacity: 0.5;
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+body:hover .cursor { opacity: 1; }
+
+/* ── SCROLL TRANSITION WRAPPER ── */
+.page-wrapper {
+  position: relative;
+}
+
+/* Each section has its own background that transitions on scroll */
+.section-cream { background: var(--cream); }
+.section-mid { background: var(--cream-mid); }
+.section-deep { background: var(--cream-deep); }
+.section-linen { background: var(--linen); }
+.section-dark { background: var(--ink); }
+
+/* ── NOISE TEXTURE ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.3;
+}
+
+/* ── NAVIGATION ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 60px;
+  transition: padding 0.4s ease, background 0.4s ease, backdrop-filter 0.4s ease;
+}
+
+nav.scrolled {
+  padding: 16px 60px;
+  background: rgba(250, 248, 243, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(112, 130, 56, 0.12);
+}
+
+.nav-logo {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-logo .amp {
+  color: var(--olive);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.nav-links {
+  display: flex;
+  gap: 40px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color 0.3s;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--olive);
+  transition: width 0.35s ease;
+}
+
+.nav-links a:hover { color: var(--ink); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-actions a {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.nav-actions a:hover { color: var(--olive); }
+
+.cart-icon {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--linen);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--ink-faint);
+  transition: border-color 0.3s, color 0.3s;
+  text-decoration: none;
+}
+.cart-icon:hover { border-color: var(--olive); color: var(--olive); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 60px 80px;
+  background: var(--cream);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Olive ink wash — top right */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(112, 130, 56, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Cream wash bottom left */
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -60px;
+  left: -60px;
+  width: 400px;
+  height: 300px;
+  background: radial-gradient(ellipse at center, rgba(112, 130, 56, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.2s forwards;
+}
+
+.hero-eyebrow::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--olive);
+}
+
+.hero-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(56px, 10vw, 148px);
+  font-weight: 800;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin-bottom: 48px;
+  max-width: 900px;
+  opacity: 0;
+  animation: fadeUp 1.2s cubic-bezier(0.16,1,0.3,1) 0.35s forwards;
+}
+
+.hero-title .green { color: var(--olive); }
+.hero-title .outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+.hero-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.8s forwards;
+}
+
+.hero-sub {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 2.2;
+  color: var(--ink-faint);
+  max-width: 360px;
+}
+
+.hero-cta {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  padding: 16px 44px;
+  text-decoration: none;
+  transition: background 0.35s ease, color 0.35s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--olive);
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+.btn-primary:hover::before { transform: translateX(0); }
+.btn-primary span { position: relative; z-index: 1; }
+
+.btn-ghost {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: color 0.3s;
+}
+
+.btn-ghost::after { content: '→'; transition: transform 0.3s; }
+.btn-ghost:hover { color: var(--olive); }
+.btn-ghost:hover::after { transform: translateX(4px); }
+
+/* ── SCROLL TICKER ── */
+.ticker {
+  background: var(--ink);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  border-top: 1px solid rgba(250,248,243,0.08);
+}
+
+.ticker-track {
+  display: flex;
+  animation: ticker 28s linear infinite;
+  white-space: nowrap;
+}
+
+.ticker-item {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: rgba(250,248,243,0.4);
+  padding: 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.ticker-sep {
+  color: var(--olive);
+  margin: 0 32px;
+  font-size: 8px;
+}
+
+/* ── COLLECTIONS SECTION ── */
+.collections {
+  padding: 120px 60px;
+  background: var(--cream);
+  position: relative;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 72px;
+}
+
+.section-label {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--olive);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.section-label::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--olive);
+}
+
+.section-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.section-title .green {
+  color: var(--olive);
+  font-style: italic;
+}
+
+.view-all {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 2px;
+  transition: border-color 0.3s, color 0.3s;
+  align-self: flex-end;
+}
+
+.view-all:hover { border-color: var(--olive); color: var(--olive); }
+
+/* Product grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 3px;
+}
+
+.product-card {
+  position: relative;
+  overflow: hidden;
+  cursor: none;
+  background: var(--cream-mid);
+  border-top: 2px solid var(--ink);
+}
+
+.product-card.featured { grid-row: span 2; }
+
+.product-card-img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+
+.product-card.featured .product-card-img {
+  aspect-ratio: auto;
+  height: 100%;
+}
+
+.product-card:hover .product-card-img { transform: scale(1.04); }
+
+/* Placeholder for product images */
+.product-placeholder {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: var(--cream-mid);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  transition: background 0.4s;
+}
+
+.product-card.featured .product-placeholder {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 600px;
+}
+
+.product-card:hover .product-placeholder { background: var(--cream-deep); }
+
+.placeholder-icon {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(48px, 6vw, 80px);
+  font-weight: 800;
+  color: rgba(112,130,56,0.15);
+  letter-spacing: -0.04em;
+}
+
+.placeholder-label {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--linen);
+}
+
+.product-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24px 28px;
+  background: linear-gradient(to top, rgba(44,44,42,0.7), transparent);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.4s, transform 0.4s;
+}
+
+.product-card:hover .product-info {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.product-name {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.product-meta {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(250,248,243,0.6);
+}
+
+.product-tag {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--olive);
+  color: var(--cream);
+  font-size: 8px;
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+}
+
+/* ── PHILOSOPHY / ABOUT SECTION ── */
+.philosophy {
+  padding: 160px 60px;
+  background: var(--cream-mid);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Watermark */
+.philosophy::after {
+  content: '絲';
+  position: absolute;
+  right: -40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(180px, 22vw, 340px);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(112,130,56,0.06);
+  pointer-events: none;
+  line-height: 1;
+  user-select: none;
+}
+
+.philosophy-content {}
+
+.philosophy-pull {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(28px, 3.5vw, 48px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 40px;
+}
+
+.philosophy-pull .green { color: var(--olive); font-style: italic; }
+
+.philosophy-body {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  line-height: 2.4;
+  color: var(--ink-faint);
+  max-width: 460px;
+  margin-bottom: 52px;
+}
+
+.philosophy-stats {
+  display: flex;
+  gap: 52px;
+}
+
+.stat-num {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 44px;
+  font-weight: 700;
+  font-style: italic;
+  color: var(--olive);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Philosophy visual */
+.philosophy-visual {
+  position: relative;
+  height: 520px;
+}
+
+.phil-block-main {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 78%;
+  height: 88%;
+  background: var(--cream-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.phil-block-accent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 46%;
+  height: 46%;
+  background: var(--olive-dim);
+  border: 1px solid rgba(112,130,56,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 28px;
+  gap: 6px;
+}
+
+.phil-accent-label {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--olive);
+}
+
+.phil-accent-value {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 24px;
+  font-style: italic;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.phil-illustration {
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+}
+
+/* ── MATERIALS SECTION ── */
+.materials {
+  background: var(--cream-deep);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.mat-cell {
+  padding: 64px 40px;
+  border-right: 1px solid rgba(44,44,42,0.08);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+.mat-cell:last-child { border-right: none; }
+
+.mat-cell::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--olive);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.23,1,0.32,1);
+}
+
+.mat-cell:hover::after { transform: scaleX(1); }
+.mat-cell:hover { background: rgba(112,130,56,0.04); }
+
+.mat-num {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  color: var(--linen);
+  margin-bottom: 36px;
+}
+
+.mat-name {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(20px, 2vw, 28px);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.mat-origin {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 20px;
+}
+
+.mat-desc {
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 2.1;
+  color: var(--ink-faint);
+}
+
+/* ── BESPOKE SECTION ── */
+.bespoke {
+  padding: 180px 60px;
+  background: var(--linen);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.bespoke::before {
+  content: '定製';
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(120px, 16vw, 220px);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(44,44,42,0.06);
+  pointer-events: none;
+  line-height: 1;
+}
+
+.bespoke-content { max-width: 560px; }
+
+.bespoke-title {
+  font-family: 'Shippori Mincho', serif;
+  font-size: clamp(40px, 6vw, 88px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 36px;
+}
+
+.bespoke-title .green { color: var(--olive); font-style: italic; }
+.bespoke-title .outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--ink);
+}
+
+.bespoke-body {
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  line-height: 2.4;
+  color: var(--ink-faint);
+  margin-bottom: 52px;
+  max-width: 420px;
+}
+
+.btn-outline {
+  display: inline-block;
+  border: 1px solid var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding: 16px 48px;
+  text-decoration: none;
+  transition: background 0.35s, color 0.35s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-outline::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--olive);
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+.btn-outline:hover { color: var(--cream); border-color: var(--olive); }
+.btn-outline:hover::before { transform: translateY(0); }
+.btn-outline span { position: relative; z-index: 1; }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--ink);
+  padding: 80px 60px 44px;
+  position: relative;
+}
+
+footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 60px;
+  width: 40px;
+  height: 2px;
+  background: var(--olive);
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  gap: 60px;
+  padding-bottom: 60px;
+  border-bottom: 1px solid rgba(250,248,243,0.06);
+  margin-bottom: 40px;
+}
+
+.footer-logo {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  margin-bottom: 6px;
+}
+
+.footer-logo .amp { color: var(--olive); font-style: italic; }
+
+.footer-tagline {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  line-height: 2;
+  color: rgba(250,248,243,0.35);
+  max-width: 260px;
+  margin-bottom: 32px;
+  margin-top: 8px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-social a {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(250,248,243,0.3);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.footer-social a:hover { color: var(--olive); }
+
+.footer-col-title {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(250,248,243,0.06);
+}
+
+.footer-col ul { list-style: none; }
+.footer-col li + li { margin-top: 14px; }
+.footer-col a {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: rgba(250,248,243,0.4);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--cream); }
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-copy {
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  color: rgba(250,248,243,0.2);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.22s; }
+.reveal-d3 { transition-delay: 0.34s; }
+.reveal-d4 { transition-delay: 0.46s; }
+
+/* Section transition via scroll */
+.section-transition {
+  transition: background-color 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+
+/* ── SELECTION ── */
+::selection { background: var(--olive); color: var(--cream); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb { background: var(--olive); }
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  nav { padding: 20px 24px; }
+  nav.scrolled { padding: 14px 24px; }
+  .nav-links { display: none; }
+
+  .hero { padding: 0 24px 60px; }
+  .hero-bottom { flex-direction: column; align-items: flex-start; gap: 32px; }
+
+  .collections { padding: 80px 24px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .product-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+  .product-card.featured { grid-row: span 1; }
+  .product-card.featured .product-placeholder { min-height: 400px; }
+
+  .philosophy { padding: 100px 24px; grid-template-columns: 1fr; gap: 60px; }
+  .philosophy::after { display: none; }
+  .philosophy-visual { height: 380px; }
+
+  .materials { grid-template-columns: 1fr 1fr; }
+  .mat-cell { padding: 48px 28px; }
+
+  .bespoke { padding: 100px 24px; flex-direction: column; }
+  .bespoke::before { display: none; }
+
+  footer { padding: 60px 24px 40px; }
+  .footer-top { grid-template-columns: 1fr; gap: 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ── NAVIGATION ── -->
+<nav id="nav">
+  <a href="#" class="nav-logo">Soie <span class="amp">&</span> Forme</a>
+  <ul class="nav-links">
+    <li><a href="#collections">Collections</a></li>
+    <li><a href="#materials">Materials</a></li>
+    <li><a href="#bespoke">Bespoke</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="#">Search</a>
+    <a href="#" class="cart-icon">0</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero section-cream">
+  <p class="hero-eyebrow">Natural Fibres — Est. 2024</p>
+  <h1 class="hero-title">
+    Silk,<br>
+    <span class="green">worn</span><br>
+    <span class="outline">daily.</span>
+  </h1>
+  <div class="hero-bottom">
+    <p class="hero-sub">
+      Rooted in China's silk heritage.<br>
+      Made for your everyday ritual.
+    </p>
+    <div class="hero-cta">
+      <a href="#collections" class="btn-primary"><span>Shop Now</span></a>
+      <a href="#about" class="btn-ghost">Our Story</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── TICKER ── -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="ticker-item">100% Mulberry Silk<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Tencel Lyocell<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Merino Wool<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">100% Cotton<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Made to Order Bedding<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Chinese Silk Heritage<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Scarves · Pillowcases · Scrunchies<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Natural Fibres Only<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">100% Mulberry Silk<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Tencel Lyocell<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Merino Wool<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">100% Cotton<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Made to Order Bedding<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Chinese Silk Heritage<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Scarves · Pillowcases · Scrunchies<span class="ticker-sep">✦</span></span>
+    <span class="ticker-item">Natural Fibres Only<span class="ticker-sep">✦</span></span>
+  </div>
+</div>
+
+<!-- ── COLLECTIONS ── -->
+<section class="collections section-cream" id="collections">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-label">Our Collections</div>
+      <h2 class="section-title">
+        Silk <span class="green">essentials</span>,<br>reimagined
+      </h2>
+    </div>
+    <a href="#" class="view-all">View All →</a>
+  </div>
+
+  <div class="product-grid">
+    <!-- Featured -->
+    <div class="product-card featured reveal">
+      <div class="product-placeholder">
+        <div class="placeholder-icon">絲</div>
+        <span class="placeholder-label">Silk Pillowcase</span>
+      </div>
+      <div class="product-tag">Bestseller</div>
+      <div class="product-info">
+        <div class="product-name">Silk Pillowcase</div>
+        <div class="product-meta">22 Momme · Mulberry Silk</div>
+      </div>
+    </div>
+
+    <!-- Grid items -->
+    <div class="product-card reveal reveal-d1">
+      <div class="product-placeholder">
+        <div class="placeholder-icon">眠</div>
+        <span class="placeholder-label">Sleep Mask</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Silk Eye Mask</div>
+        <div class="product-meta">Pure Silk · Adjustable</div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-d2">
+      <div class="product-placeholder">
+        <div class="placeholder-icon">巾</div>
+        <span class="placeholder-label">Silk Scarf</span>
+      </div>
+      <div class="product-tag">New</div>
+      <div class="product-info">
+        <div class="product-name">Silk Scarf</div>
+        <div class="product-meta">90×90cm · Hand-rolled</div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-d1">
+      <div class="product-placeholder">
+        <div class="placeholder-icon">髮</div>
+        <span class="placeholder-label">Silk Bonnet</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Silk Bonnet</div>
+        <div class="product-meta">Hair Care · All Sizes</div>
+      </div>
+    </div>
+
+    <div class="product-card reveal reveal-d2">
+      <div class="product-placeholder">
+        <div class="placeholder-icon">環</div>
+        <span class="placeholder-label">Scrunchies</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">Silk Scrunchies</div>
+        <div class="product-meta">Set of 3 · Various</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PHILOSOPHY / ABOUT ── -->
+<section class="philosophy section-mid" id="about">
+  <div class="philosophy-content reveal">
+    <div class="section-label">Our Philosophy</div>
+    <h2 class="philosophy-pull">
+      Where <span class="green">craft</span><br>meets comfort
+    </h2>
+    <p class="philosophy-body">
+      At Soie & Forme, we believe the finest things in life belong in your everyday. 
+      Inspired by China's centuries-old tradition of silk craftsmanship, we source and 
+      curate natural fibre products — from lustrous mulberry silk to breathable Tencel, 
+      soft cotton, and warm wool — each chosen for the quality of its making and the 
+      comfort it brings.
+    </p>
+    <div class="philosophy-stats">
+      <div class="reveal reveal-d1">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Natural Fibres</div>
+      </div>
+      <div class="reveal reveal-d2">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Curated Materials</div>
+      </div>
+      <div class="reveal reveal-d3">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Bespoke Options</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="philosophy-visual reveal reveal-d1">
+    <div class="phil-block-main">
+      <svg class="phil-illustration" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#D4CFC4"/>
+            <stop offset="100%" style="stop-color:#C8C2B6"/>
+          </linearGradient>
+        </defs>
+        <rect width="400" height="500" fill="url(#pg)"/>
+        <g opacity="0.3" stroke="#FAF8F3" stroke-width="0.7" fill="none">
+          <path d="M0,100 Q100,60 200,100 T400,90"/>
+          <path d="M0,180 Q120,140 250,190 T400,170"/>
+          <path d="M0,260 Q80,220 200,265 T400,250"/>
+          <path d="M0,340 Q150,300 260,345 T400,330"/>
+          <path d="M0,420 Q100,385 210,420 T400,410"/>
+        </g>
+        <text x="200" y="260" text-anchor="middle" font-family="Georgia, serif" font-size="11" letter-spacing="4" fill="#2C2C2A" opacity="0.3" font-style="italic">Soie & Forme</text>
+      </svg>
+    </div>
+    <div class="phil-block-accent">
+      <span class="phil-accent-label">Signature Weight</span>
+      <span class="phil-accent-value">22 momme</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── MATERIALS ── -->
+<section class="materials section-deep" id="materials">
+  <div class="mat-cell reveal">
+    <div class="mat-num">01</div>
+    <div class="mat-name">Mulberry Silk</div>
+    <div class="mat-origin">China</div>
+    <div class="mat-desc">Our signature fibre. Temperature-regulating, hypoallergenic, and impossibly soft against skin and hair.</div>
+  </div>
+  <div class="mat-cell reveal reveal-d1">
+    <div class="mat-num">02</div>
+    <div class="mat-name">Tencel Lyocell</div>
+    <div class="mat-origin">Closed-loop</div>
+    <div class="mat-desc">Sustainably produced from wood pulp. Breathable, moisture-wicking, and gentle on the planet.</div>
+  </div>
+  <div class="mat-cell reveal reveal-d2">
+    <div class="mat-num">03</div>
+    <div class="mat-name">Merino Wool</div>
+    <div class="mat-origin">Ethically sourced</div>
+    <div class="mat-desc">Fine-grade wool for our scarf collection. Warm, breathable, and naturally odour-resistant.</div>
+  </div>
+  <div class="mat-cell reveal reveal-d3">
+    <div class="mat-num">04</div>
+    <div class="mat-name">100% Cotton</div>
+    <div class="mat-origin">Natural</div>
+    <div class="mat-desc">Classic, durable, and endlessly comfortable. GOTS-certified where possible for full transparency.</div>
+  </div>
+</section>
+
+<!-- ── BESPOKE ── -->
+<section class="bespoke section-linen" id="bespoke">
+  <div class="bespoke-content reveal">
+    <div class="section-label">Made to Order</div>
+    <h2 class="bespoke-title">
+      Your bed,<br>
+      <span class="green">perfectly</span><br>
+      <span class="outline">dressed.</span>
+    </h2>
+    <p class="bespoke-body">
+      Our bespoke bedding service offers fully customised silk sets — your dimensions, 
+      your thread count, your colour. Every set is made to order with the same quiet 
+      precision that defines everything we make.
+    </p>
+    <a href="#" class="btn-outline"><span>Begin Your Commission</span></a>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-logo">Soie <span class="amp">&</span> Forme</div>
+      <p class="footer-tagline">
+        Quietly refined silk essentials for your everyday rituals. 
+        Rooted in China's silk heritage.
+      </p>
+      <div class="footer-social">
+        <a href="#">Instagram</a>
+        <a href="#">Pinterest</a>
+        <a href="#">WeChat</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Shop</div>
+      <ul>
+        <li><a href="#">Scarves</a></li>
+        <li><a href="#">Pillowcases</a></li>
+        <li><a href="#">Sleep Masks</a></li>
+        <li><a href="#">Bonnets</a></li>
+        <li><a href="#">Scrunchies</a></li>
+        <li><a href="#">Bedding Sets</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Information</div>
+      <ul>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Materials</a></li>
+        <li><a href="#">Bespoke</a></li>
+        <li><a href="#">Care Guide</a></li>
+        <li><a href="#">Journal</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Support</div>
+      <ul>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Shipping</a></li>
+        <li><a href="#">Returns</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Size Guide</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span class="footer-copy">© 2024 Soie & Forme. All rights reserved.</span>
+    <span class="footer-copy">soieandforme.com</span>
+  </div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top = my + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx) * 0.1;
+  ry += (my - ry) * 0.1;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+// Nav scroll
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+
+// Smooth background colour transition on scroll
+const sections = document.querySelectorAll('section');
+const bgColors = {
+  'section-cream': '#FAF8F3',
+  'section-mid': '#EDE8DE',
+  'section-deep': '#D4CFC4',
+  'section-linen': '#C8C2B6',
+  'section-dark': '#2C2C2A'
+};
+
+function getActiveSectionBg() {
+  let current = '';
+  sections.forEach(section => {
+    const rect = section.getBoundingClientRect();
+    if (rect.top <= window.innerHeight / 2) {
+      for (const cls in bgColors) {
+        if (section.classList.contains(cls)) {
+          current = bgColors[cls];
+        }
+      }
+    }
+  });
+  return current;
+}
+
+let lastBg = '';
+window.addEventListener('scroll', () => {
+  const bg = getActiveSectionBg();
+  if (bg && bg !== lastBg) {
+    document.body.style.transition = 'background-color 0.8s cubic-bezier(0.23,1,0.32,1)';
+    document.body.style.backgroundColor = bg;
+    lastBg = bg;
+  }
+}, { passive: true });
+</script>
+</body>
+</html>
