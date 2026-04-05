@@ -1,0 +1,212 @@
+/* ============================================================
+   BASE.CSS — Global design tokens, resets, and shared styles
+   Soie & Forme Shopify Theme
+   ============================================================ */
+
+/* ── DESIGN TOKENS ── */
+:root {
+  /* Colors */
+  --cream:       #FAF8F3;
+  --cream-mid:   #EDE8DE;
+  --cream-deep:  #D4CFC4;
+  --linen:       #C8C2B6;
+  --ink:         #2C2C2A;
+  --ink-soft:    #4A4A48;
+  --ink-faint:   #8C8878;
+  --olive:       #708238;
+  --olive-light: #8A9E45;
+  --olive-dim:   rgba(112, 130, 56, 0.10);
+
+  /* Typography */
+  --font-serif: 'Shippori Mincho', serif;
+  --font-mono:  'DM Mono', monospace;
+
+  /* Spacing */
+  --space-xs:  8px;
+  --space-sm:  16px;
+  --space-md:  28px;
+  --space-lg:  48px;
+  --space-xl:  80px;
+  --space-2xl: 120px;
+  --space-3xl: 180px;
+
+  /* Transitions */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── BASE ── */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--cream);
+  color: var(--ink);
+  overflow-x: hidden;
+  cursor: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img, video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: none;
+  font: inherit;
+  color: inherit;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor {
+  width: 8px;
+  height: 8px;
+  background: var(--olive);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s var(--ease-snappy),
+              height 0.2s var(--ease-snappy),
+              opacity 0.2s ease;
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+
+.cursor-ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--olive);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: width 0.3s var(--ease-snappy),
+              height 0.3s var(--ease-snappy),
+              opacity 0.2s ease,
+              border-color 0.2s ease;
+}
+
+/* Cursor becomes visible once mouse enters */
+body.cursor-visible .cursor,
+body.cursor-visible .cursor-ring {
+  opacity: 1;
+}
+
+/* Hover state: dot expands, ring shrinks */
+body.cursor-hover .cursor {
+  width: 20px;
+  height: 20px;
+}
+
+body.cursor-hover .cursor-ring {
+  width: 20px;
+  height: 20px;
+  opacity: 0.3;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9000;
+  opacity: 0.25;
+}
+
+/* ── SCROLL REVEAL ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s ease,
+              transform 0.9s var(--ease-out);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Staggered delay helpers */
+.reveal-d1 { transition-delay: 0.10s; }
+.reveal-d2 { transition-delay: 0.22s; }
+.reveal-d3 { transition-delay: 0.34s; }
+.reveal-d4 { transition-delay: 0.46s; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── TEXT SELECTION ── */
+::selection {
+  background: var(--olive);
+  color: var(--cream);
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar        { width: 3px; }
+::-webkit-scrollbar-track  { background: var(--cream); }
+::-webkit-scrollbar-thumb  { background: var(--olive); }
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ── SECTION BACKGROUND HELPERS ── */
+/* Used by JS to transition body background on scroll */
+.section-cream { background: var(--cream); }
+.section-mid   { background: var(--cream-mid); }
+.section-deep  { background: var(--cream-deep); }
+.section-linen { background: var(--linen); }
+.section-dark  { background: var(--ink); color: var(--cream); }
+
+/* ── UTILITY CLASSES ── */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
