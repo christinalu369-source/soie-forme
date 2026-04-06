@@ -30,6 +30,10 @@
 
   <!-- Styles -->
   {{ 'base.css' | asset_url | stylesheet_tag }}
+  {{ 'component-product-card.css' | asset_url | stylesheet_tag }}
+  {{ 'section-collection.css' | asset_url | stylesheet_tag }}
+  {{ 'section-product-main.css' | asset_url | stylesheet_tag }}
+  {{ 'global-nav.css' | asset_url | stylesheet_tag }}
 
   {{ content_for_header }}
 </head>
@@ -114,5 +118,6 @@
   </footer>
 
   <script src="{{ 'global.js' | asset_url }}" defer></script>
+  <script src="{{ 'section-product-main.js' | asset_url }}" defer></script>
 </body>
 </html>
