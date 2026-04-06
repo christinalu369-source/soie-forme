@@ -1,0 +1,172 @@
+{% comment %}
+  Section: Product Main
+  Full product detail — gallery, info, variant selector, add to cart.
+  Used in templates/product.json
+{% endcomment %}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign has_variants     = false
+  if product.variants.size > 1
+    assign has_variants = true
+  endif
+-%}
+
+<div class="product-page" data-product-id="{{ product.id }}">
+
+  <!-- ── IMAGE GALLERY ── -->
+  <div class="product-gallery">
+
+    <!-- Main image -->
+    <div class="product-gallery__main">
+      {%- if product.featured_image != blank -%}
+        <img
+          class="product-gallery__main-img"
+          id="product-main-image"
+          src="{{ product.featured_image | image_url: width: 1200 }}"
+          alt="{{ product.featured_image.alt | escape | default: product.title }}"
+          width="{{ product.featured_image.width }}"
+          height="{{ product.featured_image.height }}"
+        >
+      {%- else -%}
+        <div class="product-gallery__placeholder"></div>
+      {%- endif -%}
+    </div>
+
+    <!-- Thumbnail strip -->
+    {%- if product.images.size > 1 -%}
+      <div class="product-gallery__thumbs" role="list">
+        {%- for image in product.images -%}
+          <button
+            class="product-gallery__thumb{% if forloop.first %} is-active{% endif %}"
+            data-image-src="{{ image | image_url: width: 1200 }}"
+            data-image-alt="{{ image.alt | escape | default: product.title }}"
+            aria-label="View image {{ forloop.index }}"
+            role="listitem"
+          >
+            <img
+              src="{{ image | image_url: width: 200 }}"
+              alt="{{ image.alt | escape | default: product.title }}"
+              loading="lazy"
+            >
+          </button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div><!-- /product-gallery -->
+
+
+  <!-- ── PRODUCT INFO ── -->
+  <div class="product-info">
+
+    <!-- Vendor eyebrow -->
+    {%- if product.vendor != blank -%}
+      <p class="product-info__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+
+    <!-- Title -->
+    <h1 class="product-info__title">{{ product.title }}</h1>
+
+    <!-- Price -->
+    <div class="product-info__price" id="product-price">
+      {%- if current_variant.compare_at_price > current_variant.price -%}
+        <span class="product-info__price--compare">{{ current_variant.compare_at_price | money }}</span>
+        <span class="product-info__price--sale">{{ current_variant.price | money }}</span>
+      {%- else -%}
+        <span>{{ current_variant.price | money }}</span>
+      {%- endif -%}
+    </div>
+
+    <!-- Divider -->
+    <div class="product-info__rule" aria-hidden="true"></div>
+
+    <!-- Variant selector -->
+    {%- if has_variants -%}
+      <div class="product-variants">
+        {%- for option in product.options_with_values -%}
+          <div class="product-variants__group">
+            <p class="product-variants__label">
+              {{ option.name }}:
+              <span class="product-variants__selected" data-option-index="{{ forloop.index0 }}">
+                {{ option.selected_value }}
+              </span>
+            </p>
+            <div class="product-variants__buttons" data-option-index="{{ forloop.index0 }}">
+              {%- for value in option.values -%}
+                <button
+                  class="variant-btn{% if option.selected_value == value %} is-selected{% endif %}"
+                  data-value="{{ value | escape }}"
+                  data-option-index="{{ forloop.parentloop.index0 }}"
+                  aria-pressed="{{ option.selected_value == value }}"
+                >
+                  {{ value }}
+                </button>
+              {%- endfor -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    <!-- Add to cart -->
+    {%- form 'product', product, id: 'product-form', data-product-form: '' -%}
+      <input type="hidden" name="id" id="variant-id" value="{{ current_variant.id }}">
+
+      <div class="product-atc">
+        <button
+          type="submit"
+          class="product-atc__btn"
+          id="atc-button"
+          {%- unless current_variant.available -%}disabled aria-disabled="true"{%- endunless -%}
+        >
+          <span class="product-atc__btn-text">
+            {%- if current_variant.available -%}
+              Add to cart
+            {%- else -%}
+              Sold out
+            {%- endif -%}
+          </span>
+        </button>
+
+        <!-- Confirmation message (shown briefly after add) -->
+        <p class="product-atc__confirm" id="atc-confirm" aria-live="polite" hidden>
+          Added to cart &mdash; <a href="{{ routes.cart_url }}">View cart</a>
+        </p>
+      </div>
+    {%- endform -%}
+
+    <!-- Description -->
+    {%- if product.description != blank -%}
+      <div class="product-info__rule" aria-hidden="true"></div>
+      <div class="product-info__desc">
+        {{ product.description }}
+      </div>
+    {%- endif -%}
+
+    <!-- Fabric / care details -->
+    <div class="product-details">
+      <button class="product-details__toggle" aria-expanded="false" aria-controls="product-details-body">
+        <span>Material &amp; Care</span>
+        <span class="product-details__toggle-icon" aria-hidden="true">+</span>
+      </button>
+      <div class="product-details__body" id="product-details-body" hidden>
+        <p>For specific material and care information, please refer to the product description above or contact us at <a href="mailto:hello@soieandforme.com">hello@soieandforme.com</a>.</p>
+      </div>
+    </div>
+
+  </div><!-- /product-info -->
+
+</div><!-- /product-page -->
+
+<!-- Product data for JS -->
+<script type="application/json" id="product-json">
+  {{ product | json }}
+</script>
+
+{% schema %}
+{
+  "name": "Product",
+  "settings": []
+}
+{% endschema %}
