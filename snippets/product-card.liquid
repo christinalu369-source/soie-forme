@@ -1,0 +1,63 @@
+{% comment %}
+  Product Card Snippet
+  Usage: {% render 'product-card', product: product %}
+  Renders a single product card for use in grids.
+{% endcomment %}
+
+{%- liquid
+  assign primary_image   = product.featured_image
+  assign secondary_image = product.images[1]
+  assign card_url        = product.url
+-%}
+
+<div class="product-card reveal">
+  <a href="{{ card_url }}" class="product-card__image-wrap" aria-label="{{ product.title | escape }}">
+
+    {%- if primary_image != blank -%}
+      <img
+        class="product-card__image product-card__image--primary"
+        src="{{ primary_image | image_url: width: 800 }}"
+        alt="{{ primary_image.alt | escape | default: product.title }}"
+        width="{{ primary_image.width }}"
+        height="{{ primary_image.height }}"
+        loading="lazy"
+      >
+    {%- else -%}
+      <div class="product-card__placeholder"></div>
+    {%- endif -%}
+
+    {%- if secondary_image != blank -%}
+      <img
+        class="product-card__image product-card__image--secondary"
+        src="{{ secondary_image | image_url: width: 800 }}"
+        alt="{{ secondary_image.alt | escape | default: product.title }}"
+        width="{{ secondary_image.width }}"
+        height="{{ secondary_image.height }}"
+        loading="lazy"
+        aria-hidden="true"
+      >
+    {%- endif -%}
+
+  </a>
+
+  <div class="product-card__info">
+
+    {%- if product.vendor != blank -%}
+      <p class="product-card__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+
+    <h3 class="product-card__title">
+      <a href="{{ card_url }}">{{ product.title }}</a>
+    </h3>
+
+    <p class="product-card__price">
+      {%- if product.compare_at_price > product.price -%}
+        <span class="product-card__price--compare">{{ product.compare_at_price | money }}</span>
+        <span class="product-card__price--sale">{{ product.price | money }}</span>
+      {%- else -%}
+        {{ product.price | money }}
+      {%- endif -%}
+    </p>
+
+  </div>
+</div>

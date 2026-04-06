@@ -1,0 +1,122 @@
+/* ============================================================
+   COMPONENT-PRODUCT-CARD.CSS — Reusable product card
+   Used in collection grids and anywhere products appear
+   ============================================================ */
+
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── IMAGE WRAP ── */
+.product-card__image-wrap {
+  display: block;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cream-mid);
+}
+
+.product-card__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.7s var(--ease-settle), transform 0.7s var(--ease-settle);
+}
+
+.product-card__image--primary {
+  opacity: 1;
+  z-index: 1;
+}
+
+.product-card__image--secondary {
+  opacity: 0;
+  z-index: 2;
+}
+
+/* Hover: crossfade to secondary image + subtle zoom on primary */
+.product-card__image-wrap:hover .product-card__image--primary {
+  transform: scale(1.03);
+}
+
+.product-card__image-wrap:hover .product-card__image--secondary {
+  opacity: 1;
+}
+
+/* Placeholder when no image */
+.product-card__placeholder {
+  position: absolute;
+  inset: 0;
+  background: var(--cream-deep);
+}
+
+/* ── INFO ── */
+.product-card__info {
+  padding: var(--space-sm) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Vendor eyebrow */
+.product-card__vendor {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--olive);
+}
+
+/* Title */
+.product-card__title {
+  font-family: var(--font-serif);
+  font-size: clamp(15px, 1.5vw, 18px);
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.product-card__title a {
+  position: relative;
+  display: inline-block;
+}
+
+/* Underline reveal on hover */
+.product-card__title a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--ink);
+  transition: width 0.4s var(--ease-snappy);
+}
+
+.product-card:hover .product-card__title a::after {
+  width: 100%;
+}
+
+/* Price */
+.product-card__price {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-card__price--compare {
+  text-decoration: line-through;
+  color: var(--ink-faint);
+}
+
+.product-card__price--sale {
+  color: var(--ink);
+}
