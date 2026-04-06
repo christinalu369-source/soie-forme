@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "section-collection",
+      "settings": {
+        "eyebrow": "Collection",
+        "columns": "3"
+      }
+    }
+  },
+  "order": ["main"]
+}

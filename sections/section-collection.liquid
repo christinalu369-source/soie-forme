@@ -1,0 +1,67 @@
+{% comment %}
+  Section: Collection
+  Renders the collection header and product grid.
+  Used in templates/collection.json
+{% endcomment %}
+
+<div class="collection-page">
+
+  <!-- ── COLLECTION HEADER ── -->
+  <header class="collection-header">
+    <p class="collection-header__eyebrow reveal reveal-d1">
+      {{ section.settings.eyebrow | default: 'Collection' }}
+    </p>
+    <h1 class="collection-header__title reveal reveal-d2">
+      {{ collection.title }}
+    </h1>
+    {%- if collection.description != blank -%}
+      <div class="collection-header__desc reveal reveal-d3">
+        {{ collection.description }}
+      </div>
+    {%- endif -%}
+  </header>
+
+  <!-- ── PRODUCT GRID ── -->
+  {%- if collection.products.size > 0 -%}
+    <div
+      class="collection-grid"
+      data-columns="{{ section.settings.columns }}"
+    >
+      {%- for product in collection.products -%}
+        {% render 'product-card', product: product %}
+      {%- endfor -%}
+    </div>
+
+  {%- else -%}
+    <!-- Empty state -->
+    <div class="collection-empty">
+      <p class="collection-empty__message">No products here yet — check back soon.</p>
+      <a href="{{ routes.collections_url }}" class="collection-empty__link">View all collections</a>
+    </div>
+  {%- endif -%}
+
+</div>
+
+{% schema %}
+{
+  "name": "Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "Collection"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Products per row (desktop)",
+      "options": [
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    }
+  ]
+}
+{% endschema %}
