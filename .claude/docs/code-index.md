@@ -26,3 +26,19 @@ A living map of every source file in the project. Claude updates this after comp
 `locales/en.default.json` — Minimal locale stub
 
 `preview.html` — Standalone local preview of the entry page (no Shopify CLI needed); not synced to Shopify
+
+## Collection + Product Pages (v1.1)
+
+`snippets/product-card.liquid` — Reusable product card: primary/secondary image crossfade, vendor eyebrow, title, price (with sale support)
+`assets/component-product-card.css` — Product card styles: 3:4 aspect ratio, image crossfade hover, underline reveal, sale price
+
+`sections/section-collection.liquid` — Collection page: header (eyebrow + title + description), product grid via product-card snippet, empty state; schema for eyebrow + columns
+`assets/section-collection.css` — Collection styles: centered header with flanking rules, CSS Grid (3–4 col desktop, 2 tablet, 1 mobile)
+`templates/collection.json` — Collection template; renders section-collection
+
+`sections/section-product-main.liquid` — Product detail: image gallery + thumbnail strip, vendor, title, price, variant button-group selector, AJAX add-to-cart form, description, material/care accordion
+`assets/section-product-main.css` — Product page styles: two-column layout (gallery sticky left, info right), variant buttons, ATC button with olive fill, accordion
+`assets/section-product-main.js` — Product page JS: thumbnail gallery switching, variant selection + price update, AJAX add to cart, cart count update, accordion toggle
+`templates/product.json` — Product template; renders section-product-main
+
+`assets/global-nav.css` — Fixed nav bar (logo, links, cart count badge, frosted-glass scroll state) and footer (dark ink background, 4-column grid, social links)

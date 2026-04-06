@@ -59,10 +59,10 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| Collection page | `idea` | — | Grid of product cards with hover states; filter/sort if needed |
-| Product card snippet | `idea` | — | Reusable product card: image, title, price; hover reveals secondary image |
-| Product detail page | `idea` | — | Product images, title, price, variant selector, add to cart; fabric details section |
-| Product image gallery | `idea` | — | Smooth image switching / zoom on product detail page |
+| Collection page | `done` | `done-collection-and-product-pages.md` | 3-col grid, responsive, empty state, eyebrow + title header |
+| Product card snippet | `done` | `done-collection-and-product-pages.md` | Image crossfade hover, vendor eyebrow, sale price support |
+| Product detail page | `done` | `done-collection-and-product-pages.md` | Gallery + thumbnails, variant button-group, AJAX add to cart, accordion |
+| Product image gallery | `done` | `done-collection-and-product-pages.md` | Thumbnail strip with active state, smooth image swap |
 
 ### Content Pages
 
