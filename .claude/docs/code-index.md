@@ -42,3 +42,13 @@ A living map of every source file in the project. Claude updates this after comp
 `templates/product.json` — Product template; renders section-product-main
 
 `assets/global-nav.css` — Fixed nav bar (logo, links, cart count badge, frosted-glass scroll state) and footer (dark ink background, 4-column grid, social links)
+
+## Content Pages (v1.2)
+
+`sections/section-page-about.liquid` — About page: hero with eyebrow + serif heading, intro (2-col text+image), philosophy band, values strip (Fibre / Craft / Ritual), closing CTA to Contact
+`assets/section-page-about.css` — About page styles: editorial layout, responsive grid, olive accent rules, hover scale on image
+`templates/page.about.json` — About template; renders section-page-about
+
+`sections/section-page-contact.liquid` — Contact page: header intro, Shopify native contact form (name/email/subject/message), success/error states, aside info panel (email, response time, bespoke note)
+`assets/section-page-contact.css` — Contact page styles: underline-border inputs with olive focus, olive slide-fill submit button, responsive stacked layout
+`templates/page.contact.json` — Contact template; renders section-page-contact

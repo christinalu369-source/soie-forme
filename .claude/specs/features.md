@@ -68,8 +68,8 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| About / brand story page | `idea` | — | Editorial long-form page — brand origin, fabric sourcing, philosophy |
-| Contact page | `idea` | — | Simple contact form; Shopify handles form submission natively |
+| About / brand story page | `done` | `done-about-and-contact-pages.md` | Hero, intro (2-col text+image), philosophy, values strip, closing CTA |
+| Contact page | `done` | `done-about-and-contact-pages.md` | Shopify native form, aside info panel, olive submit button |
 
 ### Technical
 
