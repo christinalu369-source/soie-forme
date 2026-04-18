@@ -220,6 +220,10 @@
   color: var(--ink-faint);
 }
 
+.contact-aside__address {
+  font-style: normal;
+}
+
 /* ── RESPONSIVE ── */
 @media (max-width: 768px) {
   .contact-page {

@@ -1,0 +1,15 @@
+{
+  "sections": {
+    "main": {
+      "type": "section-page-contact",
+      "settings": {
+        "eyebrow": "Bespoke",
+        "heading": "Let us make something just for you.",
+        "subtext": "We offer custom sizing, monogramming, and bespoke fabric selections. Tell us what you have in mind and we will be in touch to discuss the details.",
+        "bespoke_note": "Please include your measurements, desired fabric, and any other details in your message.",
+        "show_address": false
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -112,6 +112,15 @@
         <p class="contact-aside__text">{{ section.settings.bespoke_note | default: 'For custom sizing, monogramming, or material enquiries, please mention your request in your message.' }}</p>
       </div>
 
+      {%- if section.settings.show_address -%}
+        <div class="contact-aside__block">
+          <div class="contact-aside__label">Studio</div>
+          <address class="contact-aside__text contact-aside__address">
+            {{ section.settings.address | newline_to_br }}
+          </address>
+        </div>
+      {%- endif -%}
+
     </aside>
 
   </div><!-- /contact-body -->
@@ -165,6 +174,22 @@
       "id": "bespoke_note",
       "label": "Bespoke orders note",
       "default": "For custom sizing, monogramming, or material enquiries, please mention your request in your message."
+    },
+    {
+      "type": "header",
+      "content": "Studio Address"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_address",
+      "label": "Show address",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "address",
+      "label": "Address",
+      "default": "680 North Lake Shore Drive\nSuite 110 – 2571\nChicago, IL 60611\nUnited States"
     }
   ],
   "presets": [
