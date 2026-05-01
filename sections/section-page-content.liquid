@@ -1,0 +1,40 @@
+{% comment %}
+  Section: Page Content
+  Generic styled content page — renders the Shopify page title and body content.
+  Used as the default page template (templates/page.json).
+  Content is written in Shopify Admin → Online Store → Pages.
+{% endcomment %}
+
+<div class="content-page">
+
+  <header class="content-page__header">
+    <p class="content-page__eyebrow">{{ section.settings.eyebrow | default: 'Soie & Forme' }}</p>
+    <h1 class="content-page__title">{{ page.title }}</h1>
+  </header>
+
+  {%- if page.content != blank -%}
+    <div class="content-page__body rte">
+      {{ page.content }}
+    </div>
+  {%- endif -%}
+
+</div>
+
+{% schema %}
+{
+  "name": "Content Page",
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow text",
+      "default": "Soie & Forme"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Content Page"
+    }
+  ]
+}
+{% endschema %}

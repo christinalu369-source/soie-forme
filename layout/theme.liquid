@@ -36,6 +36,7 @@
   {{ 'global-nav.css' | asset_url | stylesheet_tag }}
   {{ 'section-page-about.css' | asset_url | stylesheet_tag }}
   {{ 'section-page-contact.css' | asset_url | stylesheet_tag }}
+  {{ 'section-page-content.css' | asset_url | stylesheet_tag }}
 
   {{ content_for_header }}
 </head>
@@ -77,10 +78,6 @@
       <div class="footer-brand">
         <div class="footer-logo">Soie <span class="footer-logo__amp">&amp;</span> Forme</div>
         <p class="footer-tagline">Quietly refined silk essentials<br>for your everyday rituals.</p>
-        <div class="footer-social">
-          <a href="#">Instagram</a>
-          <a href="#">Pinterest</a>
-        </div>
       </div>
 
       <div class="footer-col">
@@ -109,7 +106,6 @@
           <li><a href="/pages/contact">Contact</a></li>
           <li><a href="/pages/shipping">Shipping</a></li>
           <li><a href="/pages/returns">Returns</a></li>
-          <li><a href="/pages/faq">FAQ</a></li>
         </ul>
       </div>
     </div>

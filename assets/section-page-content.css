@@ -1,0 +1,109 @@
+/* ============================================================
+   SECTION-PAGE-CONTENT.CSS
+   Generic styled content page — used for Care Guide, Shipping,
+   Returns, Materials, and any other simple informational page.
+   ============================================================ */
+
+.content-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--space-lg) var(--space-xl);
+}
+
+/* ── HEADER ── */
+.content-page__header {
+  margin-bottom: var(--space-xl);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--cream-mid);
+}
+
+.content-page__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: var(--space-md);
+}
+
+.content-page__title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+/* ── BODY / RTE ── */
+/* RTE = Rich Text Editor — styles for content written in Shopify Admin */
+.content-page__body.rte {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  line-height: 1.85;
+  color: var(--ink-soft);
+}
+
+.content-page__body.rte h2 {
+  font-family: var(--font-serif);
+  font-size: 1.375rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.content-page__body.rte h3 {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: var(--space-md) 0 var(--space-xs);
+}
+
+.content-page__body.rte p {
+  margin-bottom: var(--space-md);
+}
+
+.content-page__body.rte ul,
+.content-page__body.rte ol {
+  padding-left: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.content-page__body.rte li {
+  margin-bottom: 8px;
+}
+
+.content-page__body.rte a {
+  color: var(--olive);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.2s var(--ease-silk);
+}
+
+.content-page__body.rte a:hover {
+  text-decoration-color: var(--olive);
+}
+
+.content-page__body.rte hr {
+  border: none;
+  border-top: 1px solid var(--cream-mid);
+  margin: var(--space-lg) 0;
+}
+
+.content-page__body.rte strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  .content-page {
+    padding: var(--space-xl) var(--space-md) var(--space-lg);
+  }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
