@@ -26,10 +26,10 @@
   /* Silk-textile gradient — luminous cream with soft depth */
   background-color: var(--cream);
   background-image:
-    radial-gradient(ellipse at 25% 35%, rgba(250, 248, 243, 0.95) 0%, transparent 55%),
-    radial-gradient(ellipse at 75% 65%, rgba(237, 232, 222, 0.40) 0%, transparent 55%),
-    radial-gradient(ellipse at 50% 100%, rgba(112, 130, 56, 0.05) 0%, transparent 50%),
-    linear-gradient(155deg, #FAF8F3 0%, #EDE8DE 45%, #D4CFC4 100%);
+    radial-gradient(ellipse at 25% 35%, rgba(250, 248, 243, 0.98) 0%, transparent 60%),
+    radial-gradient(ellipse at 75% 65%, rgba(237, 232, 222, 0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 100%, rgba(112, 130, 56, 0.03) 0%, transparent 50%),
+    linear-gradient(155deg, #FAF8F3 0%, #F2EEE6 50%, #EDE8DE 100%);
 
   /* Merchant-supplied photo sits on top of the gradient */
   background-size: cover;
