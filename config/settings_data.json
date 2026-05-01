@@ -1,7 +1,39 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "current": {
     "footer_tagline": "Quietly refined silk essentials for your everyday rituals.",
     "social_instagram": "",
-    "social_pinterest": ""
+    "social_pinterest": "",
+    "sections": {
+      "section-entry": {
+        "type": "section-entry",
+        "settings": {
+          "tagline": "quietly refined silk",
+          "story_eyebrow": "Our Philosophy",
+          "story_title": "Where craft meets comfort",
+          "story_body": "<p><strong>Our Story</strong></p><p>Soie & Forme began with a quiet frustration.</p><p>Ask for silk in most stores, and you will be handed something that calls itself silk. The label says so. The price suggests so. But much of what is sold as silk today is polyester finished to mimic the shine, or a blend so diluted the original fibre is barely there. The word has been stretched until it means almost nothing.</p><p>We wanted to make something honest. So we tell you exactly what you are buying — the momme weight, the grade, the origin, the treatment. If we cannot trace it, we will not sell it.</p><p>The <em>soie</em> is the fibre itself, named for what it actually is. The <em>forme</em> is everything we build around it: cut, finish, structure. Pieces made to last, made to be repaired, made to be lived with.</p><p>We also believe natural fibre should not be reserved for the very few. We work directly with our makers, keep our overhead small, and price our pieces so that someone who cares about what they bring into their home can actually afford to. Not cheaply. Fairly.</p><p>Our aesthetic is drawn from Chinese ink painting — the single brushstroke, the empty space around it, the idea that restraint is its own kind of beauty.</p><p>Silk is soft. Silk is also strong. We named the brand for both, because the people who wear our pieces and sleep on them are the same: soft enough to want something that feels good against the skin, strong enough to ask where it came from, and to expect a real answer.</p><p>Welcome to Soie & Forme.</p>",
+          "story_cta_label": "Read our story",
+          "story_cta_url": "",
+          "bespoke_eyebrow": "Made to Order",
+          "bespoke_title": "Your vision, perfectly made",
+          "bespoke_body": "<p><strong>Bespoke Bedding</strong></p><p><em>Made for the bed you actually sleep in.</em></p><p>Mass-produced bedding is built for an average that doesn't exist. Soie & Forme bedding is made the other way around — to your measurements, in your colors, finished by hand.</p><p><strong>Sheets, fitted and flat</strong></p><p>Cut to the dimensions of your mattress, not a standard size. Tell us the depth, the length, the width — including that extra inch for the topper, if you have one — and we'll cut accordingly. Flat sheets are sized with the drape you want, whether that's tucked-and-tight or generous and loose.</p><p><strong>Duvet and blanket covers</strong></p><p>Built to fit your insert, not the other way around. Choose your closure — hidden buttons in matching silk, mother-of-pearl, or a clean envelope fold. Internal corner ties keep everything in place.</p><p><strong>Pillow cases</strong></p><p>Standard, king, euro, boudoir, or a size we draft from your measurements. Choose envelope, hidden zip, or a flanged edge. Each case is finished to match the rest of the set, or styled as a single accent.</p><p><strong>The palette</strong></p><p>Our house colors begin where ink wash ends — bone, cream, mist, smoke, ash, deep olive, charred green, ink black. Each can be specified for any piece in your set.</p><p>For something outside the house palette, we offer custom dyeing on natural silk and fibre. Send us a reference — a photograph, a swatch, a memory of a color — and we'll match it as closely as the dye will allow. Natural fibre takes color the way it wants to, and we honor that; each piece carries the small variations of something made by hand.</p><p><strong>Hand-finished details</strong></p><p>Every bespoke piece is finished by hand. Choose from:</p><p>— <em>French seams</em> on all interior edges, so nothing rough touches skin<br/>— <em>Hand-rolled hems</em> on flat sheets and pillow shams<br/>— <em>Embroidery</em> in matching or contrasting thread — a monogram, a single character, a small motif drawn from your reference<br/>— <em>Piped or flanged edges</em> in a complementary tone from the palette<br/>— <em>Hemstitching</em> or <em>ladder stitch</em> along the top hem of flat sheets and pillowcases</p><p><strong>How it works</strong></p><p>Send us your measurements and your palette. We'll confirm the specification, share a small fibre and color sample for approval, and begin. Bespoke sets are made to order; lead time is typically four to six weeks.</p><p>Each set arrives wrapped in unbleached cotton, with care instructions and a small note of what was made, by whom, and on what day.</p>",
+          "bespoke_cta_label": "Begin an enquiry",
+          "bespoke_cta_url": "",
+          "contact_eyebrow": "Get in touch",
+          "contact_title": "We'd love to hear from you",
+          "contact_body": "<p>Whether you have a question about an order, a bespoke enquiry, or simply want to know more about our materials — reach out and we'll get back to you within one business day.</p>",
+          "contact_email": "hello@soieetforme.com"
+        }
+      }
+    },
+    "content_for_index": []
   }
 }
