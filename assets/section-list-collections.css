@@ -1,0 +1,118 @@
+/* ============================================================
+   SECTION-LIST-COLLECTIONS.CSS
+   Grid of collection cards for /collections
+   ============================================================ */
+
+.list-collections-page {
+  padding: var(--space-xl) var(--space-lg) var(--space-2xl);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ── GRID ── */
+.list-collections-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+/* ── CARD ── */
+.collection-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.collection-card__image-wrap {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: var(--cream-mid);
+  margin-bottom: var(--space-sm);
+}
+
+.collection-card__image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s var(--ease-silk);
+}
+
+.collection-card:hover .collection-card__image-wrap img {
+  transform: scale(1.04);
+}
+
+.collection-card__placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--cream-deep);
+}
+
+.collection-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.collection-card__title {
+  font-family: var(--font-serif);
+  font-size: 1.125rem;
+  font-weight: 400;
+  color: var(--ink);
+  position: relative;
+  display: inline-block;
+}
+
+.collection-card__title::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--olive);
+  transition: width 0.35s var(--ease-silk);
+}
+
+.collection-card:hover .collection-card__title::after {
+  width: 100%;
+}
+
+.collection-card__count {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+/* ── EMPTY ── */
+.list-collections-empty {
+  font-family: var(--font-mono);
+  font-size: 0.9375rem;
+  color: var(--ink-faint);
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-xl) 0;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .list-collections-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .list-collections-page {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .list-collections-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
