@@ -110,7 +110,7 @@
     {%- endif -%}
 
     <!-- Add to cart -->
-    {%- form 'product', product, id: 'product-form', data-product-form: '' -%}
+    {%- form 'product', product, id: 'product-form' -%}
       <input type="hidden" name="id" id="variant-id" value="{{ current_variant.id }}">
 
       <div class="product-atc">
