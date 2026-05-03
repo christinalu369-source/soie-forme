@@ -7,7 +7,7 @@
 :root {
   --line: rgba(112, 130, 56, 0.38);
   /* Snaps in fast then decelerates with a long, heavy tail */
-  --ease-entry: cubic-bezier(0.6, 0, 0.05, 1);
+  --ease-entry: cubic-bezier(0.85, 0, 0.01, 1);
 }
 
 /* ── KEYFRAMES ── */
