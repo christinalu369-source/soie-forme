@@ -13,7 +13,6 @@
 
   <div class="list-collections-grid">
     {%- for collection in collections -%}
-      {%- unless collection.handle == 'all' -%}
         <a href="{{ collection.url }}" class="collection-card">
           <div class="collection-card__image-wrap">
             {%- if collection.image != blank -%}
@@ -37,7 +36,6 @@
             <span class="collection-card__count">{{ collection.products_count }} {{ collection.products_count | pluralize: 'product', 'products' }}</span>
           </div>
         </a>
-      {%- endunless -%}
     {%- else -%}
       <p class="list-collections-empty">No collections yet — check back soon.</p>
     {%- endfor -%}
