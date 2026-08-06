@@ -16,10 +16,11 @@
       "section-entry": {
         "type": "section-entry",
         "settings": {
+          "background_image": "shopify://shop_images/luxury-green-silk-scarves.png",
           "tagline": "quietly refined silk",
           "story_eyebrow": "Our Philosophy",
           "story_title": "Where craft meets comfort",
-          "story_body": "<p>Soie & Forme was born from a belief that the fabrics closest to your skin deserve the same quiet attention you bring to everything else. We source only the finest natural fibres — pure silk, linen, cotton — chosen for their hand-feel first and their beauty second.</p>",
+          "story_body": "<p>Soie & Forme was born from a belief that the fabrics closest to your skin deserve the same quiet attention you bring to everything else. We source only the finest natural fibres — pure silk, cashmere, virgin wool— chosen for their hand-feel first and their beauty second.</p>",
           "story_cta_label": "Read our story",
           "story_cta_url": "",
           "bespoke_eyebrow": "Made to Order",
