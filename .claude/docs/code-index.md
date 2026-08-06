@@ -10,13 +10,13 @@ A living map of every source file in the project. Claude updates this after comp
 
 `assets/base.css` — Global design tokens (colors, fonts, spacing, easing incl. `--ease-silk`/`--ease-settle`), reset, cursor, noise texture, animations, scroll reveal, utility classes
 `assets/global.js` — Custom cursor (dot + ring lerp), scroll reveal IntersectionObserver, nav scroll state
-`assets/section-entry.css` — Entry page: full-screen silk-gradient bg, animated structural diagram nav (stem → crossbar → drops → boxes), modal overlay + panels, silky transitions, mobile fallback
+`assets/section-entry.css` — Entry page: full-screen silk-gradient bg, feathered cream scrim behind the logo + cream-filled nav boxes (legibility over photo backgrounds), animated structural diagram nav (stem → crossbar → drops → boxes), modal overlay + panels, numbered styling-methods list, silky transitions, mobile fallback
 `assets/section-entry.js` — Modal open/close, overlay click dismiss, Escape key, focus trap
 
 `layout/entry.liquid` — Minimal full-screen layout for homepage only (no nav/footer); loads entry-specific CSS/JS
 `layout/theme.liquid` — Standard layout for all other pages: nav bar, footer, global JS
 
-`sections/section-entry.liquid` — Entry section: logo/tagline, animated diagram nav (Shop → /collections; Story/Bespoke/Contact → modals), 3 modal panels, full theme-editor schema
+`sections/section-entry.liquid` — Entry section: logo/tagline, animated diagram nav (Shop → /collections; Story/Styling Inspo/Contact → modals), 3 modal panels (Styling Inspo renders 4 editable how-to methods), full theme-editor schema
 
 `templates/index.liquid` — Homepage template; declares `layout/entry`, renders `section-entry`
 `templates/404.liquid` — On-brand not-found page with outlined numeral, links back to home
