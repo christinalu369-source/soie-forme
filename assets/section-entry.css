@@ -69,7 +69,30 @@
 
 /* ── LOGO + TAGLINE ── */
 .entry-head {
+  position: relative;
   text-align: center;
+  padding: 34px 52px 30px;
+}
+
+/* Cream scrim behind the logo so it reads over any background photo.
+   Feathered radial gradient rather than a solid box — no hard edge
+   against the image, keeps the quiet-luxury feel. */
+.entry-head::before {
+  content: '';
+  position: absolute;
+  inset: -36px -80px;
+  z-index: -1;
+  /* closest-side so the gradient reaches full transparency at every edge —
+     otherwise the element's rectangle shows as a visible slab */
+  background: radial-gradient(
+    ellipse closest-side at center,
+    rgba(250, 248, 243, 0.90) 0%,
+    rgba(250, 248, 243, 0.74) 42%,
+    rgba(250, 248, 243, 0.30) 70%,
+    transparent 100%
+  );
+  filter: blur(12px);
+  pointer-events: none;
 }
 
 .entry-logo {
@@ -98,7 +121,7 @@
   font-weight: 300;
   letter-spacing: 0.42em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: var(--ink-soft);
   margin-bottom: 0;
 
   opacity: 0;
@@ -196,13 +219,15 @@
   font-weight: 300;
   letter-spacing: 0.30em;
   text-transform: uppercase;
-  color: var(--ink-soft);
+  color: var(--ink);
   text-decoration: none;
 
-  border: 1px solid rgba(112, 130, 56, 0.32);
-  background: rgba(250, 248, 243, 0.06);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Cream fill (not just a blur) so the labels stay legible over a
+     dark or busy background photo */
+  border: 1px solid rgba(112, 130, 56, 0.42);
+  background: rgba(250, 248, 243, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 
   opacity: 0;
 
@@ -372,6 +397,67 @@
   margin-top: 16px;
 }
 
+/* Intro copy sitting directly above a list needs less breathing room */
+.modal-body--tight {
+  margin-bottom: 26px;
+}
+
+
+/* ── STYLING INSPO LIST ── */
+/* Numbered how-to methods inside the Styling Inspo modal.
+   Counter supplies the numerals so list markers can be styled freely. */
+.styling-list {
+  list-style: none;
+  counter-reset: styling;
+  margin-bottom: 36px;
+}
+
+.styling-item {
+  counter-increment: styling;
+  position: relative;
+  padding-left: 34px;
+}
+
+.styling-item + .styling-item {
+  margin-top: 22px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(112, 130, 56, 0.18);
+}
+
+.styling-item::before {
+  content: counter(styling, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  color: var(--olive);
+}
+
+.styling-item + .styling-item::before {
+  top: 24px;
+}
+
+.styling-item__name {
+  font-family: var(--font-serif);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.styling-item__text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 2;
+  letter-spacing: 0.03em;
+  color: var(--ink-faint);
+}
+
 
 /* ── MODAL CTA BUTTON ── */
 .modal-cta {
@@ -427,6 +513,15 @@
 
 /* ── MOBILE ── */
 @media (max-width: 600px) {
+  /* Tighter scrim padding so the logo isn't squeezed on narrow screens */
+  .entry-head {
+    padding: 26px 18px 22px;
+  }
+
+  .entry-head::before {
+    inset: -12px -16px;
+  }
+
   /* Hide structural lines — show boxes in a vertical stack */
   .diagram-stem,
   .diagram-crossbar,
@@ -447,7 +542,7 @@
 
   /* Restore all borders for vertical stack */
   .nav-col + .nav-col .nav-box {
-    border-left: 1px solid rgba(112, 130, 56, 0.32);
+    border-left: 1px solid rgba(112, 130, 56, 0.42);
     border-top: none;
   }
 

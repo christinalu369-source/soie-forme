@@ -62,16 +62,16 @@
           </button>
         </div>
 
-        <!-- Bespoke → opens modal -->
+        <!-- Styling Inspo → opens modal -->
         <div class="nav-col">
           <div class="nav-drop"></div>
           <button
             class="nav-box"
-            data-opens-modal="bespoke"
+            data-opens-modal="styling"
             aria-haspopup="dialog"
-            aria-controls="modal-bespoke"
+            aria-controls="modal-styling"
           >
-            Bespoke
+            Styling Inspo
           </button>
         </div>
 
@@ -122,25 +122,45 @@
   </div>
 
 
-  <!-- ── MODAL: BESPOKE ── -->
+  <!-- ── MODAL: STYLING INSPO ── -->
   <div
     class="modal"
-    id="modal-bespoke"
-    data-modal-id="bespoke"
+    id="modal-styling"
+    data-modal-id="styling"
     role="dialog"
     aria-modal="true"
-    aria-labelledby="modal-bespoke-title"
+    aria-labelledby="modal-styling-title"
   >
     <button class="modal-close" aria-label="Close">&times;</button>
-    <p class="modal-eyebrow">{{ section.settings.bespoke_eyebrow }}</p>
-    <h2 class="modal-title" id="modal-bespoke-title">{{ section.settings.bespoke_title }}</h2>
-    <div class="modal-body">{{ section.settings.bespoke_body }}</div>
-    {%- if section.settings.bespoke_cta_label != blank -%}
+    <p class="modal-eyebrow">{{ section.settings.styling_eyebrow }}</p>
+    <h2 class="modal-title" id="modal-styling-title">{{ section.settings.styling_title }}</h2>
+    <div class="modal-body modal-body--tight">{{ section.settings.styling_intro }}</div>
+
+    {% comment %}
+      Four styling methods, each a name + short how-to. Numbering is generated
+      by CSS counter so the merchant only edits the copy.
+    {% endcomment %}
+    <ol class="styling-list">
+      {%- for i in (1..4) -%}
+        {%- assign name_key = 'styling_' | append: i | append: '_name' -%}
+        {%- assign text_key = 'styling_' | append: i | append: '_text' -%}
+        {%- assign method_name = section.settings[name_key] -%}
+        {%- assign method_text = section.settings[text_key] -%}
+        {%- if method_name != blank -%}
+          <li class="styling-item">
+            <h3 class="styling-item__name">{{ method_name }}</h3>
+            <p class="styling-item__text">{{ method_text }}</p>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+
+    {%- if section.settings.styling_cta_label != blank -%}
       <a
-        href="{{ section.settings.bespoke_cta_url | default: '/pages/contact' }}"
+        href="{{ section.settings.styling_cta_url | default: routes.collections_url }}"
         class="modal-cta"
       >
-        <span>{{ section.settings.bespoke_cta_label }}</span>
+        <span>{{ section.settings.styling_cta_label }}</span>
       </a>
     {%- endif -%}
   </div>
@@ -232,35 +252,83 @@
     },
     {
       "type": "header",
-      "content": "Bespoke modal"
+      "content": "Styling Inspo modal"
     },
     {
       "type": "text",
-      "id": "bespoke_eyebrow",
+      "id": "styling_eyebrow",
       "label": "Eyebrow label",
-      "default": "Made to Order"
+      "default": "How to Wear"
     },
     {
       "type": "text",
-      "id": "bespoke_title",
+      "id": "styling_title",
       "label": "Title",
-      "default": "Your vision, perfectly made"
+      "default": "Four ways to wear a square"
     },
     {
       "type": "richtext",
-      "id": "bespoke_body",
-      "label": "Body",
-      "default": "<p>Our bespoke service offers fully customised silk pieces — your dimensions, your weight, your finish. Every commission is made to order with the same quiet precision that defines everything we make.</p><p>Enquire to begin a conversation about what's possible.</p>"
+      "id": "styling_intro",
+      "label": "Intro",
+      "default": "<p>One square of silk is never only one thing. These are the four we return to most — each takes under a minute, and none of them need a pin.</p>"
     },
     {
       "type": "text",
-      "id": "bespoke_cta_label",
+      "id": "styling_1_name",
+      "label": "Method 1 — name",
+      "default": "The Neck Knot"
+    },
+    {
+      "type": "textarea",
+      "id": "styling_1_text",
+      "label": "Method 1 — how-to",
+      "default": "Fold the square corner to corner, then roll it down into a soft band. Wrap once around the neck and tie a loose knot off to one side. Leave the tails uneven — it reads more relaxed than a centred bow."
+    },
+    {
+      "type": "text",
+      "id": "styling_2_name",
+      "label": "Method 2 — name",
+      "default": "The Bandeau"
+    },
+    {
+      "type": "textarea",
+      "id": "styling_2_text",
+      "label": "Method 2 — how-to",
+      "default": "Fold to a band roughly two fingers wide. Lay it across the crown of the head and tie at the nape, underneath the hair. Tuck the ends up and out of sight for a clean line."
+    },
+    {
+      "type": "text",
+      "id": "styling_3_name",
+      "label": "Method 3 — name",
+      "default": "The Handle Wrap"
+    },
+    {
+      "type": "textarea",
+      "id": "styling_3_text",
+      "label": "Method 3 — how-to",
+      "default": "Fold into a narrow strip and wind it around the base of a bag handle, overlapping as you go. Finish with a small knot and let one tail fall. It softens a hard handle and carries colour where you need it."
+    },
+    {
+      "type": "text",
+      "id": "styling_4_name",
+      "label": "Method 4 — name",
+      "default": "The Shoulder Drape"
+    },
+    {
+      "type": "textarea",
+      "id": "styling_4_text",
+      "label": "Method 4 — how-to",
+      "default": "Open the square fully and lay it flat across one shoulder, points falling front and back. Belt it at the waist over a plain shirt or fine knit. The quietest way to wear the whole print."
+    },
+    {
+      "type": "text",
+      "id": "styling_cta_label",
       "label": "Button label",
-      "default": "Begin an enquiry"
+      "default": "Shop the scarves"
     },
     {
       "type": "url",
-      "id": "bespoke_cta_url",
+      "id": "styling_cta_url",
       "label": "Button link"
     },
     {
