@@ -37,11 +37,21 @@ A boutique associate lays pieces across a table in front of you, one at a time. 
 - **Process:** hybrid. Prototype the risky interaction as static HTML first (`todo-01`), port the winner to Liquid + soft commerce (`todo-02`).
 - **Tech constraints unchanged:** vanilla CSS + JS, no build pipeline, reuse existing design tokens, respect `prefers-reduced-motion`.
 
+## Media Strategy (decided 2026-08-16)
+Direction chosen: **photography-first, with a little video.** Model the background/media as **three layers**, each with a different job:
+
+1. **Ambient canvas — keep it quiet (generative/CSS).** Cream/olive fields, film grain, the "table" surface, subtle sheen. This stays as-is; a near-empty background is a *feature* of quiet luxury. **Never put busy photo/video behind editorial text** — it kills legibility and reads less premium.
+2. **Product media — photography (primary, the backbone).** Real stills fill the panels/lookbook/diptych/66%-extend: worn & styled, flat-lay, close-up weave and hand-rolled hem, one strong image per product. Consistent art direction (natural light, cream/olive world, restrained). This is ~80% of the media.
+3. **Signature motion — video (sparingly, 1–3 spots only).** Use where the media *is* the content, not as a backdrop: (a) a hero "how silk moves" loop, (b) `scrubbable-film` (a tie/fall sequence or image sequence), (c) `scarf-transforms` (a tie-it demo). Specs: short (~6–12s) muted loop, `autoplay muted playsinline loop`, **poster-image fallback**, **paused under `prefers-reduced-motion`**, lazy-loaded, small/optimized with multiple resolutions. Prefer external/CDN hosting for hero loops (Shopify video has size limits).
+
+**Build implication:** every section must expose a **media slot that accepts an image OR a video** (a snippet that renders `<video>`+poster when a video is set, else `<img>`). That lets us ship photo-first now and drop video into the 1–3 hero spots later without rebuilding. Always require `alt` text.
+
 ## Open Questions
 - [ ] Is the entry page (`section-entry`) replaced by the Atelier Table, or does it remain as a "curtain" that opens into it?
 - [ ] How many pieces per "table session" before it feels long on mobile? (Guess: 5–7 chapters.)
 - [ ] Does soft commerce use the existing cart/AJAX from `section-product-main.js`, or a new lightweight cart affordance?
-- [ ] Real video vs. photo for the "presentation" — do we have footage, or design around stills + subtle motion for now?
+- [x] ~~Real video vs. photo for the "presentation"~~ → **Resolved: photo-first + 1–3 video moments. See Media Strategy above.**
+- [ ] Which 3 spots get video, and can we source those clips? (Candidates: hero, scrubbable-film, scarf-transforms.)
 - [ ] Does this become the homepage (`templates/index`) or a new dedicated route first (e.g. `/pages/atelier`) so it can ship without replacing the live home?
 
 ## Out of Scope
