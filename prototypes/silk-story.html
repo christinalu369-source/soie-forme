@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Soie &amp; Forme — A Story in Silk (prototype)</title>
+<!--
+  PROTOTYPE C — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept (the Tiffany insight, fixed): Tiffany's vertical scroll steps through
+  STATIC full-screen "slides" — it reads like a PowerPoint. Here, vertical scroll
+  instead drives HORIZONTAL motion: each full-screen "silk" panel slides in from
+  the right, holds center-stage to be read, then slides off to the left as the next
+  one arrives. The illusion is a story playing out in front of you, pulling you on.
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:      #FAF8F3;
+    --cream-mid:  #EDE8DE;
+    --cream-deep: #D4CFC4;
+    --linen:      #C8C2B6;
+    --ink:        #2C2C2A;
+    --ink-soft:   #4A4A48;
+    --ink-faint:  #8C8878;
+    --olive:      #708238;
+    --olive-light:#8A9E45;
+    --olive-dim:  rgba(112, 130, 56, 0.10);
+
+    --font-serif: 'Shippori Mincho', serif;
+    --font-mono:  'DM Mono', monospace;
+
+    --text-display: clamp(38px, 9vw, 82px);
+    --text-heading: clamp(30px, 8vw, 60px);
+    --text-subhead: clamp(18px, 4.5vw, 24px);
+    --text-body:    16px;
+    --text-small:   14px;
+    --text-label:   10px;
+
+    --space-sm: 16px;
+    --space-md: 28px;
+    --space-lg: 48px;
+    --space-xl: 80px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* mandatory snap = the cinematic "one slide at a time" cadence, but animated */
+  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-mono);
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ---- Static stage: stays put; the silk panels are what move ---- */
+  .stage {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(100% 70% at 50% 0%, #fffdf8 0%, var(--cream) 40%, var(--cream-mid) 80%, var(--cream-deep) 100%);
+  }
+  .stage::before { /* faint theatre-floor grain */
+    content:''; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(90deg, rgba(0,0,0,0.010) 0 1px, transparent 1px 4px);
+    opacity: 0.7;
+  }
+  body::after { /* film grain */
+    content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.26;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .reel { position: relative; z-index: 10; }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300;
+    letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive);
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--olive); }
+
+  /* ---- Each scene = one full-screen scroll step ---- */
+  .scene {
+    height: 100svh;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    display: flex; align-items: center; justify-content: center;
+    padding: var(--space-lg) var(--space-md);
+    position: relative;
+  }
+
+  /* ---- The silk panel that slides in horizontally (JS sets --x from scroll) ---- */
+  .silk {
+    position: relative;
+    width: min(90vw, 720px);
+    height: min(74svh, 760px);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--silk-bg, linear-gradient(135deg,#d9c2c9,#b98a97));
+    box-shadow: 0 40px 90px -30px rgba(44,44,42,0.55);
+    /* horizontal-only motion — no diagonal, no rotation */
+    transform: translateX(var(--x, 0)) scale(var(--sc, 1));
+    opacity: var(--op, 1);
+    will-change: transform, opacity;
+  }
+  .silk::before { /* fabric texture hint */
+    content:''; position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 28% 30%, rgba(255,255,255,0.16) 0 6%, transparent 8%),
+      radial-gradient(circle at 72% 62%, rgba(0,0,0,0.10) 0 5%, transparent 7%);
+    background-size: 84px 84px, 96px 96px; opacity: 0.5; mix-blend-mode: soft-light;
+  }
+  .silk::after { /* travelling sheen */
+    content:''; position:absolute; top:0; bottom:0; width:55%; left:-70%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.45), transparent);
+    transform: skewX(-16deg); animation: sheen 7s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
+
+  /* darken the lower third so overlaid text stays legible over any fabric */
+  .silk__scrim {
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(20,19,16,0.66) 0%, rgba(20,19,16,0.12) 42%, transparent 66%);
+  }
+
+  .silk__content {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: var(--space-lg) var(--space-md) var(--space-xl);
+    color: var(--cream);
+    /* content fades/rises in only when the panel is settled center-stage */
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .6s ease .1s, transform .6s ease .1s;
+  }
+  .scene.is-centered .silk__content { opacity: 1; transform: translateY(0); }
+  .silk__chapter {
+    font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300;
+    letter-spacing: 0.4em; text-transform: uppercase; color: rgba(250,248,243,0.85);
+    display:inline-flex; align-items:center; gap:12px; margin-bottom: 16px;
+  }
+  .silk__chapter::before { content:''; width:28px; height:1px; background: rgba(250,248,243,0.7); }
+  .silk__line {
+    font-family: var(--font-serif); font-weight: 600;
+    font-size: var(--text-heading); line-height: 1.06;
+    text-shadow: 0 2px 24px rgba(0,0,0,0.35); max-width: 16ch;
+  }
+  .silk__note {
+    margin-top: 14px; font-size: var(--text-small); font-weight: 300;
+    color: rgba(250,248,243,0.9); line-height: 1.7; max-width: 40ch;
+    text-shadow: 0 1px 14px rgba(0,0,0,0.35);
+  }
+  .silk__shop {
+    display:inline-flex; align-items:center; gap:10px; margin-top: 20px;
+    font-family: var(--font-mono); font-size: var(--text-label);
+    letter-spacing: 0.24em; text-transform: uppercase; font-weight: 300;
+    color: var(--cream); background: rgba(250,248,243,0.14);
+    border: 1px solid rgba(250,248,243,0.5); border-radius: 100px;
+    padding: 12px 20px; cursor: pointer; backdrop-filter: blur(4px);
+    transition: background .3s ease, border-color .3s ease;
+  }
+  .silk__shop:hover { background: var(--olive); border-color: var(--olive); }
+  .silk__shop .arw { font-size: 13px; }
+
+  /* ---- Opening & closing scenes (text over the bare stage, no panel) ---- */
+  .titlecard {
+    height: 100svh; scroll-snap-align: center; scroll-snap-stop: always;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: var(--space-xl) var(--space-md); position: relative; z-index: 10;
+  }
+  .titlecard__mark {
+    font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display);
+    line-height: 0.98; letter-spacing: -0.01em;
+  }
+  .titlecard__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
+  .titlecard__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; }
+  .titlecard__scroll {
+    margin-top: var(--space-xl); font-size: var(--text-label); letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--ink-faint);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .titlecard__scroll span { font-size: 18px; line-height: 1; }
+  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
+  .titlecard__cta {
+    margin-top: var(--space-lg); font-family: var(--font-mono); font-size: var(--text-label);
+    letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300;
+    color: var(--cream); background: var(--olive); border: none; border-radius: 100px;
+    padding: 16px 30px; cursor: pointer; transition: background .3s ease;
+  }
+  .titlecard__cta:hover { background: var(--olive-light); }
+
+  /* ---- Progress: horizontal filmstrip ticks ---- */
+  .film {
+    position: fixed; z-index: 60; left: 50%; bottom: 18px; transform: translateX(-50%);
+    display: flex; gap: 8px; padding: 8px 12px;
+    background: rgba(250,248,243,0.55); backdrop-filter: blur(8px); border-radius: 100px;
+  }
+  .film button {
+    width: 22px; height: 4px; padding: 0; border: none; border-radius: 4px;
+    background: var(--linen); cursor: pointer; transition: background .3s ease, width .3s ease;
+  }
+  .film button.active { background: var(--olive); width: 34px; }
+
+  .proto-flag {
+    position: fixed; left: 12px; bottom: 12px; z-index: 60;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); background: rgba(250,248,243,0.7);
+    padding: 5px 9px; border-radius: 3px; backdrop-filter: blur(4px);
+  }
+  .toast {
+    position: fixed; z-index: 120; left: 50%; bottom: 54px; transform: translate(-50%, 20px);
+    background: var(--ink); color: var(--cream); font-size: var(--text-small);
+    padding: 13px 22px; border-radius: 100px; opacity: 0; pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---- Reduced motion: no horizontal slide; cross-fade the scenes instead ---- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; scroll-snap-type: y proximity; }
+    .silk { transform: none !important; opacity: 1 !important; transition: opacity .4s ease; }
+    .silk::after { display: none; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="stage" aria-hidden="true"></div>
+
+  <div class="reel">
+
+    <!-- opening title card -->
+    <section class="titlecard" data-film="Open">
+      <p class="eyebrow">Soie &amp; Forme</p>
+      <h1 class="titlecard__mark">A story,<br>in <em>silk</em></h1>
+      <p class="titlecard__sub">Keep scrolling. Each scene arrives on its own.</p>
+      <div class="titlecard__scroll">Scroll <span>&#8595;</span></div>
+    </section>
+
+    <!-- scenes injected by JS -->
+
+    <!-- closing title card -->
+    <section class="titlecard" data-film="End">
+      <p class="eyebrow">The collection</p>
+      <h2 class="titlecard__mark" style="font-size:var(--text-heading)">Now,<br>your turn to tie it.</h2>
+      <button class="titlecard__cta" onclick="document.querySelector('.reel').scrollIntoView()">Begin again</button>
+    </section>
+
+  </div>
+
+  <nav class="film" id="film" aria-label="Story progress"></nav>
+  <div class="toast" id="toast">Added to your selection</div>
+  <span class="proto-flag">Prototype C · local only</span>
+
+<script>
+  // ---- The story: each scene = one silk panel that slides in ----
+  const SCENES = [
+    { chapter: 'Chapter I', line: 'It begins as thread.',
+      note: 'Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.',
+      bg: 'linear-gradient(135deg,#efeadf 0%,#ccc7b3 45%,#a49a80 100%)' },
+    { chapter: 'Chapter II', line: 'Colour is laid by hand.',
+      note: 'A blush field, deep cognac borders, paisley vines traced in. The print is restrained — timeless on purpose.',
+      shop: { name: 'Pink Paisley Silk Scarf', price: '$38' },
+      bg: 'linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)' },
+    { chapter: 'Chapter III', line: 'The hem is rolled by hand.',
+      note: 'Twelve to sixteen momme, hand-rolled edge. The weight catches light without the shine that reads cheap.',
+      bg: 'linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)' },
+    { chapter: 'Chapter IV', line: 'Then it is yours to tie.',
+      note: 'At the throat, on the bag, through the hair. It drapes, holds a knot, and softens with every wearing.',
+      shop: { name: 'Cognac Chain Silk Scarf', price: '$56' },
+      bg: 'linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)' },
+  ];
+
+  const reel = document.querySelector('.reel');
+  const endCard = reel.querySelector('[data-film="End"]');
+  const film = document.getElementById('film');
+
+  // build scene sections
+  SCENES.forEach((s, i) => {
+    const sec = document.createElement('section');
+    sec.className = 'scene';
+    sec.dataset.film = 'C' + (i + 1);
+    sec.style.setProperty('--silk-bg', s.bg);
+    sec.innerHTML = `
+      <div class="silk">
+        <div class="silk__scrim"></div>
+        <div class="silk__content">
+          <span class="silk__chapter">${s.chapter}</span>
+          <h2 class="silk__line">${s.line}</h2>
+          <p class="silk__note">${s.note}</p>
+          ${s.shop ? `<button class="silk__shop" data-name="${s.shop.name}">Shop this piece · ${s.shop.price} <span class="arw">&#8594;</span></button>` : ''}
+        </div>
+      </div>`;
+    reel.insertBefore(sec, endCard);
+  });
+
+  // filmstrip ticks (one per snap step, incl. title cards)
+  const steps = [...document.querySelectorAll('.titlecard, .scene')];
+  steps.forEach((step, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to scene ' + (i + 1));
+    b.addEventListener('click', () => step.scrollIntoView({ behavior: 'smooth' }));
+    film.appendChild(b);
+  });
+  const ticks = [...film.children];
+
+  // ---- Horizontal slide driven by vertical scroll ----
+  // Each panel: off-right while its scene is still below, centred at rest,
+  // off-left as the scene leaves upward. Pure X — no diagonal.
+  const scenes = [...document.querySelectorAll('.scene')];
+  let ticking = false;
+
+  function frame() {
+    ticking = false;
+    const vh = window.innerHeight;
+    const center = vh / 2;
+
+    scenes.forEach((sec) => {
+      const r = sec.getBoundingClientRect();
+      const p = ((r.top + r.height / 2) - center) / vh; // 0 centred, >0 below, <0 above
+      const cp = Math.max(-1, Math.min(1, p));
+      const silk = sec.querySelector('.silk');
+      // ease so the settle feels like fabric coming to rest
+      const eased = cp * (1.55 - Math.abs(cp) * 0.55);
+      silk.style.setProperty('--x', (eased * 108) + 'vw');
+      silk.style.setProperty('--sc', (1 - Math.abs(cp) * 0.06).toFixed(3));
+      silk.style.setProperty('--op', Math.max(0, 1 - Math.abs(cp) * 1.25).toFixed(3));
+      sec.classList.toggle('is-centered', Math.abs(cp) < 0.14);
+    });
+
+    // active filmstrip tick
+    let best = 0, bestDist = Infinity;
+    steps.forEach((step, i) => {
+      const r = step.getBoundingClientRect();
+      const d = Math.abs((r.top + r.height / 2) - center);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    ticks.forEach((t, i) => t.classList.toggle('active', i === best));
+  }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  frame();
+
+  // ---- mock shop ----
+  const toast = document.getElementById('toast');
+  let toastT;
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.silk__shop');
+    if (!btn) return;
+    clearTimeout(toastT);
+    toast.textContent = 'Opening ' + btn.dataset.name + '…';
+    toast.classList.add('show');
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+</script>
+</body>
+</html>
