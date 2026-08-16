@@ -3,15 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Soie &amp; Forme — Silk Panels / Assemble (prototype)</title>
+<title>Soie &amp; Forme — Silk Panels / Editorial (prototype)</title>
 <!--
-  PROTOTYPE B (v4) — static mockup, no Shopify, no build. Open directly in a browser.
-  Concept: combine the vertical scroll with a horizontal assemble. Later panels layer
-  on top; as you scroll a panel UP into place it also ASSEMBLES — the image side slides
-  in horizontally from the left while the caption side fades in. The outgoing panel
-  drifts up and out beneath it, so the vertical scroll stays legible and the previous
-  panel shows through while the next slides together over it.
-  Toggle in code: SLIDE_BOTH = true → caption slides in from the right instead of fading.
+  PROTOTYPE B (v5) — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept: an editorial scroll (à la Tiffany). Normal-flow sections of varied size —
+  some full-bleed, some two-up on one screen. Each panel ANIMATES IN once as it enters
+  the viewport (image side slides in horizontally, caption fades), then SETTLES and
+  holds in place — it doesn't keep sliding with the scroll. Vertical scroll + a clean
+  horizontal assemble that arrives and stays.
   See .claude/plans/in-progress-01-atelier-table-prototype.md
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,269 +31,197 @@
     --font-serif: 'Shippori Mincho', serif;
     --font-mono:  'DM Mono', monospace;
 
-    --text-display: clamp(38px, 9vw, 82px);
-    --text-heading: clamp(28px, 7vw, 52px);
+    --text-display: clamp(40px, 10vw, 88px);
+    --text-heading: clamp(26px, 6vw, 46px);
     --text-small:   14px;
     --text-body:    16px;
     --text-label:   10px;
 
+    --space-sm: 16px;
     --space-md: 28px;
     --space-lg: 48px;
     --space-xl: 80px;
+    --space-2xl: 120px;
+
+    --ease-silk: cubic-bezier(0.16, 0.84, 0.30, 1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
-  body { font-family: var(--font-mono); color: var(--ink); background: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-mono); color: var(--ink); background: var(--cream); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
   body::after { /* film grain */
     content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.24;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
 
-  /* ---- Fixed deck: panels layered, later ones on top; JS drives transforms ---- */
-  .deck { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
-  .panel {
-    position: absolute; inset: 0;
-    transform: translateY(var(--y, 0));        /* vertical component (scroll) */
-    opacity: var(--op, 1);
-    display: grid; grid-template-rows: 1fr auto;   /* image side + caption side */
-    pointer-events: none;
-    will-change: transform, opacity;
-  }
-  .panel.active { pointer-events: auto; }
+  .eyebrow { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300; letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive); display:inline-flex; align-items:center; gap:12px; }
+  .eyebrow::before { content:''; width:28px; height:1px; background: var(--olive); }
 
-  /* image side — slides in horizontally; casts a shadow onto whatever's beneath */
-  .panel__media {
-    position: relative; overflow: hidden; background: var(--bg, #b98a97);
-    transform: translateX(var(--mx, 0));
-    box-shadow: -22px 0 44px -12px rgba(20,19,16,0.42);
-  }
-  .panel__media::before {
-    content:''; position:absolute; inset:0;
-    background-image:
-      radial-gradient(circle at 28% 32%, rgba(255,255,255,0.14) 0 6%, transparent 8%),
-      radial-gradient(circle at 72% 60%, rgba(0,0,0,0.10) 0 5%, transparent 7%);
-    background-size: 90px 90px, 104px 104px; opacity: 0.5; mix-blend-mode: soft-light;
-  }
-  .panel__media::after {
-    content:''; position:absolute; top:0; bottom:0; width:55%; left:-70%;
-    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
-    transform: skewX(-16deg);
-  }
-  .panel.active .panel__media::after { animation: sheen 7s ease-in-out infinite; }
-  @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
+  /* ---- Reveal-on-enter: animates in ONCE, then holds (the "snap into place") ---- */
+  .reveal { opacity: 0; transition: opacity 1s var(--ease-silk), transform 1s var(--ease-silk); }
+  .reveal--left  { transform: translateX(-14%); }
+  .reveal--right { transform: translateX(14%); }
+  .reveal--up    { transform: translateY(30px); }
+  .reveal.in { opacity: 1; transform: none; }         /* settled — and it stays here */
+  .reveal.d1 { transition-delay: .10s; }
+  .reveal.d2 { transition-delay: .20s; }
 
-  /* caption side — fades in (or slides from the right if SLIDE_BOTH) */
-  .panel__band {
-    position: relative;
-    background: rgba(250, 248, 243, 0.94);
-    backdrop-filter: blur(8px);
-    border-top: 1px solid var(--linen);
-    padding: var(--space-md) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
-    transform: translateX(var(--cx, 0));
-    opacity: var(--cop, 1);
-  }
-  .panel__chapter { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300; letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive); display:inline-flex; align-items:center; gap:12px; margin-bottom: 12px; }
-  .panel__chapter::before { content:''; width:26px; height:1px; background: var(--olive); }
-  .panel__line { font-family: var(--font-serif); font-weight: 600; font-size: var(--text-heading); line-height: 1.05; }
-  .panel__note { margin-top: 12px; font-size: var(--text-small); font-weight: 300; line-height: 1.7; color: var(--ink-soft); max-width: 52ch; }
-  .panel__shop {
-    display:inline-flex; align-items:center; gap:10px; margin-top: 18px;
+  /* ---- Hero ---- */
+  .hero { min-height: 100svh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--space-xl) var(--space-md); }
+  .hero__mark { font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em; }
+  .hero__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
+  .hero__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; }
+  .hero__scroll { margin-top: var(--space-xl); font-size: var(--text-label); letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-faint); display:flex; flex-direction:column; align-items:center; gap:10px; animation: bob 2.4s ease-in-out infinite; }
+  .hero__scroll span { font-size: 18px; line-height: 1; }
+  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
+
+  /* ---- Feature: one big image + caption, side by side (desktop) / stacked (mobile) ---- */
+  .feature { display: grid; gap: var(--space-lg); align-items: center; padding: var(--space-2xl) var(--space-md); max-width: 1200px; margin: 0 auto; }
+  .feature__media { position: relative; aspect-ratio: 4/5; border-radius: 3px; overflow: hidden; background: var(--bg, #c98fa0); box-shadow: 0 40px 80px -34px rgba(44,44,42,0.5); }
+  .media-tex::before { content:''; position:absolute; inset:0; background-image: radial-gradient(circle at 28% 32%, rgba(255,255,255,0.14) 0 6%, transparent 8%), radial-gradient(circle at 72% 60%, rgba(0,0,0,0.10) 0 5%, transparent 7%); background-size: 90px 90px, 104px 104px; opacity:0.5; mix-blend-mode: soft-light; }
+  .feature__meta { font-size: var(--text-label); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin: 14px 0 10px; }
+  .feature__title { font-family: var(--font-serif); font-weight: 600; font-size: var(--text-heading); line-height: 1.06; }
+  .feature__note { margin-top: 14px; font-size: var(--text-body); font-weight: 300; line-height: 1.8; color: var(--ink-soft); max-width: 46ch; }
+
+  .shop {
+    display:inline-flex; align-items:center; gap:10px; margin-top: 22px;
     font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.24em; text-transform: uppercase; font-weight: 300;
     color: var(--ink); background: none; border: 1px solid var(--linen); border-radius: 100px; padding: 12px 20px; cursor: pointer;
     transition: background .3s ease, border-color .3s ease, color .3s ease;
   }
-  .panel__shop:hover { background: var(--olive); border-color: var(--olive); color: var(--cream); }
-  .panel__shop .arw { color: var(--olive); font-size: 13px; }
-  .panel__shop:hover .arw { color: var(--cream); }
+  .shop:hover { background: var(--olive); border-color: var(--olive); color: var(--cream); }
+  .shop .arw { color: var(--olive); font-size: 13px; }
+  .shop:hover .arw { color: var(--cream); }
 
-  /* title / closing panels */
-  .panel--card { display:flex; align-items:center; justify-content:center; text-align:center; padding: var(--space-xl) var(--space-md); }
-  .panel--card .panel__media { position:absolute; inset:0; z-index:-1; transform:none; box-shadow:none; }
-  .panel--card .card__inner { opacity: var(--cop, 1); }
-  .card__mark { font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em; color: var(--ink); }
-  .card__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
-  .card__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; margin-inline:auto; }
-  .card__scroll { margin-top: var(--space-xl); font-size: var(--text-label); letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-faint); display:flex; flex-direction:column; align-items:center; gap:10px; animation: bob 2.4s ease-in-out infinite; }
-  .card__scroll span { font-size: 18px; line-height: 1; }
-  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
-  .card__cta { margin-top: var(--space-lg); font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300; color: var(--cream); background: var(--olive); border: none; border-radius: 100px; padding: 16px 30px; cursor: pointer; transition: background .3s ease; }
-  .card__cta:hover { background: var(--olive-light); }
+  /* ---- Diptych: TWO panels on one screen (the "2 slides on the same page") ---- */
+  .diptych { display: grid; gap: var(--space-md); padding: var(--space-xl) var(--space-md); max-width: 1200px; margin: 0 auto; }
+  .card { position: relative; border-radius: 3px; overflow: hidden; background: var(--bg, #8a9e45); aspect-ratio: 3/4; box-shadow: 0 30px 60px -30px rgba(44,44,42,0.5); }
+  .card__scrim { position:absolute; inset:0; background: linear-gradient(to top, rgba(20,19,16,0.62) 0%, rgba(20,19,16,0.08) 46%, transparent 68%); }
+  .card__body { position:absolute; left:0; right:0; bottom:0; padding: var(--space-md); color: var(--cream); }
+  .card__eyebrow { font-size: var(--text-label); letter-spacing:0.34em; text-transform:uppercase; color: rgba(250,248,243,0.85); }
+  .card__title { font-family: var(--font-serif); font-weight: 600; font-size: clamp(20px, 5vw, 30px); line-height: 1.1; margin: 8px 0 6px; text-shadow: 0 2px 16px rgba(0,0,0,0.35); }
+  .card__price { font-size: var(--text-small); color: rgba(250,248,243,0.9); }
+  .card__shop {
+    margin-top: 14px; display:inline-flex; align-items:center; gap:8px;
+    font-family: var(--font-mono); font-size: 9px; letter-spacing:0.2em; text-transform:uppercase; font-weight:300;
+    color: var(--cream); background: rgba(250,248,243,0.14); border:1px solid rgba(250,248,243,0.5);
+    border-radius:100px; padding: 9px 14px; cursor:pointer; backdrop-filter: blur(4px);
+    transition: background .3s ease, border-color .3s ease;
+  }
+  .card__shop:hover { background: var(--olive); border-color: var(--olive); }
 
-  /* invisible scroll track */
-  .track { position: relative; z-index: 2; }
-  .step { height: 100svh; scroll-snap-align: center; }
+  .section-head { max-width: 1200px; margin: 0 auto; padding: var(--space-xl) var(--space-md) 0; }
+  .section-head h2 { font-family: var(--font-serif); font-weight: 500; font-size: var(--text-heading); line-height: 1.1; margin-top: 12px; }
 
-  .film { position: fixed; z-index: 60; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; padding: 8px 12px; background: rgba(250,248,243,0.6); backdrop-filter: blur(8px); border-radius: 100px; }
-  .film button { width: 22px; height: 4px; padding: 0; border: none; border-radius: 4px; background: var(--linen); cursor: pointer; transition: background .3s ease, width .3s ease; }
-  .film button.active { background: var(--olive); width: 34px; }
+  /* ---- Closing ---- */
+  .closing { min-height: 80svh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--space-2xl) var(--space-md); background: var(--cream-mid); }
+  .closing__title { font-family: var(--font-serif); font-weight: 500; font-size: var(--text-heading); line-height: 1.1; }
+  .closing__cta { margin-top: var(--space-lg); font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300; color: var(--cream); background: var(--olive); border: none; border-radius: 100px; padding: 16px 30px; cursor: pointer; transition: background .3s ease; }
+  .closing__cta:hover { background: var(--olive-light); }
 
   .proto-flag { position: fixed; left: 12px; bottom: 12px; z-index: 60; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); background: rgba(250,248,243,0.75); padding: 5px 9px; border-radius: 3px; backdrop-filter: blur(4px); }
-  .toast { position: fixed; z-index: 120; left: 50%; bottom: 54px; transform: translate(-50%, 20px); background: var(--ink); color: var(--cream); font-size: var(--text-small); padding: 13px 22px; border-radius: 100px; opacity: 0; pointer-events: none; transition: opacity .35s ease, transform .35s ease; }
+  .toast { position: fixed; z-index: 120; left: 50%; bottom: 34px; transform: translate(-50%, 20px); background: var(--ink); color: var(--cream); font-size: var(--text-small); padding: 13px 22px; border-radius: 100px; opacity: 0; pointer-events: none; transition: opacity .35s ease, transform .35s ease; }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .panel, .panel__media, .panel__band { transform: none !important; }
-    .panel__media::after { display:none !important; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   }
 
-  @media (min-width: 900px) {
-    .panel:not(.panel--card) { grid-template-rows: none; grid-template-columns: 1.4fr 1fr; }
-    .panel__band { display:flex; flex-direction:column; justify-content:center; border-top:none; border-left:1px solid var(--linen); }
-    .panel__note { max-width: 40ch; }
+  /* desktop layouts */
+  @media (min-width: 820px) {
+    .feature { grid-template-columns: 1fr 1fr; }
+    .feature--rev .feature__media { order: 2; }
+    .diptych { grid-template-columns: 1fr 1fr; }   /* two cards side by side */
+  }
+  /* mobile: diptych stacks but stays short so BOTH cards share a screen */
+  @media (max-width: 819px) {
+    .card { aspect-ratio: auto; height: 44svh; }
   }
 </style>
 </head>
 <body>
 
-  <div class="deck" id="deck"></div>
-  <div class="track" id="track"></div>
+  <!-- Hero -->
+  <section class="hero">
+    <p class="eyebrow reveal reveal--up in">Soie &amp; Forme · Journal</p>
+    <h1 class="hero__mark reveal reveal--up d1 in">A story,<br>in <em>silk</em></h1>
+    <p class="hero__sub reveal reveal--up d2 in">Scroll through. Each panel arrives, and stays.</p>
+    <div class="hero__scroll">Scroll <span>&#8595;</span></div>
+  </section>
 
-  <nav class="film" id="film" aria-label="Story progress"></nav>
+  <!-- Feature 1 -->
+  <section class="feature">
+    <div class="feature__media media-tex reveal reveal--left" style="--bg:linear-gradient(135deg,#efeadf 0%,#ccc7b3 45%,#a49a80 100%)"></div>
+    <div>
+      <p class="feature__meta reveal reveal--right">Chapter I</p>
+      <h2 class="feature__title reveal reveal--right d1">It begins as thread.</h2>
+      <p class="feature__note reveal reveal--right d2">Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.</p>
+    </div>
+  </section>
+
+  <!-- Diptych: TWO panels on one screen -->
+  <div class="section-head">
+    <p class="eyebrow reveal reveal--up">This season</p>
+    <h2 class="reveal reveal--up d1">Two ways to wear the print.</h2>
+  </div>
+  <section class="diptych">
+    <article class="card media-tex reveal reveal--left" style="--bg:linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)">
+      <div class="card__scrim"></div>
+      <div class="card__body">
+        <p class="card__eyebrow">Chapter II · Scarf</p>
+        <h3 class="card__title">Colour, laid by hand</h3>
+        <p class="card__price">Pink Paisley Silk Scarf · $38</p>
+        <button class="card__shop" data-name="Pink Paisley Silk Scarf">Shop &#8594;</button>
+      </div>
+    </article>
+    <article class="card media-tex reveal reveal--right d1" style="--bg:linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)">
+      <div class="card__scrim"></div>
+      <div class="card__body">
+        <p class="card__eyebrow">Chapter III · Hair</p>
+        <h3 class="card__title">The hem, rolled by hand</h3>
+        <p class="card__price">Olive Silk Scrunchie · $18</p>
+        <button class="card__shop" data-name="Olive Silk Scrunchie">Shop &#8594;</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- Feature 2 (reversed) -->
+  <section class="feature feature--rev">
+    <div class="feature__media media-tex reveal reveal--right" style="--bg:linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)"></div>
+    <div>
+      <p class="feature__meta reveal reveal--left">Chapter IV</p>
+      <h2 class="feature__title reveal reveal--left d1">Then it is yours to tie.</h2>
+      <p class="feature__note reveal reveal--left d2">At the throat, on the bag, through the hair. It drapes, holds a knot, and softens with every wearing.</p>
+      <button class="shop reveal reveal--left d2" data-name="Cognac Chain Silk Scarf">Shop this piece · $56 <span class="arw">&#8594;</span></button>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing">
+    <p class="eyebrow reveal reveal--up">The collection</p>
+    <h2 class="closing__title reveal reveal--up d1">Now, your turn to tie it.</h2>
+    <button class="closing__cta reveal reveal--up d2" onclick="scrollTo({top:0,behavior:'smooth'})">Begin again</button>
+  </section>
+
   <div class="toast" id="toast">Added to your selection</div>
   <span class="proto-flag">Prototype B · local only</span>
 
 <script>
-  // Flip to true to have the caption side slide in from the right instead of fading.
-  const SLIDE_BOTH = false;
-
-  const PANELS = [
-    { type: 'card', bg: 'radial-gradient(100% 70% at 50% 0%, #fffdf8, #EDE8DE 80%, #D4CFC4)',
-      mark: 'A story,<br>in <em>silk</em>', sub: 'Keep scrolling — each panel assembles as it rises.' },
-
-    { chapter: 'Chapter I', line: 'It begins as thread.',
-      note: 'Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.',
-      bg: 'linear-gradient(135deg,#efeadf 0%,#ccc7b3 45%,#a49a80 100%)' },
-
-    { chapter: 'Chapter II', line: 'Colour is laid by hand.',
-      note: 'A blush field, deep cognac borders, paisley vines traced in. The print is restrained — timeless on purpose.',
-      shop: { name: 'Pink Paisley Silk Scarf', price: '$38' },
-      bg: 'linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)' },
-
-    { chapter: 'Chapter III', line: 'The hem is rolled by hand.',
-      note: 'Twelve to sixteen momme, hand-rolled edge. The weight catches light without the shine that reads cheap.',
-      bg: 'linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)' },
-
-    { chapter: 'Chapter IV', line: 'Then it is yours to tie.',
-      note: 'At the throat, on the bag, through the hair. It drapes, holds a knot, and softens with every wearing.',
-      shop: { name: 'Cognac Chain Silk Scarf', price: '$56' },
-      bg: 'linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)' },
-
-    { type: 'card', bg: 'radial-gradient(100% 70% at 50% 0%, #fffdf8, #EDE8DE 80%, #D4CFC4)',
-      mark: 'Now,<br>your turn.', cta: 'Begin again' },
-  ];
-
-  const deck = document.getElementById('deck');
-  const track = document.getElementById('track');
-  const film = document.getElementById('film');
-
-  PANELS.forEach((s, i) => {
-    const el = document.createElement('div');
-    el.className = 'panel' + (s.type === 'card' ? ' panel--card' : '');
-    el.style.zIndex = i + 1;   // later panels layer ON TOP and assemble over the last
-    if (s.type === 'card') {
-      el.innerHTML = `
-        <div class="panel__media" style="background:${s.bg}"></div>
-        <div class="card__inner">
-          <h1 class="card__mark" style="font-size:${i === 0 ? 'var(--text-display)' : 'var(--text-heading)'}">${s.mark}</h1>
-          ${s.sub ? `<p class="card__sub">${s.sub}</p>` : ''}
-          ${s.cta ? `<button class="card__cta" id="ctaTop">${s.cta}</button>` :
-                    `<div class="card__scroll">Scroll <span>&#8595;</span></div>`}
-        </div>`;
-    } else {
-      el.innerHTML = `
-        <div class="panel__media" style="background:${s.bg}"></div>
-        <div class="panel__band">
-          <span class="panel__chapter">${s.chapter}</span>
-          <h2 class="panel__line">${s.line}</h2>
-          <p class="panel__note">${s.note}</p>
-          ${s.shop ? `<button class="panel__shop" data-name="${s.shop.name}">Shop this piece · ${s.shop.price} <span class="arw">&#8594;</span></button>` : ''}
-        </div>`;
-    }
-    deck.appendChild(el);
-
-    const step = document.createElement('section');
-    step.className = 'step';
-    track.appendChild(step);
-
-    const tick = document.createElement('button');
-    tick.setAttribute('aria-label', 'Go to panel ' + (i + 1));
-    tick.addEventListener('click', () => step.scrollIntoView({ behavior: 'smooth' }));
-    film.appendChild(tick);
-  });
-
-  const panels = [...deck.children];
-  const ticks = [...film.children];
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // ease so the assemble settles softly (fabric coming to rest)
-  const easeOut = t => 1 - Math.pow(1 - t, 2.2);
-
-  // ---- Vertical scroll + horizontal assemble ----
-  // base = i - frac. base in (0,1] → panel is rising in AND assembling.
-  //   image side slides from the left; caption fades (or slides from right).
-  // base < 0 → panel drifts up and out beneath the next (vertical scroll stays visible).
-  let ticking = false;
-  function frame() {
-    ticking = false;
-    const h = window.innerHeight || document.documentElement.clientHeight;
-    const frac = window.scrollY / h;
-
-    panels.forEach((p, i) => {
-      const base = i - frac;
-      const active = Math.abs(base) < 0.5;
-      const isCard = p.classList.contains('panel--card');
-
-      if (reduce) {
-        p.style.setProperty('--op', active ? 1 : 0);
-        p.classList.toggle('active', active);
-        return;
-      }
-
-      let y, op, mx = 0, cx = 0, cop = 1;
-      if (base >= 0) {                       // entering + assembling
-        const e = easeOut(Math.max(0, Math.min(1, 1 - base)));
-        y  = (1 - e) * 14;                   // rises into place (vh)
-        op = Math.min(1, e * 1.8);
-        if (!isCard) {
-          mx  = (1 - e) * -52;               // image slides in from the left (%)
-          cx  = SLIDE_BOTH ? (1 - e) * 52 : 0;
-          cop = SLIDE_BOTH ? Math.min(1, e * 1.6) : e;   // caption fades (or slides)
-        } else {
-          cop = e;                           // card just fades up
-        }
-      } else {                               // leaving — drift up and out
-        const a = -base;
-        y  = -a * 18;
-        op = Math.max(0, 1 - a * 0.85);
-        cop = 1;
-      }
-
-      p.style.setProperty('--y', y.toFixed(2) + 'vh');
-      p.style.setProperty('--op', op.toFixed(3));
-      const media = p.querySelector('.panel__media'); if (media && !isCard) media.style.setProperty('--mx', mx.toFixed(2) + '%');
-      const band = p.querySelector('.panel__band'); if (band) { band.style.setProperty('--cx', cx.toFixed(2) + '%'); band.style.setProperty('--cop', cop.toFixed(3)); }
-      const card = p.querySelector('.card__inner'); if (card) card.style.setProperty('--cop', cop.toFixed(3));
-      p.classList.toggle('active', active);
+  // Reveal each .reveal once, when it scrolls into view — then leave it settled.
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
     });
+  }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal:not(.in)').forEach((el) => io.observe(el));
 
-    const cur = Math.round(frac);
-    ticks.forEach((t, i) => t.classList.toggle('active', i === cur));
-  }
-  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', onScroll);
-  frame();
-
-  // ---- interactions ----
+  // mock shop
   const toast = document.getElementById('toast');
   let toastT;
   document.addEventListener('click', (ev) => {
-    if (ev.target.closest('#ctaTop')) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-    const btn = ev.target.closest('.panel__shop');
+    const btn = ev.target.closest('[data-name]');
     if (!btn) return;
     clearTimeout(toastT);
     toast.textContent = 'Opening ' + btn.dataset.name + '…';
