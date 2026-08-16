@@ -30,6 +30,7 @@ Precedent: the design system was originally prototyped in `soie-et-forme-v3.html
 | `kinetic-type.html` | Kinetic Type — big **scroll-driven marquee word-bands** parallaxing between silk image panels; fashion-editorial rhythm | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 | `zoom-matchcut.html` | Zoom / Match-Cut — scroll drives a **continuous cinematic push-in** through nested silk scenes (scarf → motif → weave → thread); poetic captions | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 | `card-deck.html` | Card-Flick Deck — products as a **stack of cards you flick away** with your thumb (drag/arrows), spring-back, back/next, in-card shop. Single-screen | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+| `hero-options.html` | Hero Treatments — **three first-screen directions with a top switcher**: A Cinematic (full-bleed silk motion + type over scrim), B Split (image + cream type panel), C Mosaic (editorial tile grid + title overlay) | `.claude/plans/todo-00-atelier-table-northstar.md` |
 | `silk-story.html` | A Story in Silk — full-bleed slides that **cross-fade** on vertical scroll (no slide-in, so no diagonal illusion). Horizontally-divided composition (full image + horizontal caption band) = smooth "story panels." The "animated Tiffany" direction | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 
 ## How to view
