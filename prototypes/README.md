@@ -21,4 +21,14 @@ Precedent: the design system was originally prototyped in `soie-et-forme-v3.html
 
 | File | Direction | Plan |
 |---|---|---|
-| _(tbd)_ `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in/out on scroll | `.claude/plans/todo-01-atelier-table-prototype.md` |
+| `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in/out on scroll, soft "shop this" sheet | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+
+## How to view
+
+Just open the file in a browser — no server needed:
+
+```
+open prototypes/atelier-table.html          # macOS
+```
+
+Then use the browser's device toolbar (mobile emulation, ~390px) to feel the intended mobile experience.

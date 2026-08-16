@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Soie &amp; Forme — The Atelier Table (prototype)</title>
+<!--
+  PROTOTYPE — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept: a fixed "table" backdrop; silk pieces glide in from the right, settle
+  center-stage to be presented, then slide off to the left as you scroll — like a
+  private viewing where an associate lays pieces across the table in front of you.
+  Commerce is whispered: a "shop this piece" tab slides up only when a piece rests.
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  /* ---- Design tokens (mirrored from assets/base.css so the mockup reads on-brand) ---- */
+  :root {
+    --cream:      #FAF8F3;
+    --cream-mid:  #EDE8DE;
+    --cream-deep: #D4CFC4;
+    --linen:      #C8C2B6;
+    --ink:        #2C2C2A;
+    --ink-soft:   #4A4A48;
+    --ink-faint:  #8C8878;
+    --olive:      #708238;
+    --olive-light:#8A9E45;
+    --olive-dim:  rgba(112, 130, 56, 0.10);
+
+    --font-serif: 'Shippori Mincho', serif;
+    --font-mono:  'DM Mono', monospace;
+
+    --text-display: clamp(40px, 11vw, 96px);
+    --text-heading: clamp(28px, 7vw, 48px);
+    --text-subhead: clamp(18px, 4.5vw, 24px);
+    --text-body:    16px;
+    --text-small:   14px;
+    --text-label:   10px;
+
+    --space-sm: 16px;
+    --space-md: 28px;
+    --space-lg: 48px;
+    --space-xl: 80px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-mono);
+    color: var(--ink);
+    background: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ---- The fixed "table": a warm surface with a soft top-light. Stays put while pieces move. ---- */
+  .table {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(120% 80% at 50% -10%, #FFFDF8 0%, var(--cream) 42%, var(--cream-mid) 78%, var(--cream-deep) 100%);
+  }
+  /* faint tabletop grain / weave */
+  .table::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,0.012) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,0.012) 0 1px, transparent 1px 3px);
+    opacity: 0.6;
+  }
+  /* film-grain noise overlay (brand detail) */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.28;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Content scrolls over the table ---- */
+  .stage { position: relative; z-index: 10; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--olive);
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 28px; height: 1px;
+    background: var(--olive);
+  }
+
+  /* ---- Opening curtain ---- */
+  .curtain {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+    scroll-snap-align: center;
+  }
+  .curtain__mark {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: var(--text-display);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+  }
+  .curtain__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
+  .curtain__sub {
+    margin-top: var(--space-md);
+    font-size: var(--text-small);
+    font-weight: 300;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    max-width: 34ch;
+  }
+  .curtain__scroll {
+    margin-top: var(--space-xl);
+    font-size: var(--text-label);
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .curtain__scroll span { font-size: 18px; line-height: 1; }
+  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
+
+  /* ---- A piece (one chapter) ---- */
+  .piece {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-lg) var(--space-md);
+    scroll-snap-align: center;
+    position: relative;
+  }
+  .piece__card {
+    width: min(88vw, 440px);
+    /* scroll-driven variables set by JS */
+    transform:
+      translateX(var(--x, 0))
+      rotate(var(--rot, 0deg))
+      scale(var(--sc, 1));
+    opacity: var(--op, 1);
+    will-change: transform, opacity;
+  }
+  /* the silk itself — placeholder "fabric" swatch with a moving sheen */
+  .silk {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 3px;
+    overflow: hidden;
+    box-shadow:
+      0 2px 4px rgba(44,44,42,0.06),
+      0 30px 60px -20px rgba(44,44,42,0.35);
+    background: var(--silk-bg, linear-gradient(135deg, #d9c2c9, #b98a97));
+  }
+  .silk::before { /* woven paisley-ish texture hint */
+    content:'';
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.18) 0 6%, transparent 8%),
+      radial-gradient(circle at 70% 60%, rgba(0,0,0,0.10) 0 5%, transparent 7%),
+      radial-gradient(circle at 50% 85%, rgba(255,255,255,0.12) 0 5%, transparent 7%);
+    background-size: 70px 70px, 90px 90px, 60px 60px;
+    opacity: 0.55;
+    mix-blend-mode: soft-light;
+  }
+  .silk::after { /* travelling sheen — the "silk catches light" moment */
+    content:'';
+    position:absolute; top:0; bottom:0; width:60%;
+    left:-70%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.5), transparent);
+    transform: skewX(-16deg);
+    animation: sheen 6s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
+  .silk__tag {
+    position:absolute; left:12px; top:12px;
+    font-size: 9px; letter-spacing:0.24em; text-transform:uppercase;
+    color: var(--cream); background: rgba(44,44,42,0.42);
+    backdrop-filter: blur(4px);
+    padding: 5px 9px; border-radius: 2px;
+  }
+  .silk__play { /* placeholder "video" affordance */
+    position:absolute; right:12px; bottom:12px;
+    width:34px; height:34px; border-radius:50%;
+    background: rgba(250,248,243,0.85);
+    display:flex; align-items:center; justify-content:center;
+    color: var(--ink); font-size:11px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .piece__caption { margin-top: var(--space-md); }
+  .piece__title {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: var(--text-heading);
+    line-height: 1.05;
+    margin: 12px 0 10px;
+  }
+  .piece__story {
+    font-size: var(--text-small);
+    font-weight: 300;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    max-width: 42ch;
+  }
+  .piece__meta {
+    margin-top: 14px;
+    font-size: var(--text-small);
+    color: var(--ink-faint);
+    letter-spacing: 0.02em;
+  }
+
+  /* ---- Soft-commerce tab: appears only when a piece rests center-stage ---- */
+  .shop-tab {
+    margin-top: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    font-weight: 300;
+    color: var(--ink);
+    background: none;
+    border: 1px solid var(--linen);
+    border-radius: 100px;
+    padding: 12px 20px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .5s ease, transform .5s ease, border-color .3s ease, background .3s ease;
+    pointer-events: none;
+  }
+  .piece.is-centered .shop-tab { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .shop-tab:hover { border-color: var(--olive); background: var(--olive-dim); }
+  .shop-tab .arw { color: var(--olive); font-size: 13px; }
+
+  /* ---- Closing beat ---- */
+  .closing {
+    min-height: 100svh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: var(--space-xl) var(--space-md);
+    scroll-snap-align: center;
+  }
+  .closing__title { font-family: var(--font-serif); font-weight: 500; font-size: var(--text-heading); line-height:1.1; }
+  .closing__cta {
+    margin-top: var(--space-lg);
+    font-family: var(--font-mono); font-size: var(--text-label);
+    letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300;
+    color: var(--cream); background: var(--olive);
+    border: none; border-radius: 100px; padding: 16px 30px; cursor: pointer;
+    transition: background .3s ease;
+  }
+  .closing__cta:hover { background: var(--olive-light); }
+
+  /* ---- Side progress index (tap to jump) ---- */
+  .index {
+    position: fixed; z-index: 60;
+    right: 14px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .index button {
+    width: 8px; height: 8px; padding: 0;
+    border-radius: 50%; border: 1px solid var(--ink-faint);
+    background: transparent; cursor: pointer;
+    transition: background .3s ease, transform .3s ease, border-color .3s ease;
+  }
+  .index button.active { background: var(--olive); border-color: var(--olive); transform: scale(1.35); }
+
+  /* ---- Soft product panel (bottom sheet) ---- */
+  .sheet-scrim {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(44,44,42,0.32);
+    backdrop-filter: blur(2px);
+    opacity: 0; pointer-events: none;
+    transition: opacity .4s ease;
+  }
+  .sheet-scrim.open { opacity: 1; pointer-events: auto; }
+  .sheet {
+    position: fixed; z-index: 101;
+    left: 0; right: 0; bottom: 0;
+    background: var(--cream);
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -20px 50px -20px rgba(44,44,42,0.4);
+    padding: 10px var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
+    transform: translateY(105%);
+    transition: transform .45s cubic-bezier(.22,.61,.36,1);
+    max-width: 520px; margin: 0 auto;
+    max-height: 88svh; overflow-y: auto;
+  }
+  .sheet.open { transform: translateY(0); }
+  .sheet__grip { width: 40px; height: 4px; border-radius: 4px; background: var(--linen); margin: 4px auto 18px; }
+  .sheet__eyebrow { font-size: var(--text-label); letter-spacing:0.34em; text-transform:uppercase; color: var(--olive); font-weight:300; }
+  .sheet__title { font-family: var(--font-serif); font-weight:600; font-size: var(--text-subhead); margin: 8px 0 4px; }
+  .sheet__price { font-size: var(--text-body); color: var(--ink); margin-bottom: 16px; }
+  .sheet__price s { color: var(--ink-faint); margin-right: 8px; }
+  .sheet__label { font-size: var(--text-label); letter-spacing:0.24em; text-transform:uppercase; color: var(--ink-faint); font-weight:300; margin: 14px 0 10px; }
+  .ties { display: flex; gap: 10px; }
+  .ties div {
+    flex: 1; aspect-ratio: 3/4; border-radius: 3px;
+    background: var(--silk-bg, var(--cream-deep));
+    position: relative; overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .ties div::after {
+    content: '▶'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    color: rgba(250,248,243,0.9); font-size: 12px;
+  }
+  .ties span { display:block; text-align:center; font-size: 9px; letter-spacing:0.1em; color: var(--ink-faint); margin-top: 6px; text-transform:uppercase; }
+  .sheet__add {
+    width: 100%; margin-top: 22px;
+    font-family: var(--font-mono); font-size: var(--text-small);
+    letter-spacing: 0.2em; text-transform: uppercase; font-weight: 300;
+    color: var(--cream); background: var(--ink);
+    border: none; border-radius: 100px; padding: 17px; cursor: pointer;
+    transition: background .3s ease;
+  }
+  .sheet__add:hover { background: var(--olive); }
+  .sheet__note { text-align:center; font-size: 11px; color: var(--ink-faint); margin-top: 12px; line-height:1.6; }
+  .sheet__close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; cursor: pointer;
+    font-size: 20px; color: var(--ink-faint); line-height: 1;
+  }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed; z-index: 120;
+    left: 50%; bottom: 34px; transform: translate(-50%, 20px);
+    background: var(--ink); color: var(--cream);
+    font-size: var(--text-small); letter-spacing: 0.04em;
+    padding: 13px 22px; border-radius: 100px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* tiny helper label bottom-left so it's obviously a prototype */
+  .proto-flag {
+    position: fixed; left: 12px; bottom: 12px; z-index: 60;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); background: rgba(250,248,243,0.7);
+    padding: 5px 9px; border-radius: 3px; backdrop-filter: blur(4px);
+  }
+
+  /* ---- Reduced motion: collapse glides to gentle fades ---- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; scroll-snap-type: none; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+    .piece__card { transform: none !important; opacity: 1 !important; transition: opacity .4s ease; }
+    .silk::after { display: none; }
+  }
+
+  /* wider screens: place caption beside the silk for an editorial feel */
+  @media (min-width: 820px) {
+    .piece__card { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); align-items: center; width: min(90vw, 900px); }
+    .piece__caption { margin-top: 0; }
+    .curtain__mark { letter-spacing: -0.02em; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- fixed presentation surface -->
+  <div class="table" aria-hidden="true"></div>
+
+  <main class="stage">
+
+    <!-- opening curtain -->
+    <section class="curtain" id="s0">
+      <p class="eyebrow">Soie &amp; Forme</p>
+      <h1 class="curtain__mark">A private<br><em>viewing</em></h1>
+      <p class="curtain__sub">Sit a moment. We'll bring the pieces to you — one at a time, across the table.</p>
+      <div class="curtain__scroll">Scroll <span>&#8595;</span></div>
+    </section>
+
+    <!-- pieces injected by JS -->
+
+    <!-- closing beat -->
+    <section class="closing" id="sEnd">
+      <p class="eyebrow">The collection</p>
+      <h2 class="closing__title">Fourteen pieces.<br>Each one, one of a kind.</h2>
+      <button class="closing__cta" onclick="document.getElementById('s0').scrollIntoView()">See them again</button>
+    </section>
+
+  </main>
+
+  <!-- side index -->
+  <nav class="index" id="index" aria-label="Jump to piece"></nav>
+
+  <!-- soft product sheet -->
+  <div class="sheet-scrim" id="scrim"></div>
+  <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Product details">
+    <button class="sheet__close" id="sheetClose" aria-label="Close">&times;</button>
+    <div class="sheet__grip"></div>
+    <p class="sheet__eyebrow" id="sheetEyebrow">Soie &amp; Forme</p>
+    <h3 class="sheet__title" id="sheetTitle">—</h3>
+    <p class="sheet__price" id="sheetPrice">—</p>
+    <p class="sheet__label">Ways to tie it</p>
+    <div class="ties">
+      <div><span></span></div><div><span></span></div><div><span></span></div>
+    </div>
+    <div style="display:flex;gap:0;justify-content:space-between;margin-top:6px;">
+      <span class="ties-cap">The knot</span><span class="ties-cap">At the bag</span><span class="ties-cap">Through the hair</span>
+    </div>
+    <button class="sheet__add" id="sheetAdd">Add to cart</button>
+    <p class="sheet__note">Free shipping over $75 · Hand-rolled hem · Brand new, never worn</p>
+  </aside>
+
+  <div class="toast" id="toast">Added to your selection</div>
+  <span class="proto-flag">Prototype · local only</span>
+
+<script>
+  // ---- Content: a few pieces (placeholder copy in the brand's voice) ----
+  // Each 'bg' is a CSS gradient standing in for real silk photography/video.
+  const PIECES = [
+    { tag: 'SF-001 · Mulberry silk',
+      title: 'Pink Paisley',
+      story: 'A soft blush field framed by deep cognac borders, traced with paisley vines. Knotted at the throat, tied to a top-handle bag, or wrapped through an updo.',
+      meta: '25.5" square · 12–14 momme · $38',
+      price: '$38', compare: '',
+      bg: 'linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)' },
+    { tag: 'SF-004 · Mulberry silk',
+      title: 'Olive Grove',
+      story: 'Muted olive and bone in a geometric weave. The house colour, at its quietest — it drapes, holds a knot, and softens with wear.',
+      meta: '35" square · 16 momme · $52',
+      price: '$52', compare: '',
+      bg: 'linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)' },
+    { tag: 'SF-009 · Mulberry silk',
+      title: 'Ink &amp; Cream',
+      story: 'Near-black on warm cream, a single hand-drawn border. High contrast for someone who collects accessories that outlast trends.',
+      meta: '25.5" square · 12–14 momme · $44',
+      price: '$44', compare: '$58',
+      bg: 'linear-gradient(135deg,#efeadf 0%,#b9b2a1 45%,#2c2c2a 100%)' },
+    { tag: 'SF-012 · Mulberry silk',
+      title: 'Cognac Chain',
+      story: 'A gilded chain motif over a warm cognac ground. Reads as heirloom; wears like everyday. The weight catches light without shine that reads cheap.',
+      meta: '35" square · 16 momme · $56',
+      price: '$56', compare: '',
+      bg: 'linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)' },
+    { tag: 'SF-018 · Mulberry silk',
+      title: 'Bone Floral',
+      story: 'The lightest piece — bone and faded rose, almost watercolour. A fluid satin hand that dissolves into whatever it touches.',
+      meta: '25.5" square · 12–14 momme · $40',
+      price: '$40', compare: '',
+      bg: 'linear-gradient(135deg,#f3ede2 0%,#d8bfc0 55%,#a98a86 100%)' },
+  ];
+
+  const stage = document.querySelector('.stage');
+  const endEl = document.getElementById('sEnd');
+  const indexNav = document.getElementById('index');
+
+  // Build piece sections + index dots
+  const sectionEls = [document.getElementById('s0')];
+  PIECES.forEach((p, i) => {
+    const sec = document.createElement('section');
+    sec.className = 'piece';
+    sec.id = 's' + (i + 1);
+    sec.style.setProperty('--silk-bg', p.bg);
+    sec.innerHTML = `
+      <div class="piece__card">
+        <div class="silk">
+          <span class="silk__tag">${p.tag}</span>
+          <span class="silk__play" aria-hidden="true">&#9658;</span>
+        </div>
+        <div class="piece__caption">
+          <p class="eyebrow">Piece No. ${String(i + 1).padStart(2, '0')}</p>
+          <h2 class="piece__title">${p.title}</h2>
+          <p class="piece__story">${p.story}</p>
+          <p class="piece__meta">${p.meta}</p>
+          <button class="shop-tab" data-i="${i}">Shop this piece <span class="arw">&#8594;</span></button>
+        </div>
+      </div>`;
+    stage.insertBefore(sec, endEl);
+    sectionEls.push(sec);
+  });
+  sectionEls.push(endEl);
+
+  // index dots
+  sectionEls.forEach((sec, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', 'Go to section ' + (i + 1));
+    b.addEventListener('click', () => sec.scrollIntoView({ behavior: 'smooth' }));
+    indexNav.appendChild(b);
+  });
+  const dots = [...indexNav.children];
+
+  // ---- Scroll-driven glide: pieces enter from the right, rest center, exit left ----
+  const pieceEls = [...document.querySelectorAll('.piece')];
+  let ticking = false;
+
+  function frame() {
+    ticking = false;
+    const vh = window.innerHeight;
+    const center = vh / 2;
+
+    pieceEls.forEach((sec) => {
+      const r = sec.getBoundingClientRect();
+      const secCenter = r.top + r.height / 2;
+      // p: 0 when centered, >0 while still below (incoming), <0 while above (leaving)
+      let p = (secCenter - center) / vh;
+      const cp = Math.max(-1, Math.min(1, p));
+      const card = sec.querySelector('.piece__card');
+      const eased = cp * (1.6 - Math.abs(cp) * 0.6); // slight ease so the settle feels weighty
+      card.style.setProperty('--x', (eased * 62) + 'vw');
+      card.style.setProperty('--rot', (cp * 5) + 'deg');
+      card.style.setProperty('--sc', (1 - Math.abs(cp) * 0.07).toFixed(3));
+      card.style.setProperty('--op', Math.max(0, 1 - Math.abs(cp) * 1.35).toFixed(3));
+      sec.classList.toggle('is-centered', Math.abs(cp) < 0.16);
+    });
+
+    // active index dot = whichever section is nearest center
+    let best = 0, bestDist = Infinity;
+    sectionEls.forEach((sec, i) => {
+      const r = sec.getBoundingClientRect();
+      const d = Math.abs((r.top + r.height / 2) - center);
+      if (d < bestDist) { bestDist = d; best = i; }
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === best));
+  }
+
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  frame(); // initial paint
+
+  // ---- Soft product sheet ----
+  const scrim = document.getElementById('scrim');
+  const sheet = document.getElementById('sheet');
+  const sheetClose = document.getElementById('sheetClose');
+  const toast = document.getElementById('toast');
+  let toastT;
+
+  function openSheet(i) {
+    const p = PIECES[i];
+    document.getElementById('sheetTitle').innerHTML = p.title;
+    document.getElementById('sheetPrice').innerHTML =
+      (p.compare ? `<s>${p.compare}</s>` : '') + p.price;
+    sheet.style.setProperty('--silk-bg', p.bg);
+    document.querySelectorAll('.ties div').forEach(d => d.style.background = p.bg);
+    scrim.classList.add('open');
+    sheet.classList.add('open');
+  }
+  function closeSheet() {
+    scrim.classList.remove('open');
+    sheet.classList.remove('open');
+  }
+  document.addEventListener('click', (e) => {
+    const tab = e.target.closest('.shop-tab');
+    if (tab) openSheet(+tab.dataset.i);
+  });
+  scrim.addEventListener('click', closeSheet);
+  sheetClose.addEventListener('click', closeSheet);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSheet(); });
+
+  document.getElementById('sheetAdd').addEventListener('click', () => {
+    closeSheet();
+    clearTimeout(toastT);
+    toast.classList.add('show');
+    toastT = setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+</script>
+</body>
+</html>
