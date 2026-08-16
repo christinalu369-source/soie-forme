@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Soie &amp; Forme — Silk Panels / Unfurl (prototype)</title>
+<title>Soie &amp; Forme — Silk Panels / Stack (prototype)</title>
 <!--
-  PROTOTYPE B (v2) — static mockup, no Shopify, no build. Open directly in a browser.
-  Concept: same story/deck idea as silk-story.html, but instead of cross-fading,
-  each full-bleed panel is ANCHORED to the left edge and UNFURLS rightward as you
-  scroll — like a bolt of silk unrolled across the table. Because it's rooted to one
-  side (it grows, it doesn't fly in), there's no untethered "box entering" look.
-  A light-catching leading edge marks the fold as it extends.
+  PROTOTYPE B (v3) — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept: a layered vertical stack you actually scroll through. The previous panel
+  stays on TOP and lingers as it exits upward; the next panel rises from the bottom
+  and slides in UNDERNEATH it (lower layer), with a soft shadow at the seam. So mid-
+  transition you see the previous panel filling the top half while the next tucks in
+  below it — the vertical scroll is visible, nothing floats in untethered.
   See .claude/plans/in-progress-01-atelier-table-prototype.md
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,7 +43,7 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+  html { scroll-snap-type: y proximity; scroll-behavior: smooth; }
   body { font-family: var(--font-mono); color: var(--ink); background: var(--ink); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
   body::after { /* film grain */
@@ -51,43 +51,33 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
 
-  /* ---- Fixed deck: panels stack; each unfurls from the left over the one below ---- */
+  /* ---- Fixed deck: panels are layered; JS translates each with scroll ---- */
   .deck { position: fixed; inset: 0; z-index: 1; }
   .panel {
     position: absolute; inset: 0;
-    /* the unfurl: clip from the right edge inward. --reveal 0 → hidden, 1 → full width. */
-    clip-path: inset(0 calc((1 - var(--reveal, 0)) * 100%) 0 0);
+    transform: translateY(var(--y, 0));
+    /* soft shadow the panel casts DOWN onto whatever slides in beneath it */
+    box-shadow: 0 26px 50px -12px rgba(20,19,16,0.45);
     display: grid; grid-template-rows: 1fr auto;   /* image band + horizontal caption band */
     pointer-events: none;
   }
   .panel.active { pointer-events: auto; }
 
   .panel__media { position: relative; overflow: hidden; background: var(--bg, #b98a97); }
-  .panel__media::before { /* fabric texture hint */
+  .panel__media::before {
     content:''; position:absolute; inset:0;
     background-image:
       radial-gradient(circle at 28% 32%, rgba(255,255,255,0.14) 0 6%, transparent 8%),
       radial-gradient(circle at 72% 60%, rgba(0,0,0,0.10) 0 5%, transparent 7%);
     background-size: 90px 90px, 104px 104px; opacity: 0.5; mix-blend-mode: soft-light;
   }
-  .panel__media::after { /* slow sheen on the active panel */
+  .panel__media::after {
     content:''; position:absolute; top:0; bottom:0; width:55%; left:-70%;
     background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
     transform: skewX(-16deg);
   }
   .panel.active .panel__media::after { animation: sheen 7s ease-in-out infinite; }
   @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
-
-  /* the fold: a light-catching leading edge that rides the reveal boundary */
-  .panel__edge {
-    position: absolute; top: 0; bottom: 0; width: 46px;
-    left: calc(var(--reveal, 0) * 100%);
-    transform: translateX(-50%);
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.65), rgba(255,255,255,0.15));
-    box-shadow: -8px 0 24px -6px rgba(0,0,0,0.35);   /* soft shadow the extending cloth casts */
-    opacity: 0; pointer-events: none;
-    transition: opacity .2s ease;
-  }
 
   /* horizontal caption band = the visible division of the panel */
   .panel__band {
@@ -96,7 +86,9 @@
     backdrop-filter: blur(8px);
     border-top: 1px solid var(--linen);
     padding: var(--space-md) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
+    opacity: 0; transition: opacity .5s ease;   /* caption settles in when the panel is centred */
   }
+  .panel.active .panel__band { opacity: 1; }
   .panel__chapter { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300; letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive); display:inline-flex; align-items:center; gap:12px; margin-bottom: 12px; }
   .panel__chapter::before { content:''; width:26px; height:1px; background: var(--olive); }
   .panel__line { font-family: var(--font-serif); font-weight: 600; font-size: var(--text-heading); line-height: 1.05; }
@@ -114,6 +106,8 @@
   /* title / closing panels */
   .panel--card { display:flex; align-items:center; justify-content:center; text-align:center; padding: var(--space-xl) var(--space-md); }
   .panel--card .panel__media { position:absolute; inset:0; z-index:-1; }
+  .panel--card .card__inner { opacity: 0; transition: opacity .5s ease; }
+  .panel--card.active .card__inner { opacity: 1; }
   .card__mark { font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em; color: var(--ink); }
   .card__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
   .card__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; margin-inline:auto; }
@@ -125,7 +119,7 @@
 
   /* invisible scroll track */
   .track { position: relative; z-index: 2; }
-  .step { height: 100svh; scroll-snap-align: center; scroll-snap-stop: always; }
+  .step { height: 100svh; scroll-snap-align: center; }
 
   .film { position: fixed; z-index: 60; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; padding: 8px 12px; background: rgba(250,248,243,0.6); backdrop-filter: blur(8px); border-radius: 100px; }
   .film button { width: 22px; height: 4px; padding: 0; border: none; border-radius: 4px; background: var(--linen); cursor: pointer; transition: background .3s ease, width .3s ease; }
@@ -137,8 +131,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .panel { clip-path: none !important; transition: opacity .35s ease; }
-    .panel__edge { display: none !important; }
+    .panel { transform: none !important; transition: opacity .35s ease; }
     .panel__media::after { display:none !important; }
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   }
@@ -162,7 +155,7 @@
 <script>
   const PANELS = [
     { type: 'card', bg: 'radial-gradient(100% 70% at 50% 0%, #fffdf8, #EDE8DE 80%, #D4CFC4)',
-      mark: 'A story,<br>in <em>silk</em>', sub: 'Keep scrolling. Each panel unrolls across the table.' },
+      mark: 'A story,<br>in <em>silk</em>', sub: 'Keep scrolling — each panel rises in beneath the last.' },
 
     { chapter: 'Chapter I', line: 'It begins as thread.',
       note: 'Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.',
@@ -189,16 +182,16 @@
   const deck = document.getElementById('deck');
   const track = document.getElementById('track');
   const film = document.getElementById('film');
+  const N = PANELS.length;
 
   PANELS.forEach((s, i) => {
     const el = document.createElement('div');
     el.className = 'panel' + (s.type === 'card' ? ' panel--card' : '');
-    el.style.zIndex = i + 1; // later panels unfurl on top of earlier ones
+    el.style.zIndex = N - i;   // earlier panels sit ON TOP; later ones slide in underneath
     if (s.type === 'card') {
       el.innerHTML = `
         <div class="panel__media" style="background:${s.bg}"></div>
-        <div class="panel__edge"></div>
-        <div>
+        <div class="card__inner">
           <h1 class="card__mark" style="font-size:${i === 0 ? 'var(--text-display)' : 'var(--text-heading)'}">${s.mark}</h1>
           ${s.sub ? `<p class="card__sub">${s.sub}</p>` : ''}
           ${s.cta ? `<button class="card__cta" id="ctaTop">${s.cta}</button>` :
@@ -207,7 +200,6 @@
     } else {
       el.innerHTML = `
         <div class="panel__media" style="background:${s.bg}"></div>
-        <div class="panel__edge"></div>
         <div class="panel__band">
           <span class="panel__chapter">${s.chapter}</span>
           <h2 class="panel__line">${s.line}</h2>
@@ -228,12 +220,13 @@
   });
 
   const panels = [...deck.children];
-  const edges = panels.map(p => p.querySelector('.panel__edge'));
   const ticks = [...film.children];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ---- Unfurl driven by vertical scroll ----
-  // reveal_i = how far panel i has unrolled: 0 as scroll enters (i-1), 1 by the time it reaches i.
+  // ---- Layered vertical stack driven by scroll ----
+  // base = i - frac. base>0 → panel is below, rising from the bottom (linear).
+  // base<0 → panel is above/leaving; it LINGERS (eases out slowly) so the next one
+  // visibly slides in underneath it before it clears the top.
   let ticking = false;
   function frame() {
     ticking = false;
@@ -241,13 +234,19 @@
     const frac = window.scrollY / h;
 
     panels.forEach((p, i) => {
-      const reveal = Math.max(0, Math.min(1, frac - (i - 1)));   // rooted to the left, grows rightward
-      const active = Math.round(frac) === i;
+      const base = i - frac;                 // 0 = centred, + = below, - = above
+      const active = Math.abs(base) < 0.5;
       if (reduce) {
         p.style.opacity = active ? 1 : 0;
       } else {
-        p.style.setProperty('--reveal', reveal.toFixed(3));
-        edges[i].style.opacity = (reveal > 0.02 && reveal < 0.985) ? 1 : 0; // fold only while extending
+        let yvh;
+        if (base >= 0) {
+          yvh = base * 100;                  // incoming: rise straight up from the bottom
+        } else {
+          const a = -base;                   // 0..1 as it leaves upward
+          yvh = -Math.pow(a, 1.9) * 100;     // linger near the top, then clear quickly
+        }
+        p.style.setProperty('--y', yvh.toFixed(2) + 'vh');
       }
       p.classList.toggle('active', active);
     });

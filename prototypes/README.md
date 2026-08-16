@@ -22,7 +22,7 @@ Precedent: the design system was originally prototyped in `soie-et-forme-v3.html
 | File | Direction | Plan |
 |---|---|---|
 | `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in from the side / rest / exit on scroll, soft "shop this" sheet | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
-| `silk-panels.html` | Silk Panels / Unfurl — full-bleed panels **anchored to the left edge** that *unroll* rightward on scroll (rooted to one side — grows/extends, never flies in), with a light-catching leading fold | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+| `silk-panels.html` | Silk Panels / Stack — layered vertical stack; the previous panel lingers on top as it exits while the next **slides up underneath it** from the bottom (soft shadow at the seam). Vertical scroll stays visible | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 | `silk-story.html` | A Story in Silk — full-bleed slides that **cross-fade** on vertical scroll (no slide-in, so no diagonal illusion). Horizontally-divided composition (full image + horizontal caption band) = smooth "story panels." The "animated Tiffany" direction | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 
 ## How to view
