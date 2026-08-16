@@ -23,6 +23,7 @@ Precedent: the design system was originally prototyped in `soie-et-forme-v3.html
 |---|---|---|
 | `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in from the side / rest / exit on scroll, soft "shop this" sheet | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 | `silk-panels.html` | Silk Panels / Editorial — Tiffany-style editorial scroll: normal-flow sections of varied size (incl. **two panels on one screen**). Each panel **slides/fades in once as it enters, then settles and holds** in place (no continuous scroll-linking) | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+| `silk-panels-2.html` | Silk Panels II / Extend — same reveal-and-hold animation, but each panel is a **~66% full-bleed image that extends in from one edge** (alternating sides) with the copy in the remaining **~34%, fading in**. Follows the Tiffany image-block layout; includes a video play affordance | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 | `silk-story.html` | A Story in Silk — full-bleed slides that **cross-fade** on vertical scroll (no slide-in, so no diagonal illusion). Horizontally-divided composition (full image + horizontal caption band) = smooth "story panels." The "animated Tiffany" direction | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 
 ## How to view

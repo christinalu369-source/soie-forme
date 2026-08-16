@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Soie &amp; Forme — Silk Panels II / Extend (prototype)</title>
+<!--
+  PROTOTYPE B2 — static mockup, no Shopify, no build. Open directly in a browser.
+  Same reveal-and-hold animation as silk-panels.html, but the panel shape follows the
+  Tiffany reference: a full-bleed image that EXTENDS IN from one edge and covers only
+  ~66% of the width (it doesn't reach the far side); the copy sits in the remaining
+  ~34% and simply FADES IN. Sections alternate which side the image extends from.
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream:      #FAF8F3;
+    --cream-mid:  #EDE8DE;
+    --cream-deep: #D4CFC4;
+    --linen:      #C8C2B6;
+    --ink:        #2C2C2A;
+    --ink-soft:   #4A4A48;
+    --ink-faint:  #8C8878;
+    --olive:      #708238;
+    --olive-light:#8A9E45;
+
+    --font-serif: 'Shippori Mincho', serif;
+    --font-mono:  'DM Mono', monospace;
+
+    --text-display: clamp(40px, 10vw, 88px);
+    --text-heading: clamp(28px, 4vw, 48px);
+    --text-small:   14px;
+    --text-body:    16px;
+    --text-label:   10px;
+
+    --space-sm: 16px;
+    --space-md: 28px;
+    --space-lg: 48px;
+    --space-xl: 80px;
+    --space-2xl: 120px;
+
+    --ease-silk: cubic-bezier(0.16, 0.84, 0.30, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-mono); color: var(--ink); background: var(--cream); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body::after { /* film grain */
+    content: ''; position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: 0.22;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  .eyebrow { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300; letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive); display:inline-flex; align-items:center; gap:12px; }
+  .eyebrow::before { content:''; width:28px; height:1px; background: var(--olive); }
+
+  /* ---- Reveal-on-enter: animates in ONCE, then holds ---- */
+  .reveal { opacity: 0; transition: opacity 1s var(--ease-silk), transform 1.05s var(--ease-silk); }
+  .reveal--left  { transform: translateX(-16%); }   /* image extends in from the left */
+  .reveal--right { transform: translateX(16%); }    /* image extends in from the right */
+  .reveal--fade  { }                                /* words: opacity only */
+  .reveal--up    { transform: translateY(30px); }
+  .reveal.in { opacity: 1; transform: none; }        /* settled */
+  .reveal.d1 { transition-delay: .12s; }
+  .reveal.d2 { transition-delay: .24s; }
+  .reveal.d3 { transition-delay: .36s; }
+
+  /* ---- Hero ---- */
+  .hero { min-height: 100svh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--space-xl) var(--space-md); }
+  .hero__mark { font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em; }
+  .hero__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
+  .hero__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; }
+  .hero__scroll { margin-top: var(--space-xl); font-size: var(--text-label); letter-spacing: 0.32em; text-transform: uppercase; color: var(--ink-faint); display:flex; flex-direction:column; align-items:center; gap:10px; animation: bob 2.4s ease-in-out infinite; }
+  .hero__scroll span { font-size: 18px; line-height: 1; }
+  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
+
+  /* ---- Showcase: ~66% full-bleed image + ~34% copy ---- */
+  .showcase {
+    display: grid;
+    grid-template-rows: auto;
+    align-items: center;
+    min-height: 92svh;
+    padding: var(--space-2xl) 0;
+  }
+  .showcase__media {
+    position: relative;
+    align-self: stretch;
+    min-height: 60svh;
+    background: var(--bg, #234); background-size: cover; background-position: center;
+    overflow: hidden;
+  }
+  .showcase__media::before { /* fabric/vignette depth */
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(80% 70% at 40% 40%, transparent 40%, rgba(0,0,0,0.28) 100%),
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10) 0 6%, transparent 8%);
+    background-size: cover, 96px 96px;
+  }
+  .showcase__media::after { /* travelling sheen */
+    content:''; position:absolute; top:0; bottom:0; width:45%; left:-60%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-16deg); animation: sheen 8s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%{left:-60%} 55%,100%{left:130%} }
+
+  .play { /* video affordance, like the reference */
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 76px; height: 76px; border-radius: 50%;
+    background: rgba(112,130,56,0.86); color: var(--cream);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3); cursor: pointer;
+    transition: transform .3s ease, background .3s ease;
+  }
+  .play:hover { transform: translate(-50%,-50%) scale(1.06); background: var(--olive); }
+
+  .showcase__text { padding: var(--space-lg) var(--space-xl); }
+  .showcase__meta { font-size: var(--text-label); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 14px; }
+  .showcase__title { font-family: var(--font-serif); font-weight: 600; font-size: var(--text-heading); line-height: 1.1; }
+  .showcase__note { margin-top: 18px; font-size: var(--text-body); font-weight: 300; line-height: 1.85; color: var(--ink-soft); max-width: 42ch; }
+  .link {
+    display:inline-block; margin-top: 26px;
+    font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.24em; text-transform: uppercase; font-weight: 300;
+    color: var(--ink); text-decoration: none; padding-bottom: 6px; border-bottom: 1px solid var(--olive); cursor: pointer;
+    transition: color .3s ease;
+  }
+  .link:hover { color: var(--olive); }
+
+  /* ---- Closing ---- */
+  .closing { min-height: 80svh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: var(--space-2xl) var(--space-md); background: var(--cream-mid); }
+  .closing__title { font-family: var(--font-serif); font-weight: 500; font-size: var(--text-heading); line-height: 1.1; }
+  .closing__cta { margin-top: var(--space-lg); font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300; color: var(--cream); background: var(--olive); border: none; border-radius: 100px; padding: 16px 30px; cursor: pointer; transition: background .3s ease; }
+  .closing__cta:hover { background: var(--olive-light); }
+
+  .proto-flag { position: fixed; left: 12px; bottom: 12px; z-index: 60; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-faint); background: rgba(250,248,243,0.75); padding: 5px 9px; border-radius: 3px; backdrop-filter: blur(4px); }
+  .toast { position: fixed; z-index: 120; left: 50%; bottom: 34px; transform: translate(-50%, 20px); background: var(--ink); color: var(--cream); font-size: var(--text-small); padding: 13px 22px; border-radius: 100px; opacity: 0; pointer-events: none; transition: opacity .35s ease, transform .35s ease; }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+  }
+
+  /* ---- Desktop: ~66% image + ~34% copy, image bleeds to its edge ---- */
+  @media (min-width: 820px) {
+    .showcase { grid-template-columns: 2fr 1fr; }          /* image ~66%, copy ~34% */
+    .showcase__media { min-height: 82svh; }
+    .showcase--right { grid-template-columns: 1fr 2fr; }    /* image extends from the right */
+    .showcase--right .showcase__media { order: 2; }
+    .showcase--right .showcase__text { order: 1; }
+  }
+  /* ---- Mobile: image full-width on top, copy below ---- */
+  @media (max-width: 819px) {
+    .showcase { grid-template-columns: 1fr; gap: var(--space-lg); min-height: auto; }
+    .showcase__text { padding: 0 var(--space-md); }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <p class="eyebrow reveal reveal--up in">Soie &amp; Forme · Journal</p>
+    <h1 class="hero__mark reveal reveal--up d1 in">A story,<br>in <em>silk</em></h1>
+    <p class="hero__sub reveal reveal--up d2 in">Scroll through. Each piece extends into view.</p>
+    <div class="hero__scroll">Scroll <span>&#8595;</span></div>
+  </section>
+
+  <!-- Showcase 1 — image extends from the LEFT -->
+  <section class="showcase">
+    <div class="showcase__media reveal reveal--left" style="--bg:linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)">
+      <button class="play" aria-label="Play film">&#9658;</button>
+    </div>
+    <div class="showcase__text">
+      <p class="showcase__meta reveal reveal--fade">Chapter I · The Print</p>
+      <h2 class="showcase__title reveal reveal--fade d1">Introducing the<br>Pink Paisley Square</h2>
+      <p class="showcase__note reveal reveal--fade d2">A soft blush field, framed by deep cognac borders and traced with paisley vines. Cut from 12–14 momme mulberry silk with a fluid satin hand — it drapes, holds a knot, and softens with wear.</p>
+      <a class="link reveal reveal--fade d3" data-name="Pink Paisley Silk Scarf">Shop the collection</a>
+    </div>
+  </section>
+
+  <!-- Showcase 2 — image extends from the RIGHT -->
+  <section class="showcase showcase--right">
+    <div class="showcase__media reveal reveal--right" style="--bg:linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)">
+      <button class="play" aria-label="Play film">&#9658;</button>
+    </div>
+    <div class="showcase__text">
+      <p class="showcase__meta reveal reveal--fade">Chapter II · The House Colour</p>
+      <h2 class="showcase__title reveal reveal--fade d1">Olive, at its<br>quietest</h2>
+      <p class="showcase__note reveal reveal--fade d2">The house colour in a geometric weave — muted olive and bone. Restrained on purpose, made to travel across a whole look, from the scarf at your throat to the scrunchie on your wrist.</p>
+      <a class="link reveal reveal--fade d3" data-name="Olive Silk Scrunchie">Shop the collection</a>
+    </div>
+  </section>
+
+  <!-- Showcase 3 — image extends from the LEFT -->
+  <section class="showcase">
+    <div class="showcase__media reveal reveal--left" style="--bg:linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)">
+      <button class="play" aria-label="Play film">&#9658;</button>
+    </div>
+    <div class="showcase__text">
+      <p class="showcase__meta reveal reveal--fade">Chapter III · The Detail</p>
+      <h2 class="showcase__title reveal reveal--fade d1">A gilded chain,<br>hand-rolled hem</h2>
+      <p class="showcase__note reveal reveal--fade d2">A chain motif over a warm cognac ground — reads as heirloom, wears like everyday. Sixteen momme, a hand-rolled edge that catches light without the shine that reads cheap.</p>
+      <a class="link reveal reveal--fade d3" data-name="Cognac Chain Silk Scarf">Shop the collection</a>
+    </div>
+  </section>
+
+  <!-- Closing -->
+  <section class="closing">
+    <p class="eyebrow reveal reveal--up">The collection</p>
+    <h2 class="closing__title reveal reveal--up d1">Now, your turn to tie it.</h2>
+    <button class="closing__cta reveal reveal--up d2" onclick="scrollTo({top:0,behavior:'smooth'})">Begin again</button>
+  </section>
+
+  <div class="toast" id="toast">Added to your selection</div>
+  <span class="proto-flag">Prototype B2 · local only</span>
+
+<script>
+  // Reveal each .reveal once, when it scrolls into view — then leave it settled.
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+    });
+  }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal:not(.in)').forEach((el) => io.observe(el));
+
+  // mock shop
+  const toast = document.getElementById('toast');
+  let toastT;
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-name]');
+    if (!btn) return;
+    ev.preventDefault();
+    clearTimeout(toastT);
+    toast.textContent = 'Opening ' + btn.dataset.name + '…';
+    toast.classList.add('show');
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+</script>
+</body>
+</html>
