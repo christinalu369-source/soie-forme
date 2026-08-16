@@ -42,16 +42,16 @@ Direction chosen: **photography-first, with a little video.** Model the backgrou
 
 1. **Ambient canvas — keep it quiet (generative/CSS).** Cream/olive fields, film grain, the "table" surface, subtle sheen. This stays as-is; a near-empty background is a *feature* of quiet luxury. **Never put busy photo/video behind editorial text** — it kills legibility and reads less premium.
 2. **Product media — photography (primary, the backbone).** Real stills fill the panels/lookbook/diptych/66%-extend: worn & styled, flat-lay, close-up weave and hand-rolled hem, one strong image per product. Consistent art direction (natural light, cream/olive world, restrained). This is ~80% of the media.
-3. **Signature motion — video (sparingly, 1–3 spots only).** Use where the media *is* the content, not as a backdrop: (a) a hero "how silk moves" loop, (b) `scrubbable-film` (a tie/fall sequence or image sequence), (c) `scarf-transforms` (a tie-it demo). Specs: short (~6–12s) muted loop, `autoplay muted playsinline loop`, **poster-image fallback**, **paused under `prefers-reduced-motion`**, lazy-loaded, small/optimized with multiple resolutions. Prefer external/CDN hosting for hero loops (Shopify video has size limits).
+3. **Signature motion — at most ONE video (the hero).** Stills are preferred throughout; video is optional and capped at a **single spot** — the hero "how silk moves" loop — used only if we can produce it well. Everything else (including `scrubbable-film` and `scarf-transforms`) should be driven by **stills / image sequences**, not video. If the hero video is used: short (~6–12s) muted loop, `autoplay muted playsinline loop`, **poster-image fallback**, **paused under `prefers-reduced-motion`**, lazy-loaded, optimized; prefer external/CDN hosting (Shopify video has size limits).
 
-**Build implication:** every section must expose a **media slot that accepts an image OR a video** (a snippet that renders `<video>`+poster when a video is set, else `<img>`). That lets us ship photo-first now and drop video into the 1–3 hero spots later without rebuilding. Always require `alt` text.
+**Build implication:** the hero section exposes a **media slot that accepts an image OR a video** (renders `<video>`+poster when a video is set, else `<img>`) so the single hero clip can drop in later without a rebuild. All other sections are **image-only**. Always require `alt` text.
 
 ## Open Questions
 - [ ] Is the entry page (`section-entry`) replaced by the Atelier Table, or does it remain as a "curtain" that opens into it?
 - [ ] How many pieces per "table session" before it feels long on mobile? (Guess: 5–7 chapters.)
 - [ ] Does soft commerce use the existing cart/AJAX from `section-product-main.js`, or a new lightweight cart affordance?
-- [x] ~~Real video vs. photo for the "presentation"~~ → **Resolved: photo-first + 1–3 video moments. See Media Strategy above.**
-- [ ] Which 3 spots get video, and can we source those clips? (Candidates: hero, scrubbable-film, scarf-transforms.)
+- [x] ~~Real video vs. photo for the "presentation"~~ → **Resolved: stills preferred throughout; at most ONE optional hero video. See Media Strategy above.**
+- [ ] Do we produce the single hero video at all, or ship stills-only for launch? (Can we source one good silk-motion clip?)
 - [ ] Does this become the homepage (`templates/index`) or a new dedicated route first (e.g. `/pages/atelier`) so it can ship without replacing the live home?
 
 ## Out of Scope
