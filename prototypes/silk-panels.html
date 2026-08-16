@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Soie &amp; Forme — Silk Panels / Stack (prototype)</title>
+<title>Soie &amp; Forme — Silk Panels / Assemble (prototype)</title>
 <!--
-  PROTOTYPE B (v3) — static mockup, no Shopify, no build. Open directly in a browser.
-  Concept: a layered vertical stack you actually scroll through. The previous panel
-  stays on TOP and lingers as it exits upward; the next panel rises from the bottom
-  and slides in UNDERNEATH it (lower layer), with a soft shadow at the seam. So mid-
-  transition you see the previous panel filling the top half while the next tucks in
-  below it — the vertical scroll is visible, nothing floats in untethered.
+  PROTOTYPE B (v4) — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept: combine the vertical scroll with a horizontal assemble. Later panels layer
+  on top; as you scroll a panel UP into place it also ASSEMBLES — the image side slides
+  in horizontally from the left while the caption side fades in. The outgoing panel
+  drifts up and out beneath it, so the vertical scroll stays legible and the previous
+  panel shows through while the next slides together over it.
+  Toggle in code: SLIDE_BOTH = true → caption slides in from the right instead of fading.
   See .claude/plans/in-progress-01-atelier-table-prototype.md
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -51,19 +52,24 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
 
-  /* ---- Fixed deck: panels are layered; JS translates each with scroll ---- */
-  .deck { position: fixed; inset: 0; z-index: 1; }
+  /* ---- Fixed deck: panels layered, later ones on top; JS drives transforms ---- */
+  .deck { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
   .panel {
     position: absolute; inset: 0;
-    transform: translateY(var(--y, 0));
-    /* soft shadow the panel casts DOWN onto whatever slides in beneath it */
-    box-shadow: 0 26px 50px -12px rgba(20,19,16,0.45);
-    display: grid; grid-template-rows: 1fr auto;   /* image band + horizontal caption band */
+    transform: translateY(var(--y, 0));        /* vertical component (scroll) */
+    opacity: var(--op, 1);
+    display: grid; grid-template-rows: 1fr auto;   /* image side + caption side */
     pointer-events: none;
+    will-change: transform, opacity;
   }
   .panel.active { pointer-events: auto; }
 
-  .panel__media { position: relative; overflow: hidden; background: var(--bg, #b98a97); }
+  /* image side — slides in horizontally; casts a shadow onto whatever's beneath */
+  .panel__media {
+    position: relative; overflow: hidden; background: var(--bg, #b98a97);
+    transform: translateX(var(--mx, 0));
+    box-shadow: -22px 0 44px -12px rgba(20,19,16,0.42);
+  }
   .panel__media::before {
     content:''; position:absolute; inset:0;
     background-image:
@@ -79,16 +85,16 @@
   .panel.active .panel__media::after { animation: sheen 7s ease-in-out infinite; }
   @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
 
-  /* horizontal caption band = the visible division of the panel */
+  /* caption side — fades in (or slides from the right if SLIDE_BOTH) */
   .panel__band {
     position: relative;
     background: rgba(250, 248, 243, 0.94);
     backdrop-filter: blur(8px);
     border-top: 1px solid var(--linen);
     padding: var(--space-md) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
-    opacity: 0; transition: opacity .5s ease;   /* caption settles in when the panel is centred */
+    transform: translateX(var(--cx, 0));
+    opacity: var(--cop, 1);
   }
-  .panel.active .panel__band { opacity: 1; }
   .panel__chapter { font-family: var(--font-mono); font-size: var(--text-label); font-weight: 300; letter-spacing: 0.4em; text-transform: uppercase; color: var(--olive); display:inline-flex; align-items:center; gap:12px; margin-bottom: 12px; }
   .panel__chapter::before { content:''; width:26px; height:1px; background: var(--olive); }
   .panel__line { font-family: var(--font-serif); font-weight: 600; font-size: var(--text-heading); line-height: 1.05; }
@@ -105,9 +111,8 @@
 
   /* title / closing panels */
   .panel--card { display:flex; align-items:center; justify-content:center; text-align:center; padding: var(--space-xl) var(--space-md); }
-  .panel--card .panel__media { position:absolute; inset:0; z-index:-1; }
-  .panel--card .card__inner { opacity: 0; transition: opacity .5s ease; }
-  .panel--card.active .card__inner { opacity: 1; }
+  .panel--card .panel__media { position:absolute; inset:0; z-index:-1; transform:none; box-shadow:none; }
+  .panel--card .card__inner { opacity: var(--cop, 1); }
   .card__mark { font-family: var(--font-serif); font-weight: 700; font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em; color: var(--ink); }
   .card__mark em { font-style: italic; font-weight: 500; color: var(--olive); }
   .card__sub { margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300; color: var(--ink-soft); line-height: 1.7; max-width: 32ch; margin-inline:auto; }
@@ -131,7 +136,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .panel { transform: none !important; transition: opacity .35s ease; }
+    .panel, .panel__media, .panel__band { transform: none !important; }
     .panel__media::after { display:none !important; }
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
   }
@@ -153,9 +158,12 @@
   <span class="proto-flag">Prototype B · local only</span>
 
 <script>
+  // Flip to true to have the caption side slide in from the right instead of fading.
+  const SLIDE_BOTH = false;
+
   const PANELS = [
     { type: 'card', bg: 'radial-gradient(100% 70% at 50% 0%, #fffdf8, #EDE8DE 80%, #D4CFC4)',
-      mark: 'A story,<br>in <em>silk</em>', sub: 'Keep scrolling — each panel rises in beneath the last.' },
+      mark: 'A story,<br>in <em>silk</em>', sub: 'Keep scrolling — each panel assembles as it rises.' },
 
     { chapter: 'Chapter I', line: 'It begins as thread.',
       note: 'Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.',
@@ -182,12 +190,11 @@
   const deck = document.getElementById('deck');
   const track = document.getElementById('track');
   const film = document.getElementById('film');
-  const N = PANELS.length;
 
   PANELS.forEach((s, i) => {
     const el = document.createElement('div');
     el.className = 'panel' + (s.type === 'card' ? ' panel--card' : '');
-    el.style.zIndex = N - i;   // earlier panels sit ON TOP; later ones slide in underneath
+    el.style.zIndex = i + 1;   // later panels layer ON TOP and assemble over the last
     if (s.type === 'card') {
       el.innerHTML = `
         <div class="panel__media" style="background:${s.bg}"></div>
@@ -223,10 +230,13 @@
   const ticks = [...film.children];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // ---- Layered vertical stack driven by scroll ----
-  // base = i - frac. base>0 → panel is below, rising from the bottom (linear).
-  // base<0 → panel is above/leaving; it LINGERS (eases out slowly) so the next one
-  // visibly slides in underneath it before it clears the top.
+  // ease so the assemble settles softly (fabric coming to rest)
+  const easeOut = t => 1 - Math.pow(1 - t, 2.2);
+
+  // ---- Vertical scroll + horizontal assemble ----
+  // base = i - frac. base in (0,1] → panel is rising in AND assembling.
+  //   image side slides from the left; caption fades (or slides from right).
+  // base < 0 → panel drifts up and out beneath the next (vertical scroll stays visible).
   let ticking = false;
   function frame() {
     ticking = false;
@@ -234,20 +244,40 @@
     const frac = window.scrollY / h;
 
     panels.forEach((p, i) => {
-      const base = i - frac;                 // 0 = centred, + = below, - = above
+      const base = i - frac;
       const active = Math.abs(base) < 0.5;
+      const isCard = p.classList.contains('panel--card');
+
       if (reduce) {
-        p.style.opacity = active ? 1 : 0;
-      } else {
-        let yvh;
-        if (base >= 0) {
-          yvh = base * 100;                  // incoming: rise straight up from the bottom
-        } else {
-          const a = -base;                   // 0..1 as it leaves upward
-          yvh = -Math.pow(a, 1.9) * 100;     // linger near the top, then clear quickly
-        }
-        p.style.setProperty('--y', yvh.toFixed(2) + 'vh');
+        p.style.setProperty('--op', active ? 1 : 0);
+        p.classList.toggle('active', active);
+        return;
       }
+
+      let y, op, mx = 0, cx = 0, cop = 1;
+      if (base >= 0) {                       // entering + assembling
+        const e = easeOut(Math.max(0, Math.min(1, 1 - base)));
+        y  = (1 - e) * 14;                   // rises into place (vh)
+        op = Math.min(1, e * 1.8);
+        if (!isCard) {
+          mx  = (1 - e) * -52;               // image slides in from the left (%)
+          cx  = SLIDE_BOTH ? (1 - e) * 52 : 0;
+          cop = SLIDE_BOTH ? Math.min(1, e * 1.6) : e;   // caption fades (or slides)
+        } else {
+          cop = e;                           // card just fades up
+        }
+      } else {                               // leaving — drift up and out
+        const a = -base;
+        y  = -a * 18;
+        op = Math.max(0, 1 - a * 0.85);
+        cop = 1;
+      }
+
+      p.style.setProperty('--y', y.toFixed(2) + 'vh');
+      p.style.setProperty('--op', op.toFixed(3));
+      const media = p.querySelector('.panel__media'); if (media && !isCard) media.style.setProperty('--mx', mx.toFixed(2) + '%');
+      const band = p.querySelector('.panel__band'); if (band) { band.style.setProperty('--cx', cx.toFixed(2) + '%'); band.style.setProperty('--cop', cop.toFixed(3)); }
+      const card = p.querySelector('.card__inner'); if (card) card.style.setProperty('--cop', cop.toFixed(3));
       p.classList.toggle('active', active);
     });
 
