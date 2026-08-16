@@ -1,0 +1,377 @@
+<!--
+  PROTOTYPE — Kinetic Type
+  Static mockup only. No Shopify, no build pipeline, no server — open locally by double-clicking.
+  Interaction: full-bleed marquee bands of oversized serif/mono words slide horizontally,
+  scroll-linked (translateX driven by window.scrollY via rAF); alternating rows move left/right
+  at varied speeds so the type parallaxes. Image panels (CSS gradients) rise/fade in on view.
+  Reference: .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soie &amp; Forme — Kinetic Type</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878; --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(48px,15vw,150px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    font-family:var(--font-mono); color:var(--ink); background:var(--cream);
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; position:relative;
+  }
+  /* film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- proto flag ---------- */
+  .proto-flag{
+    position:fixed; bottom:12px; left:12px; z-index:95;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-faint); background:rgba(250,248,243,.6); backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px); padding:5px 9px; border-radius:2px;
+  }
+
+  /* ---------- eyebrow ---------- */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:14px;
+    font-family:var(--font-mono); font-size:10px; font-weight:300; letter-spacing:.4em;
+    text-transform:uppercase; color:var(--olive);
+  }
+  .eyebrow::before{ content:''; width:28px; height:1px; background:var(--olive); display:inline-block; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    min-height:96vh; display:flex; flex-direction:column; justify-content:center;
+    padding:64px 20px 40px; position:relative; overflow:hidden;
+  }
+  .hero__eyebrow{ margin-bottom:26px; }
+  .hero__title{
+    font-family:var(--font-serif); font-weight:700; line-height:.92;
+    font-size:var(--text-display); letter-spacing:-.01em; color:var(--ink);
+  }
+  .hero__title em{ font-style:italic; color:var(--olive); font-weight:600; }
+  .hero__title .thin{ display:block; font-weight:400; }
+  .hero__sub{
+    margin-top:26px; max-width:34ch; font-size:var(--text-small); line-height:1.7;
+    color:var(--ink-soft); font-weight:300;
+  }
+  .scroll-hint{
+    margin-top:44px; display:inline-flex; align-items:center; gap:12px;
+    font-family:var(--font-mono); font-size:10px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .scroll-hint__line{
+    width:1px; height:40px; background:linear-gradient(var(--olive),transparent);
+    animation:hint 2.2s ease-in-out infinite;
+  }
+  @keyframes hint{ 0%,100%{transform:scaleY(.4);opacity:.4;transform-origin:top} 50%{transform:scaleY(1);opacity:1;transform-origin:top} }
+
+  /* ---------- marquee bands ---------- */
+  .band{
+    width:100%; overflow:hidden; white-space:nowrap; padding:8px 0;
+    display:flex; user-select:none;
+  }
+  .band--divider{ padding:22px 0; }
+  .band__row{
+    display:inline-flex; will-change:transform; flex:0 0 auto;
+    /* translateX set from JS */
+  }
+  .band__word{ display:inline-block; padding-right:.35em; }
+
+  /* serif display row */
+  .band--serif .band__row{
+    font-family:var(--font-serif); font-weight:700; font-size:var(--text-display);
+    line-height:1; letter-spacing:-.01em; color:var(--ink);
+  }
+  .band--serif.band--italic .band__row{ font-style:italic; font-weight:600; }
+  .band--serif .band__row em{ color:var(--olive); font-style:italic; }
+  .band--outline .band__row{
+    color:transparent; -webkit-text-stroke:1.4px var(--cream-deep); text-stroke:1.4px var(--cream-deep);
+  }
+
+  /* mono tracked row */
+  .band--mono .band__row{
+    font-family:var(--font-mono); font-weight:400; text-transform:uppercase;
+    font-size:clamp(20px,5.5vw,44px); letter-spacing:.14em; color:var(--ink-soft);
+  }
+  .band--mono.band--olive .band__row{ color:var(--olive); }
+
+  /* ---------- image panels ---------- */
+  .panels{ padding:36px 16px; display:flex; flex-direction:column; gap:36px; }
+  .panel{
+    position:relative; border-radius:3px; overflow:hidden;
+    height:64vh; min-height:360px; box-shadow:0 24px 60px -34px rgba(44,44,42,.55);
+    opacity:0; transform:translateY(38px);
+    transition:opacity 1s cubic-bezier(.2,.7,.2,1), transform 1s cubic-bezier(.2,.7,.2,1);
+  }
+  .panel.in{ opacity:1; transform:translateY(0); }
+  .panel__media{ position:absolute; inset:0; }
+  /* subtle moving sheen over the gradient */
+  .panel__media::after{
+    content:''; position:absolute; inset:-40%;
+    background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.28) 50%,transparent 62%);
+    transform:translateX(-60%); animation:sheen 6.5s ease-in-out infinite;
+  }
+  @keyframes sheen{ 0%{transform:translateX(-70%)} 55%,100%{transform:translateX(90%)} }
+
+  .panel__caption{
+    position:absolute; left:18px; bottom:18px; right:18px; z-index:2;
+    display:flex; flex-direction:column; align-items:flex-start; gap:12px;
+  }
+  .panel__name{
+    font-family:var(--font-serif); font-weight:600; font-size:clamp(22px,6vw,30px);
+    line-height:1.05; color:var(--cream);
+    text-shadow:0 2px 18px rgba(20,18,14,.5);
+  }
+  .panel__name em{ font-style:italic; color:var(--cream-mid); }
+  .shop-pill{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--ink); background:var(--cream); padding:9px 15px; border-radius:100px;
+    cursor:pointer; border:none; transition:background .25s ease, transform .25s ease;
+  }
+  .shop-pill:hover{ background:var(--olive); color:var(--cream); transform:translateY(-2px); }
+  .shop-pill .price{ color:var(--olive); }
+  .shop-pill:hover .price{ color:var(--cream); }
+
+  /* ---------- interlude copy ---------- */
+  .interlude{ padding:56px 22px; max-width:640px; }
+  .interlude .eyebrow{ margin-bottom:20px; }
+  .interlude__text{
+    font-family:var(--font-serif); font-weight:400; font-size:var(--text-heading);
+    line-height:1.32; color:var(--ink); letter-spacing:-.005em;
+  }
+  .interlude__text em{ font-style:italic; color:var(--olive); }
+
+  /* ---------- closing ---------- */
+  .closer{ padding:70px 20px 120px; text-align:center; }
+  .closer__title{
+    font-family:var(--font-serif); font-weight:700; font-size:var(--text-heading);
+    line-height:1.05; color:var(--ink); margin-bottom:30px;
+  }
+  .closer__title em{ font-style:italic; color:var(--olive); }
+  .closer .shop-pill{
+    background:var(--ink); color:var(--cream); font-size:12px; padding:14px 26px;
+  }
+  .closer .shop-pill .price{ color:var(--olive-light); }
+  .closer .shop-pill:hover{ background:var(--olive); }
+  .closer .shop-pill:hover .price{ color:var(--cream); }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed; left:50%; bottom:34px; transform:translate(-50%,20px);
+    z-index:120; background:var(--ink); color:var(--cream);
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
+    padding:12px 22px; border-radius:100px; opacity:0; pointer-events:none;
+    transition:opacity .3s ease, transform .3s ease; white-space:nowrap;
+    box-shadow:0 16px 40px -18px rgba(44,44,42,.7);
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+
+  /* ---------- reduced motion: freeze the type & animations ---------- */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    .band{ overflow:hidden; }
+    .band__row{ transform:none !important; }
+    .panel{ opacity:1 !important; transform:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <span class="eyebrow hero__eyebrow">Maison de Soie · Est. Paris</span>
+    <h1 class="hero__title">
+      A STORY<br><span class="thin">IN <em>SILK</em></span>
+    </h1>
+    <p class="hero__sub">Mulberry silk, hand-rolled, worn a hundred ways. Scroll to let it move.</p>
+    <div class="scroll-hint">
+      <span class="scroll-hint__line"></span>
+      Scroll
+    </div>
+  </header>
+
+  <!-- ============ MARQUEE STACK 1 ============ -->
+  <!-- data-speed = px translated per px scrolled; data-dir = 1 (right) / -1 (left) -->
+  <section class="band band--serif" aria-hidden="true">
+    <div class="band__row" data-speed="0.35" data-dir="-1"></div>
+  </section>
+  <section class="band band--mono band--olive" aria-hidden="true">
+    <div class="band__row" data-speed="0.6" data-dir="1"></div>
+  </section>
+
+  <!-- ============ IMAGE PANEL 1 ============ -->
+  <section class="panels">
+    <article class="panel" data-reveal>
+      <div class="panel__media" style="background:linear-gradient(135deg,#e7c9d0,#c98fa0 55%,#7a4a3c)"></div>
+      <div class="panel__caption">
+        <span class="panel__name">Pink Paisley <em>Silk Scarf</em></span>
+        <button class="shop-pill" data-name="Pink Paisley Silk Scarf">Shop · <span class="price">$38</span> ▸</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ MARQUEE STACK 2 ============ -->
+  <section class="band band--serif band--italic" aria-hidden="true">
+    <div class="band__row" data-speed="0.45" data-dir="1"></div>
+  </section>
+  <section class="band band--mono" aria-hidden="true">
+    <div class="band__row" data-speed="0.72" data-dir="-1"></div>
+  </section>
+
+  <!-- ============ INTERLUDE ============ -->
+  <section class="interlude">
+    <span class="eyebrow">The Cloth</span>
+    <p class="interlude__text">Sixteen momme of <em>pure mulberry silk</em>, finished by hand at the edge — tie it, drape it, knot it.</p>
+  </section>
+
+  <!-- ============ IMAGE PANEL 2 ============ -->
+  <section class="panels">
+    <article class="panel" data-reveal>
+      <div class="panel__media" style="background:linear-gradient(135deg,#c7cba6,#8a9e45 55%,#4c5a24)"></div>
+      <div class="panel__caption">
+        <span class="panel__name">Olive <em>Silk Scrunchie</em></span>
+        <button class="shop-pill" data-name="Olive Silk Scrunchie">Shop · <span class="price">$18</span> ▸</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ MARQUEE STACK 3 ============ -->
+  <section class="band band--serif band--outline" aria-hidden="true">
+    <div class="band__row" data-speed="0.5" data-dir="-1"></div>
+  </section>
+  <section class="band band--mono band--olive" aria-hidden="true">
+    <div class="band__row" data-speed="0.66" data-dir="1"></div>
+  </section>
+
+  <!-- ============ IMAGE PANEL 3 ============ -->
+  <section class="panels">
+    <article class="panel" data-reveal>
+      <div class="panel__media" style="background:linear-gradient(135deg,#e3c39a,#b6823f 55%,#5c3a1c)"></div>
+      <div class="panel__caption">
+        <span class="panel__name">Cognac Chain <em>Silk Scarf</em></span>
+        <button class="shop-pill" data-name="Cognac Chain Silk Scarf">Shop · <span class="price">$56</span> ▸</button>
+      </div>
+    </article>
+  </section>
+
+  <!-- ============ CLOSING MARQUEE ============ -->
+  <section class="band band--serif" aria-hidden="true">
+    <div class="band__row" data-speed="0.4" data-dir="1"></div>
+  </section>
+
+  <!-- ============ CLOSER ============ -->
+  <footer class="closer">
+    <span class="eyebrow" style="margin-bottom:24px;">Fait Main · Paris</span>
+    <h2 class="closer__title">Wear it your <em>own way</em>.</h2>
+    <button class="shop-pill" data-name="The Collection">Shop the collection · <span class="price">▸</span></button>
+  </footer>
+
+  <!-- proto flag -->
+  <div class="proto-flag">Kinetic · local only</div>
+  <!-- toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- phrases per marquee row (matched by DOM order to .band__row) ---- */
+  const PHRASES = [
+    'SOIE &amp; FORME · SOIE &amp; FORME · <em>SOIE</em> &amp; FORME · ',
+    'MULBERRY SILK · 16 MOMME · HAND-ROLLED HEM · ',
+    'tie it · drape it · <em>knot it</em> · ',
+    'QUIET LUXURY · FAIT MAIN · PURE SILK · ',
+    'A STORY IN <em>SILK</em> · A STORY IN SILK · ',
+    'PURE SILK · SAVOIR-FAIRE · PARIS · ',
+    'wear it · <em>your way</em> · fait main · ',
+  ];
+
+  /* ---- build each row: repeat phrase enough to overflow both sides ---- */
+  const rows = Array.from(document.querySelectorAll('.band__row'));
+  rows.forEach((row, i) => {
+    const phrase = PHRASES[i % PHRASES.length];
+    // repeat generously so the strip is far wider than the viewport
+    row.innerHTML = new Array(8).fill(phrase).join('');
+  });
+
+  /* ---- cache row config once ---- */
+  const rowData = rows.map(row => ({
+    el: row,
+    speed: parseFloat(row.dataset.speed) || 0.4,
+    dir: parseInt(row.dataset.dir, 10) || 1,
+    // center each row's overflow so it doesn't start flush-left
+    base: -row.scrollWidth / 3
+  }));
+
+  /* ---- scroll-linked translateX via rAF (throttled) ---- */
+  let scrollY = window.scrollY;
+  let ticking = false;
+
+  function render(){
+    for (const r of rowData){
+      // translateX = base + scroll * speed * direction
+      const x = r.base + scrollY * r.speed * r.dir;
+      r.el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
+    }
+    ticking = false;
+  }
+  function onScroll(){
+    scrollY = window.scrollY;
+    if (!ticking){ ticking = true; requestAnimationFrame(render); }
+  }
+
+  if (!reduce){
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', () => {
+      // recompute base widths after layout shifts
+      rowData.forEach(r => { r.base = -r.el.scrollWidth / 3; });
+      render();
+    }, { passive:true });
+    render(); // initial paint
+  }
+
+  /* ---- panel reveal on intersect (animate once, then hold) ---- */
+  const panels = document.querySelectorAll('[data-reveal]');
+  if ('IntersectionObserver' in window && !reduce){
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting){
+          entry.target.classList.add('in');
+          obs.unobserve(entry.target); // hold — no longer scroll-linked
+        }
+      });
+    }, { threshold:0.22 });
+    panels.forEach(p => io.observe(p));
+  } else {
+    panels.forEach(p => p.classList.add('in'));
+  }
+
+  /* ---- mock-shop toast handler ---- */
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-name]');
+    if (!target || !toast) return;
+    toast.textContent = 'Opening ' + target.dataset.name + '…';
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+})();
+</script>
+</body>
+</html>

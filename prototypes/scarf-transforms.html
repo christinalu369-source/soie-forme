@@ -1,0 +1,476 @@
+<!--
+  PROTOTYPE — Scarf Transforms
+  ------------------------------------------------------------------
+  Static design-exploration mockup for Soie & Forme. No Shopify, no
+  build step, no server — a single self-contained HTML file, local only.
+
+  Interaction: one silk piece stays pinned in the center of the screen
+  while you scroll. Scroll progress drives the same scarf through four
+  discrete tied states (Square → Fold → Knot → Drape), crossfading
+  between stacked layers so it morphs like a piece being retied by hand.
+
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scarf Transforms — Soie &amp; Forme</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878;
+    --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(38px,9vw,82px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+    /* the one fabric — same scarf across every state (Pink Paisley) */
+    --silk: linear-gradient(135deg,#e7c9d0,#c98fa0 55%,#7a4a3c);
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    font-family:var(--font-mono);
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    line-height:1.5;
+  }
+
+  /* fixed film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* proto flag bottom-left */
+  .proto-flag{
+    position:fixed; left:14px; bottom:14px; z-index:95;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-faint);
+    background:rgba(250,248,243,.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    padding:6px 10px; border-radius:2px;
+  }
+
+  /* eyebrow */
+  .eyebrow{
+    display:inline-flex; align-items:center;
+    font-family:var(--font-mono); font-size:10px; font-weight:300;
+    letter-spacing:.4em; text-transform:uppercase; color:var(--olive);
+  }
+  .eyebrow::before{
+    content:''; width:28px; height:1px; background:var(--olive);
+    margin-right:14px; display:inline-block;
+  }
+
+  /* ---------- intro / outro cards ---------- */
+  .card{
+    min-height:100svh; display:flex; flex-direction:column; justify-content:center;
+    align-items:flex-start; padding:0 24px; gap:22px; position:relative;
+  }
+  .card__title{
+    font-family:var(--font-serif); font-weight:600; font-size:var(--text-display);
+    line-height:1.02; letter-spacing:-.01em; max-width:9ch;
+  }
+  .card__body{
+    font-family:var(--font-mono); font-size:var(--text-small); font-weight:300;
+    color:var(--ink-soft); max-width:34ch; line-height:1.75;
+  }
+  .scroll-cue{
+    position:absolute; left:24px; bottom:40px;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.24em;
+    text-transform:uppercase; color:var(--ink-faint);
+    display:flex; align-items:center; gap:10px;
+  }
+  .scroll-cue span{
+    width:1px; height:34px; background:var(--ink-faint); display:inline-block;
+    transform-origin:top; animation:cue 2.4s ease-in-out infinite;
+  }
+  @keyframes cue{ 0%,100%{transform:scaleY(.3);opacity:.4} 50%{transform:scaleY(1);opacity:1} }
+
+  /* ---------- the tall pinned section ---------- */
+  .transform-track{
+    position:relative;
+    height:500svh;              /* tall scroll runway */
+    background:var(--cream);
+  }
+  .stage{
+    position:sticky; top:0;
+    height:100svh;
+    overflow:hidden;
+    display:grid;
+    grid-template-rows:1fr auto;
+  }
+
+  /* the pinned piece area */
+  .piece-wrap{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    min-height:0;
+  }
+
+  /* soft shadow beneath the piece */
+  .piece-shadow{
+    position:absolute;
+    bottom:14%; left:50%; transform:translateX(-50%);
+    width:min(58vw,240px); height:26px;
+    background:radial-gradient(ellipse at center, rgba(44,44,42,.28), rgba(44,44,42,0) 70%);
+    filter:blur(3px);
+    transition:width .5s ease, opacity .5s ease;
+  }
+
+  /* stacked silk layers — one per state, crossfaded by opacity */
+  .silk-stack{
+    position:relative;
+    width:min(62vw,260px); height:min(62vw,260px);
+  }
+  .silk{
+    position:absolute; inset:0;
+    background:var(--silk);
+    box-shadow: inset 0 0 44px rgba(122,74,60,.35), inset 0 2px 8px rgba(255,255,255,.35);
+    transform-origin:center center;
+    will-change:transform,opacity;
+    overflow:hidden;
+    /* transitions only for the small idle settling — scroll sets values directly */
+  }
+  /* moving sheen for silk feel */
+  .silk::before{
+    content:''; position:absolute; top:-40%; left:-60%;
+    width:80%; height:180%;
+    background:linear-gradient(105deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.34) 48%, rgba(255,255,255,0) 100%);
+    transform:rotate(8deg);
+    animation:sheen 6.5s ease-in-out infinite;
+    mix-blend-mode:screen;
+  }
+  @keyframes sheen{ 0%{transform:translateX(-40%) rotate(8deg)} 50%{transform:translateX(160%) rotate(8deg)} 100%{transform:translateX(-40%) rotate(8deg)} }
+
+  /* the four resting shapes — set as base transforms, JS layers opacity + subtle drift */
+  .silk--1{ border-radius:6px; }
+  .silk--2{ border-radius:10px; }
+  .silk--3{ border-radius:46% 44% 52% 50% / 50% 52% 46% 48%; }
+  .silk--4{ border-radius:14px 60px 18px 60px; }
+
+  /* ---------- caption ---------- */
+  .caption-area{
+    position:relative;
+    padding:0 24px 34px;
+    min-height:170px;
+  }
+  .caption{
+    position:absolute; left:24px; right:24px; bottom:34px;
+    display:flex; flex-direction:column; gap:14px;
+    opacity:0; transform:translateY(10px);
+    transition:opacity .5s ease, transform .5s ease;
+    pointer-events:none;
+  }
+  .caption.is-active{ opacity:1; transform:none; pointer-events:auto; }
+  .caption__line{
+    font-family:var(--font-serif); font-weight:500;
+    font-size:var(--text-heading); line-height:1.08; letter-spacing:-.01em;
+    max-width:14ch;
+  }
+  .shop-btn{
+    align-self:flex-start;
+    margin-top:6px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
+    color:var(--cream); background:var(--ink);
+    border:none; border-radius:2px; cursor:pointer;
+    padding:12px 18px;
+    display:inline-flex; align-items:center; gap:8px;
+    opacity:0; transform:translateY(6px);
+    transition:opacity .5s ease .1s, transform .5s ease .1s, background .3s ease;
+  }
+  .caption.is-active .shop-btn{ opacity:1; transform:none; }
+  .shop-btn:hover{ background:var(--olive); }
+
+  /* ---------- state indicator ---------- */
+  .indicator{
+    position:fixed; top:50%; right:16px; transform:translateY(-50%);
+    z-index:80; display:flex; flex-direction:column; gap:16px;
+    opacity:0; transition:opacity .4s ease;
+  }
+  .indicator.is-visible{ opacity:1; }
+  .indicator button{
+    appearance:none; border:none; background:none; cursor:pointer;
+    padding:6px 4px; display:flex; align-items:center; gap:8px;
+  }
+  .indicator .tick{
+    width:22px; height:1px; background:var(--ink-faint);
+    transition:width .35s ease, background .35s ease, height .35s ease;
+    display:inline-block;
+  }
+  .indicator button[aria-current="true"] .tick{
+    width:34px; height:2px; background:var(--olive);
+  }
+  .indicator .tick-num{
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.1em;
+    color:var(--ink-faint); opacity:0;
+    transition:opacity .3s ease;
+  }
+  .indicator button[aria-current="true"] .tick-num{ opacity:1; color:var(--olive); }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed; left:50%; bottom:34px; transform:translateX(-50%) translateY(20px);
+    z-index:120;
+    background:var(--ink); color:var(--cream);
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
+    padding:12px 22px; border-radius:999px;
+    opacity:0; pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+    box-shadow:0 8px 30px rgba(44,44,42,.25);
+  }
+  .toast.is-visible{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* wider screens: caption sits to the side of the piece */
+  @media (min-width:760px){
+    .stage{ grid-template-rows:none; grid-template-columns:1fr 1fr; align-items:center; }
+    .caption-area{ min-height:auto; padding-bottom:0; align-self:center; }
+    .caption{ position:static; }
+    .caption:not(.is-active){ position:absolute; }
+  }
+
+  /* ---------- reduced motion: show first state, reveal all captions ---------- */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+    .caption{ opacity:1 !important; transform:none !important; position:static !important;
+      pointer-events:auto; margin-bottom:24px; }
+    .caption .shop-btn{ opacity:1 !important; transform:none !important; }
+    .caption-area{ overflow:visible; }
+    .silk{ opacity:1 !important; }
+    .indicator{ opacity:1 !important; }
+  }
+</style>
+</head>
+<body>
+
+  <span class="proto-flag">Transform · local only</span>
+
+  <!-- state indicator -->
+  <nav class="indicator" id="indicator" aria-label="Scarf states">
+    <button data-state="0" aria-current="true"><span class="tick-num">01</span><span class="tick"></span></button>
+    <button data-state="1"><span class="tick-num">02</span><span class="tick"></span></button>
+    <button data-state="2"><span class="tick-num">03</span><span class="tick"></span></button>
+    <button data-state="3"><span class="tick-num">04</span><span class="tick"></span></button>
+  </nav>
+
+  <!-- intro card -->
+  <section class="card">
+    <span class="eyebrow">One square, many ways</span>
+    <h1 class="card__title">Tie it your way.</h1>
+    <p class="card__body">The same twenty-five-inch silk, worn four ways. Scroll to watch it fold, knot, and drape — no two the same.</p>
+    <div class="scroll-cue"><span></span>Scroll</div>
+  </section>
+
+  <!-- the pinned transform section -->
+  <section class="transform-track" id="track">
+    <div class="stage">
+      <!-- the pinned piece -->
+      <div class="piece-wrap">
+        <div class="piece-shadow" id="shadow"></div>
+        <div class="silk-stack" id="stack">
+          <div class="silk silk--1" data-state="0"></div>
+          <div class="silk silk--2" data-state="1"></div>
+          <div class="silk silk--3" data-state="2"></div>
+          <div class="silk silk--4" data-state="3"></div>
+        </div>
+      </div>
+
+      <!-- captions -->
+      <div class="caption-area">
+        <div class="caption is-active" data-state="0">
+          <span class="eyebrow">The Square</span>
+          <p class="caption__line">One 25-inch square.</p>
+        </div>
+        <div class="caption" data-state="1">
+          <span class="eyebrow">The Fold</span>
+          <p class="caption__line">Fold, corner to corner.</p>
+        </div>
+        <div class="caption" data-state="2">
+          <span class="eyebrow">The Knot</span>
+          <p class="caption__line">A neckerchief at the throat.</p>
+        </div>
+        <div class="caption" data-state="3">
+          <span class="eyebrow">The Drape</span>
+          <p class="caption__line">Loose, through a top-handle bag.</p>
+          <button class="shop-btn" data-name="Pink Paisley Silk Scarf">Shop this piece · $38 ▸</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- outro card -->
+  <section class="card">
+    <span class="eyebrow">Yours to fold</span>
+    <h1 class="card__title">One piece. Endless form.</h1>
+    <p class="card__body">Every Soie &amp; Forme square is hand-rolled silk twill, made to be retied a thousand times over.</p>
+  </section>
+
+  <!-- toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- mock-shop toast ---------- */
+  var toast = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(name){
+    if(!toast) return;
+    toast.textContent = 'Opening ' + name + '…';
+    toast.classList.add('is-visible');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('is-visible'); }, 1800);
+  }
+  // delegate: any element with data-name acts as a mock link
+  document.addEventListener('click', function(e){
+    var el = e.target.closest ? e.target.closest('[data-name]') : null;
+    if(el){ e.preventDefault(); showToast(el.getAttribute('data-name')); }
+  });
+
+  /* ---------- the four resting transforms (SAME scarf, retied) ---------- */
+  // each state describes how the pinned silk sits at rest
+  var STATES = [
+    // 1 — open square
+    { rotate:0,   scaleX:1,    scaleY:1,    skewX:0,  tx:0,   ty:0   },
+    // 2 — folded corner-to-corner (shorter, tipped)
+    { rotate:-18, scaleX:1.02, scaleY:0.56, skewX:0,  tx:0,   ty:14  },
+    // 3 — knot at the throat (small, rounded, turned)
+    { rotate:34,  scaleX:0.62, scaleY:0.62, skewX:0,  tx:0,   ty:-6  },
+    // 4 — draped through a handle (skewed, offset, elongated)
+    { rotate:8,   scaleX:0.78, scaleY:1.12, skewX:-14, tx:22,  ty:18  }
+  ];
+  var N = STATES.length;
+
+  var stack   = document.getElementById('stack');
+  var layers  = stack ? stack.querySelectorAll('.silk') : [];
+  var captions= document.querySelectorAll('.caption');
+  var shadow  = document.getElementById('shadow');
+  var track   = document.getElementById('track');
+  var indicator = document.getElementById('indicator');
+  var indButtons = indicator ? indicator.querySelectorAll('button') : [];
+
+  function transformFor(s){
+    return 'rotate('+s.rotate+'deg) skewX('+s.skewX+'deg) '
+         + 'scale('+s.scaleX+','+s.scaleY+') '
+         + 'translate('+s.tx+'px,'+s.ty+'px)';
+  }
+
+  // set each layer's resting transform once
+  for(var i=0;i<layers.length;i++){
+    layers[i].style.transform = transformFor(STATES[i]);
+  }
+
+  // linear crossfade weight: 1 when progress == index, 0 once a full step away
+  function weight(index, progress){
+    var d = Math.abs(progress - index);
+    return d >= 1 ? 0 : (1 - d);
+  }
+
+  var lastActive = -1;
+
+  function render(progress){
+    // progress runs 0 → N-1
+    // opacity crossfade between adjacent stacked layers
+    for(var i=0;i<layers.length;i++){
+      layers[i].style.opacity = weight(i, progress).toFixed(3);
+    }
+
+    // active (rounded) state drives captions + indicator + shadow
+    var active = Math.round(progress);
+    if(active < 0) active = 0;
+    if(active > N-1) active = N-1;
+
+    if(active !== lastActive){
+      lastActive = active;
+      for(var c=0;c<captions.length;c++){
+        captions[c].classList.toggle('is-active', (+captions[c].getAttribute('data-state')) === active);
+      }
+      for(var b=0;b<indButtons.length;b++){
+        indButtons[b].setAttribute('aria-current', (+indButtons[b].getAttribute('data-state')) === active ? 'true':'false');
+      }
+    }
+
+    // shadow tightens as the piece gets smaller/knotted (fractional so it eases)
+    if(shadow){
+      var shrink = 1 - (0.30 * (progress / (N-1))); // gently narrower toward knot/drape
+      shadow.style.width = (Math.max(0.55, shrink) * Math.min(window.innerWidth*0.58, 240)) + 'px';
+    }
+  }
+
+  /* ---------- scroll → progress, rAF throttled ---------- */
+  var ticking = false;
+
+  function computeProgress(){
+    if(!track) return 0;
+    var rect = track.getBoundingClientRect();
+    var total = track.offsetHeight - window.innerHeight; // scrollable runway
+    if(total <= 0) return 0;
+    var scrolled = -rect.top;                    // how far into the track
+    var p = scrolled / total;                    // 0 → 1 across the track
+    if(p < 0) p = 0; if(p > 1) p = 1;
+    return p * (N - 1);                          // 0 → N-1
+  }
+
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      render(computeProgress());
+      updateIndicatorVisibility();
+      ticking = false;
+    });
+  }
+
+  // show the indicator only while the track is on screen
+  function updateIndicatorVisibility(){
+    if(!indicator || !track) return;
+    var rect = track.getBoundingClientRect();
+    var onScreen = rect.top < window.innerHeight*0.5 && rect.bottom > window.innerHeight*0.5;
+    indicator.classList.toggle('is-visible', onScreen);
+  }
+
+  /* ---------- tappable indicator → scroll to that state ---------- */
+  function scrollToState(index){
+    if(!track) return;
+    var total = track.offsetHeight - window.innerHeight;
+    var frac = index / (N - 1);
+    // add a hair of nudge so we land clearly inside the state band
+    var targetY = track.offsetTop + (frac * total);
+    window.scrollTo({ top: targetY, behavior: prefersReduced ? 'auto' : 'smooth' });
+  }
+  for(var k=0;k<indButtons.length;k++){
+    (function(btn){
+      btn.addEventListener('click', function(){
+        scrollToState(+btn.getAttribute('data-state'));
+      });
+    })(indButtons[k]);
+  }
+
+  /* ---------- init ---------- */
+  if(prefersReduced){
+    // show the first resting state cleanly; captions already revealed via CSS
+    render(0);
+    for(var m=0;m<layers.length;m++){ layers[m].style.opacity = (m===0?1:0.14); }
+  } else {
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll, { passive:true });
+    render(computeProgress());
+    updateIndicatorVisibility();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!--
+  PROTOTYPE — Lookbook Swipe
+  Static mockup only: no Shopify, no build pipeline, runs locally by double-clicking.
+  Interaction: a full-viewport, horizontally-swiped "Stories"-style lookbook. The user
+  swipes sideways (touch / trackpad) through full-bleed silk slides; story-style progress
+  bars track position, tap zones (left/right thirds) and arrow keys navigate between pieces.
+  See design-exploration siblings; related plan: .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soie &amp; Forme — Lookbook Swipe</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878;
+    --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(38px,9vw,82px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{ height:100%; }
+
+  body{
+    font-family:var(--font-mono);
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    overflow-y:hidden; /* page itself never scrolls — swiping is horizontal */
+  }
+
+  /* Fixed film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ============ HORIZONTAL SWIPE TRACK ============ */
+  .track{
+    display:flex;
+    height:100svh;
+    width:100vw;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;           /* Firefox */
+  }
+  .track::-webkit-scrollbar{ display:none; } /* WebKit */
+
+  .slide{
+    position:relative;
+    min-width:100vw;
+    height:100svh;
+    flex:none;
+    scroll-snap-align:center;
+    scroll-snap-stop:always;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+  }
+
+  /* Silk gradient fill for each slide */
+  .silk{ position:absolute; inset:0; z-index:0; }
+
+  /* Moving sheen sweep across the fabric */
+  .silk::before{
+    content:''; position:absolute; top:-40%; left:-60%;
+    width:60%; height:180%;
+    background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
+    transform:skewX(-18deg);
+    animation:sheen 7s linear infinite;
+    mix-blend-mode:soft-light;
+  }
+  @keyframes sheen{
+    0%   { left:-60%; opacity:0; }
+    12%  { opacity:1; }
+    60%  { opacity:1; }
+    75%  { left:150%; opacity:0; }
+    100% { left:150%; opacity:0; }
+  }
+
+  /* Faint woven-fabric texture hint */
+  .silk::after{
+    content:''; position:absolute; inset:0; opacity:0.10; mix-blend-mode:overlay;
+    background-image:
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.5) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,0.4) 0 1px, transparent 1px 3px);
+    background-size:6px 6px;
+  }
+
+  /* Bottom scrim for text legibility */
+  .scrim{
+    position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(to top, rgba(20,20,18,0.72) 0%, rgba(20,20,18,0.30) 32%, rgba(20,20,18,0) 56%);
+  }
+
+  /* ============ TAP ZONES ============ */
+  /* Left / right thirds for prev / next. Kept below the shop button in stacking. */
+  .tapzone{
+    position:absolute; top:0; bottom:0; z-index:5;
+    width:33.33%;
+    background:transparent; border:0; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .tapzone--prev{ left:0; }
+  .tapzone--next{ right:0; }
+
+  /* ============ SLIDE CONTENT ============ */
+  .content{
+    position:relative; z-index:10;
+    padding:0 24px calc(64px + env(safe-area-inset-bottom)) 24px;
+    max-width:560px;
+    pointer-events:none; /* let taps fall through to zones; re-enable on interactive bits */
+  }
+  .content > *{ pointer-events:none; }
+  .content .shop{ pointer-events:auto; }
+
+  /* Eyebrow */
+  .eyebrow{
+    font-family:var(--font-mono); font-size:10px; font-weight:300;
+    letter-spacing:.4em; text-transform:uppercase; color:var(--olive);
+    display:flex; align-items:center; gap:12px; margin-bottom:16px;
+  }
+  .eyebrow::before{
+    content:''; width:28px; height:1px; background:var(--olive); display:inline-block; flex:none;
+  }
+  /* On dark silk slides, lighten eyebrow for contrast */
+  .slide--piece .eyebrow{ color:var(--olive-light); }
+
+  .title{
+    font-family:var(--font-serif); font-weight:600;
+    font-size:var(--text-heading); line-height:1.05; color:var(--cream);
+    margin-bottom:14px; text-wrap:balance;
+    text-shadow:0 1px 24px rgba(0,0,0,0.35);
+  }
+
+  .styling{
+    font-family:var(--font-mono); font-weight:300; font-size:var(--text-small);
+    line-height:1.5; color:var(--cream-mid); max-width:34ch; margin-bottom:26px;
+    text-shadow:0 1px 16px rgba(0,0,0,0.4);
+  }
+
+  /* Discreet pill shop button */
+  .shop{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
+    color:var(--ink); background:var(--cream);
+    border:0; border-radius:999px; padding:13px 20px; cursor:pointer;
+    transition:transform .3s ease, background .3s ease;
+    box-shadow:0 6px 26px rgba(0,0,0,0.28);
+  }
+  .shop:hover{ transform:translateY(-2px); background:#fff; }
+  .shop .arrow{ color:var(--olive); font-size:13px; }
+
+  /* ============ COVER SLIDE ============ */
+  .slide--cover{ justify-content:center; align-items:center; text-align:center; }
+  .slide--cover .silk{ background:linear-gradient(160deg, var(--cream) 0%, var(--cream-mid) 48%, var(--cream-deep) 100%); }
+  .slide--cover .silk::before{ mix-blend-mode:normal; opacity:0.5; }
+  .cover-inner{ position:relative; z-index:10; padding:0 28px; }
+  .cover-inner .eyebrow{ justify-content:center; color:var(--olive); }
+  .cover-title{
+    font-family:var(--font-serif); font-weight:700; font-size:var(--text-display);
+    line-height:1.02; color:var(--ink); margin-bottom:18px; text-wrap:balance;
+  }
+  .cover-sub{
+    font-family:var(--font-mono); font-weight:300; font-size:var(--text-small);
+    letter-spacing:.04em; color:var(--ink-soft); margin-bottom:44px;
+  }
+  .swipe-hint{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.28em;
+    text-transform:uppercase; color:var(--ink-faint);
+  }
+  .swipe-hint .swipe-arrow{
+    display:inline-block; color:var(--olive); font-size:15px;
+    animation:nudge 1.8s ease-in-out infinite;
+  }
+  @keyframes nudge{
+    0%,100%{ transform:translateX(0); opacity:.5; }
+    50%    { transform:translateX(8px); opacity:1; }
+  }
+
+  /* ============ CLOSING SLIDE ============ */
+  .slide--close{ justify-content:center; align-items:center; text-align:center; }
+  .slide--close .silk{ background:linear-gradient(200deg, var(--cream-mid) 0%, var(--cream-deep) 55%, var(--linen) 100%); }
+  .slide--close .silk::before{ mix-blend-mode:normal; opacity:0.5; }
+  .close-inner{ position:relative; z-index:10; padding:0 28px; }
+  .close-inner .eyebrow{ justify-content:center; color:var(--olive); }
+  .close-title{
+    font-family:var(--font-serif); font-weight:600; font-size:var(--text-heading);
+    line-height:1.05; color:var(--ink); margin-bottom:16px; text-wrap:balance;
+  }
+  .close-sub{
+    font-family:var(--font-mono); font-weight:300; font-size:var(--text-small);
+    color:var(--ink-soft); margin-bottom:34px;
+  }
+  .close-inner .shop{ position:relative; }
+
+  /* ============ STORY PROGRESS BARS ============ */
+  .progress{
+    position:fixed; top:0; left:0; right:0; z-index:80;
+    display:flex; gap:6px;
+    padding:calc(12px + env(safe-area-inset-top)) 16px 0 16px;
+    pointer-events:none;
+  }
+  .progress__seg{
+    flex:1; height:3px; border-radius:2px;
+    background:rgba(200,194,182,0.55); /* faint linen for upcoming */
+    overflow:hidden; position:relative;
+  }
+  .progress__seg::after{
+    content:''; position:absolute; inset:0;
+    background:var(--olive); transform:scaleX(0); transform-origin:left;
+    transition:transform .45s ease;
+  }
+  .progress__seg.is-filled::after{ transform:scaleX(1); }
+
+  /* ============ PROTO FLAG ============ */
+  .proto-flag{
+    position:fixed; left:12px; bottom:12px; z-index:95;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--ink-faint);
+    background:rgba(250,248,243,0.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    padding:5px 9px; border-radius:4px;
+    pointer-events:none;
+  }
+
+  /* ============ TOAST ============ */
+  .toast{
+    position:fixed; left:50%; bottom:26px; transform:translate(-50%, 20px);
+    z-index:100;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.04em;
+    color:var(--cream); background:var(--ink);
+    padding:11px 20px; border-radius:999px;
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .4s ease, transform .4s ease;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+  }
+  .toast.show{ opacity:1; visibility:visible; transform:translate(-50%, 0); }
+
+  /* ============ REDUCED MOTION ============ */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    *{ transform:none !important; }
+    .silk::before{ display:none; }        /* kill the sheen sweep */
+    .progress__seg.is-filled::after{ transform:scaleX(1) !important; }
+    .swipe-hint .swipe-arrow{ animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Story-style progress bars (one segment per slide) -->
+  <div class="progress" id="progress" aria-hidden="true"></div>
+
+  <!-- Horizontal swipe track -->
+  <main class="track" id="track">
+
+    <!-- COVER -->
+    <section class="slide slide--cover" data-label="">
+      <div class="silk"></div>
+      <div class="cover-inner">
+        <span class="eyebrow">The Lookbook</span>
+        <h1 class="cover-title">Swipe through the season</h1>
+        <p class="cover-sub">Five pieces of silk, held to the light.</p>
+        <span class="swipe-hint">Swipe <span class="swipe-arrow">→</span></span>
+      </div>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+    </section>
+
+    <!-- PIECE 01 -->
+    <section class="slide slide--piece">
+      <div class="silk" style="background:linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%);"></div>
+      <div class="scrim"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+      <div class="content">
+        <span class="eyebrow">Piece No. 01</span>
+        <h2 class="title">Pink Paisley Silk Scarf</h2>
+        <p class="styling">Knotted at the throat, let the tails fall long over a bare collarbone.</p>
+        <button class="shop" data-name="Pink Paisley Silk Scarf">Shop this piece · $38 <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+    <!-- PIECE 02 -->
+    <section class="slide slide--piece">
+      <div class="silk" style="background:linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%);"></div>
+      <div class="scrim"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+      <div class="content">
+        <span class="eyebrow">Piece No. 02</span>
+        <h2 class="title">Olive Silk Scrunchie</h2>
+        <p class="styling">Twisted twice through a low chignon — the quiet detail that finishes a look.</p>
+        <button class="shop" data-name="Olive Silk Scrunchie">Shop this piece · $18 <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+    <!-- PIECE 03 -->
+    <section class="slide slide--piece">
+      <div class="silk" style="background:linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%);"></div>
+      <div class="scrim"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+      <div class="content">
+        <span class="eyebrow">Piece No. 03</span>
+        <h2 class="title">Cognac Chain Silk Scarf</h2>
+        <p class="styling">Looped through the strap of a bag, warm brown against worn leather.</p>
+        <button class="shop" data-name="Cognac Chain Silk Scarf">Shop this piece · $56 <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+    <!-- PIECE 04 -->
+    <section class="slide slide--piece">
+      <div class="silk" style="background:linear-gradient(135deg,#efeadf 0%,#b9b2a1 45%,#2c2c2a 100%);"></div>
+      <div class="scrim"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+      <div class="content">
+        <span class="eyebrow">Piece No. 04</span>
+        <h2 class="title">Ink &amp; Cream Silk Scarf</h2>
+        <p class="styling">Folded into a headband, the gradient framing the face like light on water.</p>
+        <button class="shop" data-name="Ink & Cream Silk Scarf">Shop this piece · $44 <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+    <!-- PIECE 05 -->
+    <section class="slide slide--piece">
+      <div class="silk" style="background:linear-gradient(135deg,#f3ede2 0%,#d8bfc0 55%,#a98a86 100%);"></div>
+      <div class="scrim"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <button class="tapzone tapzone--next" aria-label="Next"></button>
+      <div class="content">
+        <span class="eyebrow">Piece No. 05</span>
+        <h2 class="title">Bone Floral Silk Scarf</h2>
+        <p class="styling">Draped open over the shoulders of a linen coat — soft florals, softer edges.</p>
+        <button class="shop" data-name="Bone Floral Silk Scarf">Shop this piece · $40 <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+    <!-- CLOSE -->
+    <section class="slide slide--close">
+      <div class="silk"></div>
+      <button class="tapzone tapzone--prev" aria-label="Previous"></button>
+      <div class="close-inner">
+        <span class="eyebrow">The Full Edit</span>
+        <h2 class="close-title">Shop the collection</h2>
+        <p class="close-sub">Every piece, in one place.</p>
+        <button class="shop" data-name="the Full Collection">Enter the atelier <span class="arrow">▸</span></button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Proto flag -->
+  <div class="proto-flag">Lookbook · local only</div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const track = document.getElementById('track');
+      const progress = document.getElementById('progress');
+      const toast = document.getElementById('toast');
+      if (!track) return;
+
+      const slides = Array.from(track.querySelectorAll('.slide'));
+      const total = slides.length;
+
+      /* ---- Build one progress segment per slide ---- */
+      const segs = [];
+      if (progress) {
+        slides.forEach((_, i) => {
+          const seg = document.createElement('div');
+          seg.className = 'progress__seg';
+          progress.appendChild(seg);
+          segs.push(seg);
+        });
+      }
+
+      /* ---- Track the active slide index, update progress bars ---- */
+      let current = 0;
+      const setActive = (index) => {
+        const clamped = Math.max(0, Math.min(total - 1, index));
+        current = clamped;
+        // Fill active + passed segments; leave upcoming faint.
+        segs.forEach((seg, i) => {
+          seg.classList.toggle('is-filled', i <= clamped);
+        });
+      };
+
+      /* Compute nearest slide from scroll position (works on touch + trackpad). */
+      let scrollRaf = null;
+      const onScroll = () => {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = null;
+          const slideWidth = track.clientWidth || 1;
+          const index = Math.round(track.scrollLeft / slideWidth);
+          if (index !== current) setActive(index);
+        });
+      };
+      track.addEventListener('scroll', onScroll, { passive: true });
+
+      /* Prefer IntersectionObserver for accuracy when available. */
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              const idx = slides.indexOf(entry.target);
+              if (idx !== -1) setActive(idx);
+            }
+          });
+        }, { root: track, threshold: [0.6] });
+        slides.forEach((s) => io.observe(s));
+      }
+
+      /* ---- Navigation between slides ---- */
+      const goTo = (index) => {
+        const clamped = Math.max(0, Math.min(total - 1, index));
+        const target = slides[clamped];
+        if (target && typeof target.scrollIntoView === 'function') {
+          target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      };
+      const next = () => goTo(current + 1);
+      const prev = () => goTo(current - 1);
+
+      /* Tap zones (left/right thirds). These sit below the shop button in z-order. */
+      track.querySelectorAll('.tapzone--next').forEach((btn) => {
+        btn.addEventListener('click', next);
+      });
+      track.querySelectorAll('.tapzone--prev').forEach((btn) => {
+        btn.addEventListener('click', prev);
+      });
+
+      /* Keyboard arrows */
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+      });
+
+      /* ---- Mock-shop toast handler for any [data-name] element ---- */
+      let toastTimer = null;
+      const showToast = (name) => {
+        if (!toast) return;
+        toast.textContent = 'Opening ' + name + '…';
+        toast.classList.add('show');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+      };
+      document.querySelectorAll('[data-name]').forEach((el) => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation(); // don't trigger any underlying tap zone
+          showToast(el.getAttribute('data-name'));
+        });
+      });
+
+      /* Initialise */
+      setActive(0);
+    });
+  </script>
+</body>
+</html>

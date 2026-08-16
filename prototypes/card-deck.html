@@ -1,0 +1,663 @@
+<!--
+  PROTOTYPE — Card-Flick Deck
+  Static mockup only. No Shopify, no build pipeline, no server — open locally by double-click.
+
+  Interaction: products are a stack of tall silk cards in the center. Drag/flick the top
+  card left or right with your thumb (pointer events) to browse the edit; it rotates and
+  flings off past a threshold, promoting the next card. Back/next ghost buttons, arrow keys,
+  and a "shop this" pill (toast) round it out.
+
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soie &amp; Forme — The Edit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878;
+    --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(38px,9vw,82px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{ height:100%; }
+
+  body{
+    font-family:var(--font-mono);
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;                 /* single-screen app */
+    position:fixed; inset:0;         /* lock viewport, no rubber-banding */
+    touch-action:none;               /* we handle all dragging in JS */
+  }
+
+  /* fixed film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* proto flag bottom-left */
+  .proto-flag{
+    position:fixed; left:12px; bottom:12px; z-index:95;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-faint);
+    background:rgba(250,248,243,0.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    padding:5px 9px; border-radius:20px;
+    pointer-events:none;
+  }
+
+  /* ---- layout frame: header / deck / controls, fits one screen ---- */
+  .app{
+    position:relative; z-index:1;
+    height:100svh; height:100dvh;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    padding:max(18px,env(safe-area-inset-top)) 20px max(18px,env(safe-area-inset-bottom));
+    gap:8px;
+  }
+
+  /* eyebrow */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:12px;
+    font-family:var(--font-mono); font-size:10px; font-weight:300;
+    letter-spacing:.4em; text-transform:uppercase; color:var(--olive);
+  }
+  .eyebrow::before{
+    content:''; width:28px; height:1px; background:var(--olive); display:inline-block;
+  }
+
+  header.frame{ text-align:center; }
+  header.frame .eyebrow{ justify-content:center; }
+  header.frame .instruction{
+    margin-top:9px;
+    font-family:var(--font-serif); font-weight:400;
+    font-size:clamp(15px,4.4vw,20px); color:var(--ink-soft);
+    letter-spacing:.01em; line-height:1.4;
+  }
+
+  /* ---- the deck ---- */
+  .deck-wrap{
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    min-height:0;               /* let it shrink inside the grid row */
+  }
+  .deck{
+    position:relative;
+    width:min(78vw,320px);
+    height:min(62svh,480px);
+    max-height:100%;
+  }
+
+  .card{
+    position:absolute; inset:0;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 18px 40px -18px rgba(44,44,42,0.55), 0 2px 8px -2px rgba(44,44,42,0.25);
+    will-change:transform, opacity;
+    transform-origin:50% 120%;         /* pivot below the card = elegant hinge */
+    cursor:grab;
+    user-select:none; -webkit-user-select:none;
+    background:var(--cream-mid);
+  }
+  .card.dragging{ cursor:grabbing; }
+
+  /* the fling / spring animation only applies when NOT dragging */
+  .card.animate{
+    transition:transform .62s cubic-bezier(.19,1,.22,1), opacity .5s ease;
+  }
+  .card.settle{                        /* stack-position easing for behind cards */
+    transition:transform .5s cubic-bezier(.22,1,.36,1), opacity .4s ease, filter .5s ease;
+  }
+
+  /* full-bleed silk gradient lives here */
+  .card__silk{
+    position:absolute; inset:0;
+    background:var(--silk, var(--cream-deep));
+    background-size:200% 200%;
+  }
+  /* moving sheen sweeping across the silk */
+  .card__sheen{
+    position:absolute; inset:-40%;
+    background:linear-gradient(115deg,
+      transparent 30%,
+      rgba(255,255,255,0.32) 47%,
+      rgba(255,255,255,0.05) 55%,
+      transparent 70%);
+    mix-blend-mode:soft-light;
+    animation:sheen 7s linear infinite;
+    pointer-events:none;
+  }
+  @keyframes sheen{
+    0%{ transform:translateX(-30%) translateY(-10%); }
+    100%{ transform:translateX(30%) translateY(10%); }
+  }
+
+  /* soft bottom scrim so text reads */
+  .card__scrim{
+    position:absolute; inset:0;
+    background:linear-gradient(to top,
+      rgba(28,28,26,0.68) 0%,
+      rgba(28,28,26,0.30) 30%,
+      rgba(28,28,26,0.0) 58%);
+    pointer-events:none;
+  }
+
+  .card__body{
+    position:absolute; left:0; right:0; bottom:0;
+    padding:22px 22px 24px;
+    color:var(--cream);
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .card__eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:10px; font-weight:300;
+    letter-spacing:.36em; text-transform:uppercase;
+    color:rgba(250,248,243,0.85);
+  }
+  .card__eyebrow::before{
+    content:''; width:24px; height:1px; background:var(--olive-light); display:inline-block;
+  }
+  .card__name{
+    font-family:var(--font-serif); font-weight:600;
+    font-size:clamp(24px,7vw,32px); line-height:1.08;
+    letter-spacing:.005em;
+    text-wrap:balance;
+  }
+  .card__meta{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin-top:6px;
+  }
+  .card__price{
+    font-family:var(--font-mono); font-size:14px; letter-spacing:.06em;
+    color:rgba(250,248,243,0.92);
+  }
+  .card__shop{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--cream);
+    background:rgba(250,248,243,0.14);
+    border:1px solid rgba(250,248,243,0.4);
+    backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+    padding:8px 14px; border-radius:22px;
+    cursor:pointer;
+    transition:background .3s ease, border-color .3s ease;
+    white-space:nowrap;
+  }
+  .card__shop:hover,.card__shop:focus-visible{
+    background:rgba(112,130,56,0.55); border-color:rgba(250,248,243,0.7); outline:none;
+  }
+
+  /* first-load drag hint floating over the top card */
+  .hint{
+    position:absolute; z-index:6; left:50%; top:44%;
+    transform:translate(-50%,-50%);
+    display:flex; align-items:center; gap:10px;
+    font-family:var(--font-mono); font-size:10px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--cream);
+    background:rgba(28,28,26,0.4); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px);
+    padding:9px 15px; border-radius:24px;
+    pointer-events:none;
+    animation:hintSway 2.6s ease-in-out infinite;
+    transition:opacity .5s ease;
+  }
+  .hint .swipe{ font-size:14px; letter-spacing:0; }
+  @keyframes hintSway{
+    0%,100%{ transform:translate(-58%,-50%); opacity:.85; }
+    50%{ transform:translate(-42%,-50%); opacity:1; }
+  }
+  .hint.gone{ opacity:0; }
+
+  /* end state overlay */
+  .end{
+    position:absolute; inset:0; z-index:4;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    text-align:center; padding:24px;
+    border-radius:22px;
+    background:var(--cream-mid);
+    box-shadow:0 18px 40px -18px rgba(44,44,42,0.5);
+    opacity:0; pointer-events:none; transition:opacity .5s ease;
+  }
+  .end.show{ opacity:1; pointer-events:auto; }
+  .end__title{ font-family:var(--font-serif); font-size:clamp(22px,6vw,30px); font-weight:600; }
+  .end__sub{ font-size:12px; letter-spacing:.06em; color:var(--ink-faint); max-width:22ch; line-height:1.5; }
+  .end__restart{
+    margin-top:6px; font-family:var(--font-mono); font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink); background:transparent; border:1px solid var(--cream-deep);
+    padding:11px 20px; border-radius:24px; cursor:pointer;
+    transition:border-color .3s ease, color .3s ease;
+  }
+  .end__restart:hover,.end__restart:focus-visible{ border-color:var(--olive); color:var(--olive); outline:none; }
+
+  /* ---- controls row ---- */
+  .controls{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+  }
+
+  /* progress */
+  .progress{
+    display:flex; align-items:center; gap:14px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.18em; color:var(--ink-faint);
+  }
+  .dots{ display:flex; gap:7px; }
+  .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--cream-deep);
+    transition:background .35s ease, transform .35s ease;
+  }
+  .dot.active{ background:var(--olive); transform:scale(1.35); }
+  .count{ font-variant-numeric:tabular-nums; }
+
+  .ghost-row{ display:flex; gap:12px; }
+  .ghost{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ink-soft);
+    background:transparent;
+    border:1px solid var(--cream-deep);
+    padding:11px 20px; border-radius:26px;
+    cursor:pointer;
+    transition:border-color .3s ease, color .3s ease, opacity .3s ease;
+  }
+  .ghost:hover,.ghost:focus-visible{ border-color:var(--olive); color:var(--olive); outline:none; }
+  .ghost:disabled{ opacity:.4; cursor:default; }
+
+  /* ---- toast ---- */
+  .toast{
+    position:fixed; left:50%; bottom:calc(24px + env(safe-area-inset-bottom));
+    transform:translate(-50%,20px); z-index:120;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.08em;
+    color:var(--cream); background:var(--ink);
+    padding:12px 20px; border-radius:26px;
+    box-shadow:0 10px 30px -10px rgba(44,44,42,0.6);
+    opacity:0; pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .toast.show{ opacity:1; transform:translate(-50%,0); }
+
+  /* ---- reduced motion: keep it working, drop springy/large motion ---- */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; }
+    .card.animate,.card.settle{ transition:transform .2s ease, opacity .2s ease !important; }
+    .card__sheen{ display:none; }
+    .hint{ animation:none; transform:translate(-50%,-50%); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- slim header frame -->
+    <header class="frame">
+      <span class="eyebrow">Soie &amp; Forme · The Edit</span>
+      <p class="instruction">Flick through the season — drag a card aside to reveal the next.</p>
+    </header>
+
+    <!-- the deck -->
+    <div class="deck-wrap">
+      <div class="deck" id="deck">
+        <!-- cards injected by JS -->
+
+        <!-- first-load hint -->
+        <div class="hint" id="hint">
+          <span class="swipe">↤</span> drag to browse <span class="swipe">↦</span>
+        </div>
+
+        <!-- end state -->
+        <div class="end" id="end" aria-hidden="true">
+          <div class="end__title">That's the edit.</div>
+          <div class="end__sub">Five pieces, quietly chosen. Begin again, or shop the collection.</div>
+          <button class="end__restart" id="restart" type="button">Start over</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- controls -->
+    <div class="controls">
+      <div class="progress">
+        <span class="count" id="count">01 / 05</span>
+        <span class="dots" id="dots"></span>
+      </div>
+      <div class="ghost-row">
+        <button class="ghost" id="back" type="button" aria-label="Return the last card">‹ back</button>
+        <button class="ghost" id="next" type="button" aria-label="Flick to the next card">next ›</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- proto flag -->
+  <div class="proto-flag">Deck · local only</div>
+
+  <!-- toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---- product data (placeholder "silk" = CSS gradients, no images) ----
+  const PRODUCTS = [
+    { type:'Silk Scarf',    name:'Pink Paisley Silk Scarf',   price:'$38', silk:'linear-gradient(135deg,#e7c9d0,#c98fa0 55%,#7a4a3c)' },
+    { type:'Silk Scrunchie',name:'Olive Silk Scrunchie',      price:'$18', silk:'linear-gradient(135deg,#c7cba6,#8a9e45 55%,#4c5a24)' },
+    { type:'Silk Scarf',    name:'Cognac Chain Silk Scarf',   price:'$56', silk:'linear-gradient(135deg,#e3c39a,#b6823f 55%,#5c3a1c)' },
+    { type:'Silk Scarf',    name:'Ink & Cream Silk Scarf',    price:'$44', silk:'linear-gradient(135deg,#efeadf,#b9b2a1 45%,#2c2c2a)' },
+    { type:'Silk Scarf',    name:'Bone Floral Silk Scarf',    price:'$40', silk:'linear-gradient(135deg,#f3ede2,#d8bfc0 55%,#a98a86)' },
+  ];
+
+  const TOTAL = PRODUCTS.length;
+  const VISIBLE = 3;          // how many cards peek behind the top one
+  const THRESHOLD = 0.32;     // fraction of deck width needed to fling
+  const VELOCITY_FLING = 0.6; // px/ms horizontal velocity that also triggers a fling
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const deck    = document.getElementById('deck');
+  const hint    = document.getElementById('hint');
+  const endEl   = document.getElementById('end');
+  const restart = document.getElementById('restart');
+  const countEl = document.getElementById('count');
+  const dotsEl  = document.getElementById('dots');
+  const backBtn = document.getElementById('back');
+  const nextBtn = document.getElementById('next');
+  const toastEl = document.getElementById('toast');
+
+  let current = 0;            // index of the top card in PRODUCTS
+  let cards = [];             // card DOM elements, one per product
+  let interacted = false;     // has the user flicked at least once
+  let flickHistory = [];      // stack of directions for "back"
+
+  // ---------- toast ----------
+  let toastTimer = null;
+  function showToast(name){
+    toastEl.textContent = `Opening ${name}…`;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+  }
+
+  // ---------- build the deck ----------
+  function pad(n){ return String(n).padStart(2, '0'); }
+
+  function buildCard(product){
+    const card = document.createElement('article');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card__silk" style="--silk:${product.silk}"></div>
+      <div class="card__sheen"></div>
+      <div class="card__scrim"></div>
+      <div class="card__body">
+        <span class="card__eyebrow">${product.type}</span>
+        <h2 class="card__name">${product.name}</h2>
+        <div class="card__meta">
+          <span class="card__price">${product.price}</span>
+          <button class="card__shop" type="button" data-name="${product.name}">Shop ▸</button>
+        </div>
+      </div>`;
+    return card;
+  }
+
+  function build(){
+    // remove any previous cards (keep hint + end nodes which are static children)
+    cards.forEach(c => c.remove());
+    cards = PRODUCTS.map(buildCard);
+    // insert cards before the hint element so hint/end stay on top of stack z-order
+    cards.forEach(c => deck.insertBefore(c, hint));
+    attachShopHandlers();
+    layout();
+    updateProgress();
+  }
+
+  // position every card based on its offset from `current`
+  function layout(animate = true){
+    cards.forEach((card, i) => {
+      const offset = i - current;
+      card.classList.toggle('settle', animate && !reduceMotion);
+      card.classList.remove('animate');
+
+      if(offset < 0){
+        // already flicked away — park off-screen (kept for "back")
+        return;
+      }
+      if(offset >= VISIBLE){
+        // deep in the stack: hide flat behind
+        card.style.opacity = '0';
+        card.style.transform = `translateY(${18*VISIBLE}px) scale(${1 - 0.05*VISIBLE})`;
+        card.style.zIndex = String(100 - offset);
+        card.style.pointerEvents = 'none';
+        return;
+      }
+      // visible stack member
+      const scale = 1 - offset * 0.05;
+      const ty = offset * 18;                 // each card sits slightly lower
+      card.style.opacity = '1';
+      card.style.transform = `translate(0px, ${ty}px) scale(${scale})`;
+      card.style.zIndex = String(100 - offset);
+      card.style.pointerEvents = (offset === 0) ? 'auto' : 'none';
+      card.style.filter = offset === 0 ? 'none' : `brightness(${1 - offset*0.04})`;
+    });
+    // enable/disable ghost controls
+    backBtn.disabled = current === 0;
+    nextBtn.disabled = current >= TOTAL;
+  }
+
+  function updateProgress(){
+    const shown = Math.min(current + 1, TOTAL);
+    countEl.textContent = `${pad(shown)} / ${pad(TOTAL)}`;
+    // dots
+    if(dotsEl.children.length !== TOTAL){
+      dotsEl.innerHTML = '';
+      for(let i=0;i<TOTAL;i++){
+        const d = document.createElement('span');
+        d.className = 'dot';
+        dotsEl.appendChild(d);
+      }
+    }
+    [...dotsEl.children].forEach((d,i) => d.classList.toggle('active', i === current));
+  }
+
+  // ---------- flick a card off-screen ----------
+  function flick(dir){                 // dir: 1 = right, -1 = left
+    if(current >= TOTAL) return;
+    const card = cards[current];
+    interacted = true;
+    hideHint();
+
+    const w = window.innerWidth;
+    const flyX = dir * (w * 1.2);
+    const rot = dir * 16;
+
+    card.classList.add('animate');
+    card.classList.remove('settle');
+    card.style.transform = `translate(${flyX}px, -40px) rotate(${rot}deg)`;
+    card.style.opacity = '0';
+    card.style.pointerEvents = 'none';
+
+    flickHistory.push(dir);
+    current++;
+    // reveal the next card(s)
+    requestAnimationFrame(() => layout(true));
+    updateProgress();
+    checkEnd();
+  }
+
+  // ---------- bring the last flicked card back ----------
+  function goBack(){
+    if(current === 0) return;
+    hideEnd();
+    current--;
+    flickHistory.pop();
+    const card = cards[current];
+    card.classList.add('animate');
+    card.classList.remove('settle');
+    card.style.opacity = '1';
+    card.style.pointerEvents = 'auto';
+    // it snaps back into the top position
+    requestAnimationFrame(() => layout(true));
+    updateProgress();
+  }
+
+  function checkEnd(){
+    if(current >= TOTAL){
+      endEl.classList.add('show');
+      endEl.setAttribute('aria-hidden','false');
+      nextBtn.disabled = true;
+    }
+  }
+  function hideEnd(){
+    endEl.classList.remove('show');
+    endEl.setAttribute('aria-hidden','true');
+  }
+
+  function restartDeck(){
+    hideEnd();
+    current = 0;
+    flickHistory = [];
+    build();               // rebuild for a clean state
+  }
+
+  // ---------- hint ----------
+  function hideHint(){
+    if(!hint.classList.contains('gone')){
+      hint.classList.add('gone');
+    }
+  }
+
+  // ---------- drag handling (pointer events, touch + mouse) ----------
+  let dragCard = null;
+  let startX = 0, startY = 0;
+  let lastX = 0, lastT = 0, velX = 0;
+  let dx = 0, dy = 0;
+  let pointerId = null;
+
+  function onPointerDown(e){
+    if(current >= TOTAL) return;
+    const card = cards[current];
+    if(!card) return;
+    // ignore drags that begin on the shop pill (that's a click)
+    if(e.target.closest('.card__shop')) return;
+
+    dragCard = card;
+    pointerId = e.pointerId;
+    dragCard.setPointerCapture?.(pointerId);
+    dragCard.classList.add('dragging');
+    dragCard.classList.remove('animate','settle');
+
+    startX = lastX = e.clientX;
+    startY = e.clientY;
+    lastT = performance.now();
+    dx = dy = velX = 0;
+  }
+
+  function onPointerMove(e){
+    if(!dragCard || e.pointerId !== pointerId) return;
+    dx = e.clientX - startX;
+    dy = e.clientY - startY;
+
+    // velocity for fling detection
+    const now = performance.now();
+    const dt = now - lastT;
+    if(dt > 0){
+      velX = (e.clientX - lastX) / dt;   // px per ms
+      lastX = e.clientX; lastT = now;
+    }
+
+    // rotate proportional to horizontal offset, capped ~10deg
+    const w = deck.offsetWidth || 320;
+    const rot = Math.max(-10, Math.min(10, (dx / w) * 22));
+    dragCard.style.transform = `translate(${dx}px, ${dy*0.35}px) rotate(${rot}deg)`;
+
+    // as the top card leaves, ease the card behind toward full presence
+    const progress = Math.min(1, Math.abs(dx) / (w * THRESHOLD));
+    const behind = cards[current + 1];
+    if(behind){
+      const scale = 0.95 + progress * 0.05;
+      const ty = 18 - progress * 18;
+      behind.classList.remove('settle');
+      behind.style.transform = `translate(0px, ${ty}px) scale(${scale})`;
+      behind.style.filter = `brightness(${0.96 + progress*0.04})`;
+    }
+
+    if(Math.abs(dx) > 6) hideHint();
+  }
+
+  function onPointerUp(e){
+    if(!dragCard || e.pointerId !== pointerId) return;
+    const card = dragCard;
+    card.classList.remove('dragging');
+    card.releasePointerCapture?.(pointerId);
+
+    const w = deck.offsetWidth || 320;
+    const passedThreshold = Math.abs(dx) > w * THRESHOLD;
+    const flungFast = Math.abs(velX) > VELOCITY_FLING && Math.abs(dx) > 24;
+
+    dragCard = null;
+    pointerId = null;
+
+    if(passedThreshold || flungFast){
+      const dir = (dx !== 0 ? Math.sign(dx) : Math.sign(velX)) || 1;
+      flick(dir);
+    } else {
+      // spring back to center
+      springBack(card);
+    }
+  }
+
+  // spring the top card back and re-settle the card behind it
+  function springBack(card){
+    card.classList.add('animate');
+    card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+    const behind = cards[current + 1];
+    if(behind){
+      behind.classList.add('settle');
+      behind.style.transform = 'translate(0px, 18px) scale(0.95)';
+      behind.style.filter = 'brightness(0.96)';
+    }
+  }
+
+  // ---------- shop pills ----------
+  function attachShopHandlers(){
+    deck.querySelectorAll('[data-name]').forEach(btn => {
+      btn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        showToast(btn.getAttribute('data-name'));
+      });
+    });
+  }
+
+  // ---------- wire it all up ----------
+  deck.addEventListener('pointerdown', onPointerDown);
+  window.addEventListener('pointermove', onPointerMove);
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+
+  backBtn.addEventListener('click', goBack);
+  nextBtn.addEventListener('click', () => flick(1));
+  restart.addEventListener('click', restartDeck);
+
+  // arrow keys flick in the same animated way
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'ArrowLeft'){ e.preventDefault(); flick(-1); }
+    else if(e.key === 'ArrowRight'){ e.preventDefault(); flick(1); }
+  });
+
+  // auto-hide the hint after a few seconds even without interaction
+  setTimeout(() => { if(!interacted) hideHint(); }, 5200);
+
+  // reflow positions on resize (viewport-relative fling distances)
+  window.addEventListener('resize', () => layout(false));
+
+  build();
+})();
+</script>
+</body>
+</html>

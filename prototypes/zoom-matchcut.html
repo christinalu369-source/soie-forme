@@ -1,0 +1,484 @@
+<!--
+  PROTOTYPE — Zoom / Match-Cut
+  Static mockup only. No Shopify, no build pipeline, no server — open locally by double-click.
+
+  Interaction: scroll drives a continuous cinematic push-in. The camera dives INTO a detail
+  of one silk scene until that detail becomes the next scene (an infinite-zoom / match-cut).
+  Four nested scenes cross-fade at scale boundaries; poetic captions surface per window.
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoom / Match-Cut — Soie &amp; Forme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878;
+    --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(38px,9vw,82px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:auto; }
+
+  body{
+    font-family:var(--font-mono);
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* Fixed film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* Proto flag bottom-left */
+  .proto-flag{
+    position:fixed; left:14px; bottom:14px; z-index:95;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--ink-faint);
+    background:rgba(250,248,243,.62); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);
+    padding:6px 10px; border-radius:2px;
+  }
+
+  /* Eyebrow */
+  .eyebrow{
+    font-family:var(--font-mono); font-size:10px; font-weight:300; letter-spacing:.4em;
+    text-transform:uppercase; color:var(--olive); display:inline-flex; align-items:center; gap:14px;
+  }
+  .eyebrow::before{ content:''; width:28px; height:1px; background:var(--olive); display:inline-block; }
+
+  /* ---- Intro / closing cards ---- */
+  .card{
+    min-height:100svh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:40px 28px; position:relative; background:var(--cream);
+  }
+  .card .lede{ margin-top:26px; }
+  .card h1{
+    font-family:var(--font-serif); font-weight:600; font-size:var(--text-display);
+    line-height:1.02; letter-spacing:-.01em; margin-top:22px; color:var(--ink);
+  }
+  .card h2{
+    font-family:var(--font-serif); font-weight:500; font-size:var(--text-heading);
+    line-height:1.08; margin-top:20px; color:var(--ink);
+  }
+  .card p.sub{
+    margin-top:22px; max-width:30ch; font-size:var(--text-small); font-weight:300;
+    line-height:1.7; color:var(--ink-soft);
+  }
+  .scroll-cue{
+    position:absolute; bottom:34px; left:50%; transform:translateX(-50%);
+    font-size:9px; letter-spacing:.3em; text-transform:uppercase; color:var(--ink-faint);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .scroll-cue span.line{ width:1px; height:40px; background:linear-gradient(var(--ink-faint),transparent); animation:cue 2.4s ease-in-out infinite; }
+  @keyframes cue{ 0%,100%{ transform:scaleY(.4); opacity:.4; transform-origin:top; } 50%{ transform:scaleY(1); opacity:1; transform-origin:top; } }
+
+  /* ---- Zoom section ---- */
+  #zoom{ position:relative; height:500svh; }        /* tall scroll track */
+  .stage{
+    position:sticky; top:0; height:100svh; width:100%;
+    overflow:hidden; background:#1c1a17;
+    perspective:1200px;
+  }
+
+  /* Each nested scene fills the stage; JS controls scale + opacity */
+  .scene{
+    position:absolute; inset:0; will-change:transform,opacity;
+    transform-origin:50% 50%;
+    display:flex; align-items:center; justify-content:center;
+    backface-visibility:hidden;
+  }
+  .scene__inner{ position:absolute; inset:0; }
+
+  /* Soft vignette to keep it cinematic */
+  .stage::after{
+    content:''; position:absolute; inset:0; z-index:40; pointer-events:none;
+    background:radial-gradient(120% 90% at 50% 50%, transparent 52%, rgba(20,18,15,.55) 100%);
+  }
+
+  /* Drifting sheen sweeping across the stage */
+  .sheen{
+    position:absolute; inset:-40%; z-index:35; pointer-events:none; mix-blend-mode:screen; opacity:.5;
+    background:linear-gradient(115deg, transparent 38%, rgba(255,250,235,.28) 50%, transparent 62%);
+    animation:sheen 9s linear infinite;
+  }
+  @keyframes sheen{ 0%{ transform:translateX(-30%) translateY(-10%) rotate(4deg); } 100%{ transform:translateX(30%) translateY(10%) rotate(4deg); } }
+
+  /* --- Scene 1: full Pink Paisley scarf --- */
+  .s1{ background:linear-gradient(135deg,#e7c9d0,#c98fa0 55%,#7a4a3c); }
+  /* scattered paisley motifs; the focal one is centered */
+  .paisley{
+    position:absolute; border-radius:70% 30% 55% 45% / 60% 40% 60% 40%;
+    background:
+      radial-gradient(circle at 34% 34%, rgba(250,240,235,.9), transparent 40%),
+      radial-gradient(circle at 62% 66%, rgba(120,60,50,.55), transparent 55%),
+      linear-gradient(135deg,#f0d7dd,#b06b70 60%,#6d3b34);
+    box-shadow:inset 0 0 30px rgba(90,40,40,.4);
+    transform:rotate(-18deg);
+  }
+  .paisley.focal{ left:50%; top:50%; width:20vmin; height:26vmin; margin-left:-10vmin; margin-top:-13vmin; }
+  .paisley.a{ left:14%; top:22%; width:14vmin; height:18vmin; opacity:.85; }
+  .paisley.b{ left:70%; top:18%; width:12vmin; height:15vmin; opacity:.8; transform:rotate(30deg); }
+  .paisley.c{ left:20%; top:70%; width:16vmin; height:20vmin; opacity:.75; transform:rotate(12deg); }
+  .paisley.d{ left:76%; top:72%; width:13vmin; height:16vmin; opacity:.8; transform:rotate(-40deg); }
+
+  /* --- Scene 2: woven weave close-up --- */
+  .s2{
+    background:
+      repeating-linear-gradient(45deg, rgba(120,64,52,.55) 0 6px, transparent 6px 12px),
+      repeating-linear-gradient(-45deg, rgba(200,120,120,.5) 0 6px, transparent 6px 12px),
+      radial-gradient(80% 80% at 50% 50%, #d79ba1, #8a4a4a);
+  }
+  /* the focal single thread that we dive into */
+  .thread{
+    position:absolute; left:50%; top:50%; width:8vmin; height:40vmin;
+    margin-left:-4vmin; margin-top:-20vmin; transform:rotate(24deg);
+    border-radius:4vmin;
+    background:linear-gradient(90deg, rgba(255,245,240,0), rgba(255,245,240,.85) 45%, rgba(160,80,70,.6) 55%, rgba(255,245,240,0));
+    box-shadow:0 0 24px rgba(255,240,230,.4);
+  }
+
+  /* --- Scene 3: Cognac Chain scarf → gilded link --- */
+  .s3{ background:linear-gradient(135deg,#e3c39a,#b6823f 55%,#5c3a1c); }
+  .chain{
+    position:absolute; left:50%; top:50%; width:22vmin; height:22vmin;
+    margin-left:-11vmin; margin-top:-11vmin; border-radius:50%;
+    border:5vmin solid transparent;
+    background:
+      linear-gradient(#000 0 0) padding-box,
+      conic-gradient(from 40deg, #7a5a24, #f6e3ad, #b98a35, #f6e3ad, #6f4e1c, #f6e3ad, #7a5a24) border-box;
+    box-shadow:0 0 40px rgba(240,210,140,.4), inset 0 0 30px rgba(90,60,20,.5);
+  }
+  .chain::before, .chain::after{
+    content:''; position:absolute; width:16vmin; height:16vmin; border-radius:50%;
+    border:3.4vmin solid transparent;
+    background:
+      linear-gradient(#000 0 0) padding-box,
+      conic-gradient(from 120deg, #6f4e1c, #f6e3ad, #b98a35, #f6e3ad, #7a5a24) border-box;
+  }
+  .chain::before{ left:-13vmin; top:3vmin; }
+  .chain::after{ left:19vmin; top:3vmin; }
+
+  /* --- Scene 4: product hero resolve --- */
+  .s4{
+    background:var(--cream);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .hero-swatch{
+    width:56vmin; height:56vmin; max-width:340px; max-height:340px; border-radius:4px;
+    background:linear-gradient(135deg,#e3c39a,#b6823f 55%,#5c3a1c);
+    box-shadow:0 30px 70px rgba(60,40,20,.28);
+    position:relative; overflow:hidden;
+  }
+  .hero-swatch::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(115deg, transparent 40%, rgba(255,250,235,.35) 50%, transparent 60%);
+  }
+
+  /* ---- Captions (fixed within stage) ---- */
+  .captions{ position:absolute; inset:0; z-index:50; pointer-events:none; }
+  .caption{
+    position:absolute; left:50%; bottom:16%; transform:translate(-50%,14px);
+    width:min(88%,30ch); text-align:center;
+    opacity:0; transition:opacity .1s linear;
+  }
+  .caption .txt{
+    font-family:var(--font-serif); font-weight:500; font-size:clamp(22px,6vw,38px);
+    line-height:1.12; color:#faf6ee; text-shadow:0 2px 24px rgba(20,15,10,.6);
+  }
+  .caption .meta{
+    display:block; margin-top:12px; font-family:var(--font-mono); font-size:10px;
+    letter-spacing:.35em; text-transform:uppercase; color:rgba(250,246,238,.72);
+  }
+
+  /* Final caption gets a shop button */
+  .shop-line{ pointer-events:auto; }
+  .shop-btn{
+    display:inline-flex; align-items:center; gap:10px; margin-top:22px;
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:#faf6ee; background:transparent;
+    border:1px solid rgba(250,246,238,.55); border-radius:2px;
+    padding:14px 22px; cursor:pointer; transition:background .3s ease, color .3s ease;
+  }
+  .shop-btn:hover{ background:#faf6ee; color:var(--ink); }
+  .shop-btn .arrow{ transform:translateX(0); transition:transform .3s ease; }
+  .shop-btn:hover .arrow{ transform:translateX(4px); }
+
+  /* progress hair-line at top of stage */
+  .progress{
+    position:absolute; top:0; left:0; height:2px; width:0%; z-index:60;
+    background:var(--olive-light); box-shadow:0 0 10px rgba(138,158,69,.7);
+    transition:width .05s linear;
+  }
+
+  /* ---- Toast ---- */
+  #toast{
+    position:fixed; left:50%; bottom:38px; transform:translateX(-50%) translateY(20px);
+    z-index:120; background:var(--ink); color:var(--cream);
+    font-family:var(--font-mono); font-size:12px; letter-spacing:.06em;
+    padding:13px 22px; border-radius:999px; opacity:0; pointer-events:none;
+    transition:opacity .4s ease, transform .4s ease; box-shadow:0 12px 34px rgba(20,18,15,.35);
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---- Reduced motion: show a composed frame + all captions ---- */
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+    #zoom{ height:auto; }
+    .stage{ position:relative; height:auto; }
+    .scene{
+      position:relative; inset:auto; transform:none !important; opacity:1 !important;
+      height:70svh; border-bottom:1px solid rgba(255,255,255,.15);
+    }
+    .stage::after, .sheen{ display:none; }
+    .captions{ position:relative; }
+    .caption{
+      position:relative; left:auto; bottom:auto; transform:none; opacity:1 !important;
+      margin:0 auto; padding:26px 0;
+    }
+    .caption .txt{ color:var(--ink); text-shadow:none; }
+    .caption .meta{ color:var(--ink-faint); }
+    .shop-btn{ color:var(--ink); border-color:var(--ink); }
+    .progress{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ INTRO CARD ============ -->
+  <section class="card" id="intro">
+    <span class="eyebrow">Soie &amp; Forme · Atelier</span>
+    <h1>Look closer.</h1>
+    <p class="sub">A single silk square holds a thousand small worlds. Scroll to fall into one.</p>
+    <div class="scroll-cue"><span class="line"></span>Scroll to zoom</div>
+  </section>
+
+  <!-- ============ ZOOM TRACK ============ -->
+  <section id="zoom">
+    <div class="stage">
+      <div class="progress" id="progress"></div>
+
+      <!-- Scene 1 — Pink Paisley scarf; focal point = centered paisley -->
+      <div class="scene" data-scene="0">
+        <div class="scene__inner s1">
+          <div class="paisley a"></div>
+          <div class="paisley b"></div>
+          <div class="paisley c"></div>
+          <div class="paisley d"></div>
+          <div class="paisley focal"></div>
+        </div>
+      </div>
+
+      <!-- Scene 2 — Weave close-up; focal point = single thread -->
+      <div class="scene" data-scene="1">
+        <div class="scene__inner s2">
+          <div class="thread"></div>
+        </div>
+      </div>
+
+      <!-- Scene 3 — Cognac Chain scarf; focal point = gilded chain link -->
+      <div class="scene" data-scene="2">
+        <div class="scene__inner s3">
+          <div class="chain"></div>
+        </div>
+      </div>
+
+      <!-- Scene 4 — Product hero resolve -->
+      <div class="scene" data-scene="3">
+        <div class="scene__inner s4">
+          <div class="hero-swatch"></div>
+        </div>
+      </div>
+
+      <div class="sheen"></div>
+
+      <!-- Captions -->
+      <div class="captions">
+        <div class="caption" data-cap="0"><span class="txt">Look closer.</span><span class="meta">Pink Paisley Silk</span></div>
+        <div class="caption" data-cap="1"><span class="txt">Every thread, mulberry silk.</span><span class="meta">Woven by hand</span></div>
+        <div class="caption" data-cap="2"><span class="txt">Sixteen momme, hand-rolled.</span><span class="meta">The gilded edge</span></div>
+        <div class="caption shop-line" data-cap="3">
+          <span class="txt">Cognac Chain Silk Scarf</span>
+          <span class="meta">$56 · 100% mulberry silk</span>
+          <button class="shop-btn" data-name="Cognac Chain Silk Scarf">Shop this piece · $56 <span class="arrow">▸</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING CARD ============ -->
+  <section class="card" id="outro">
+    <span class="eyebrow">Now you've seen it up close</span>
+    <h2>The whole collection,<br>at this resolution.</h2>
+    <p class="sub">Three silks. Endless small worlds. Made to be worn, and looked at closely.</p>
+    <button class="shop-btn" style="color:var(--ink); border-color:var(--ink); margin-top:30px;" data-name="Silk Collection">Explore the collection <span class="arrow">▸</span></button>
+  </section>
+
+  <!-- Proto flag -->
+  <div class="proto-flag">Zoom · local only</div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  'use strict';
+
+  /* ---------- Mock-shop toast handler ---------- */
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  function showToast(name){
+    if (!toast) return;
+    toast.textContent = 'Opening ' + name + '…';
+    toast.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-name]');
+    if (el) showToast(el.getAttribute('data-name'));
+  });
+
+  /* ---------- Continuous zoom / match-cut engine ---------- */
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (!prefersReduced){
+    const zoom     = document.getElementById('zoom');
+    const scenes   = Array.from(document.querySelectorAll('.scene'));
+    const captions = Array.from(document.querySelectorAll('.caption'));
+    const progress = document.getElementById('progress');
+    const N = scenes.length;                 // number of scenes (4)
+
+    // Focal points (in %) where the NEXT scene is "born" small before growing.
+    // Each matches the centered focal detail of the current scene.
+    const FOCAL = [
+      { x: 50, y: 50 },  // scene 0 -> dive into centered paisley
+      { x: 50, y: 50 },  // scene 1 -> dive into centered thread
+      { x: 50, y: 50 },  // scene 2 -> dive into centered chain link
+      { x: 50, y: 50 }   // scene 3 -> hero (no further dive)
+    ];
+
+    const SEED_SCALE = 0.15;   // how small the incoming scene starts (nested detail)
+    const K          = 3.4;    // exponential growth strength within a window (mesmerising, not dizzying)
+
+    // Anchor every scene's transform-origin at its focal point.
+    scenes.forEach((s, i) => {
+      const f = FOCAL[i];
+      s.style.transformOrigin = f.x + '% ' + f.y + '%';
+    });
+
+    // smootherstep for gentle opacity ramps
+    const smooth = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t*t*t*(t*(t*6-15)+10);
+
+    let ticking = false;
+    let latestProgress = 0;
+
+    function computeProgress(){
+      const rect = zoom.getBoundingClientRect();
+      const total = rect.height - window.innerHeight; // scrollable distance inside the track
+      if (total <= 0) return 0;
+      // -rect.top = how far we've scrolled past the section top
+      const p = (-rect.top) / total;
+      return Math.min(1, Math.max(0, p));
+    }
+
+    function render(){
+      ticking = false;
+      const p = latestProgress;                 // 0..1 across whole track
+      if (progress) progress.style.width = (p * 100) + '%';
+
+      const win = 1 / N;                         // width of each scene's progress window
+
+      for (let i = 0; i < N; i++){
+        const scene = scenes[i];
+        const start = i * win;
+        // localT: 0 at the moment this scene fills the frame, →1 as we blow past it
+        const localT = (p - start) / win;
+
+        let scale, opacity;
+
+        if (localT < 0){
+          // This scene hasn't been reached yet — it lives as a tiny nested "detail"
+          // inside the current scene, waiting at the focal point.
+          const dist = -localT;                 // how far before its window (0..N)
+          scale = SEED_SCALE * Math.pow(0.85, dist * 8); // stays tiny/hidden
+          opacity = 0;
+        } else if (localT <= 1){
+          // Active window: grow from SEED_SCALE (if not the very first render of the scene)
+          // up through large scale. Exponential push-in.
+          // Incoming phase (first ~35%): scale up from seed to ~1 while fading IN.
+          // Outgoing phase: keep pushing past 1 while fading OUT so next scene crosses in.
+          const growIn = 0.30;                  // fraction of window used to arrive at full frame
+
+          if (localT < growIn){
+            const g = localT / growIn;          // 0..1 arriving
+            // scale from seed to 1 (exp so it feels like emerging from a detail)
+            scale = SEED_SCALE * Math.pow(1 / SEED_SCALE, smooth(g));
+            opacity = smooth(g);
+          } else {
+            const g = (localT - growIn) / (1 - growIn); // 0..1 departing
+            // push past 1 → large, exponential
+            scale = Math.pow(2, g * K);
+            // fade out in the last stretch so the next (growing) scene takes over
+            opacity = 1 - smooth(Math.max(0, (g - 0.55) / 0.45));
+          }
+        } else {
+          // Already zoomed past — huge and gone.
+          scale = Math.pow(2, K) * 2;
+          opacity = 0;
+        }
+
+        scene.style.transform = 'scale(' + scale.toFixed(4) + ')';
+        scene.style.opacity = opacity.toFixed(3);
+        // z-order: later-but-active scenes should sit above the blown-out ones
+        scene.style.zIndex = opacity > 0.01 ? String(10 + i) : '0';
+      }
+
+      // ----- Captions: one active per window, fading in the middle of each -----
+      for (let i = 0; i < captions.length; i++){
+        const cap = captions[i];
+        const start = i * win;
+        const localT = (p - start) / win;       // 0..1 within its scene window
+        let o = 0;
+        if (localT >= 0 && localT <= 1){
+          // fade in over first 25%, hold, fade out over last 30%
+          const inO  = smooth(Math.min(1, localT / 0.25));
+          const outO = 1 - smooth(Math.max(0, (localT - 0.70) / 0.30));
+          o = Math.min(inO, outO);
+        }
+        // last caption (product) lingers fully at the end
+        if (i === captions.length - 1 && p > 0.90){ o = 1; }
+        cap.style.opacity = o.toFixed(3);
+        cap.style.transform = 'translate(-50%,' + ((1 - o) * 14).toFixed(1) + 'px)';
+      }
+    }
+
+    function onScroll(){
+      latestProgress = computeProgress();
+      if (!ticking){
+        ticking = true;
+        window.requestAnimationFrame(render);
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', onScroll, { passive:true });
+    // initial paint
+    onScroll();
+    // ensure a render even if scroll fires before rAF is ready
+    requestAnimationFrame(render);
+  }
+</script>
+</body>
+</html>

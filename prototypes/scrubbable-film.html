@@ -1,0 +1,546 @@
+<!doctype html>
+<!--
+  PROTOTYPE — Scrubbable Film
+  Static mockup for Soie & Forme. No Shopify, no build step, no server — local only.
+
+  Interaction: a tall section pins a full-screen "film player" stage while you scroll.
+  Scroll position scrubs a simulated silk-scarf shot frame-by-frame (fold → knot → product),
+  with a progress scrubber, frame counter, and captions keyed to scroll progress.
+  See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soie &amp; Forme — Scrubbable Film</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --cream:#FAF8F3; --cream-mid:#EDE8DE; --cream-deep:#D4CFC4; --linen:#C8C2B6;
+    --ink:#2C2C2A; --ink-soft:#4A4A48; --ink-faint:#8C8878;
+    --olive:#708238; --olive-light:#8A9E45;
+    --font-serif:'Shippori Mincho',serif; --font-mono:'DM Mono',monospace;
+    --text-display:clamp(38px,9vw,82px); --text-heading:clamp(28px,7vw,52px);
+    --text-small:14px; --text-body:16px; --text-label:10px;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior:auto; }
+
+  body{
+    font-family:var(--font-mono);
+    color:var(--ink);
+    background:var(--cream);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    line-height:1.5;
+  }
+
+  /* Fixed film-grain overlay */
+  body::after{
+    content:''; position:fixed; inset:0; z-index:90; pointer-events:none; opacity:0.24;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Eyebrow ---- */
+  .eyebrow{
+    font-family:var(--font-mono); font-size:var(--text-label); font-weight:300;
+    letter-spacing:.4em; text-transform:uppercase; color:var(--olive);
+    display:inline-flex; align-items:center; gap:14px;
+  }
+  .eyebrow::before{
+    content:''; display:inline-block; width:28px; height:1px; background:var(--olive);
+  }
+
+  /* ---- Intro / closing cards ---- */
+  .card{
+    min-height:100svh; display:flex; flex-direction:column; justify-content:center;
+    padding:40px 26px; position:relative; z-index:2;
+  }
+  .card__title{
+    font-family:var(--font-serif); font-weight:600; font-size:var(--text-display);
+    line-height:1.02; margin-top:22px; color:var(--ink);
+  }
+  .card__title em{ font-style:italic; font-weight:500; color:var(--ink-soft); }
+  .card__sub{
+    margin-top:22px; max-width:34ch; font-size:var(--text-small);
+    color:var(--ink-soft); font-weight:300;
+  }
+  .card__scroll{
+    margin-top:46px; font-size:9px; letter-spacing:.24em; text-transform:uppercase;
+    color:var(--ink-faint); display:flex; align-items:center; gap:10px;
+  }
+  .card__scroll span{ display:inline-block; width:1px; height:34px; background:var(--cream-deep); position:relative; overflow:hidden; }
+  .card__scroll span::after{
+    content:''; position:absolute; inset:0; background:var(--olive);
+    animation:scrollhint 2.2s ease-in-out infinite;
+  }
+  @keyframes scrollhint{
+    0%{ transform:translateY(-100%); } 50%{ transform:translateY(0); } 100%{ transform:translateY(100%); }
+  }
+
+  .card--closing{ align-items:flex-start; }
+  .card--closing .card__title{ font-size:var(--text-heading); }
+
+  /* ---- The tall scrub section ---- */
+  .film{
+    position:relative;
+    height:340svh;           /* the scroll distance that scrubs the film */
+    z-index:1;
+  }
+  .stage{
+    position:sticky; top:0;
+    height:100svh; width:100%;
+    overflow:hidden;
+    background:
+      radial-gradient(120% 90% at 50% 8%, #F3EFE7 0%, var(--cream-mid) 46%, var(--cream-deep) 100%);
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  /* vignette so it reads like a framed player */
+  .stage::before{
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:6;
+    background:radial-gradient(130% 100% at 50% 45%, transparent 52%, rgba(44,44,42,.16) 100%);
+  }
+
+  /* ---- The silk "film" object ---- */
+  .silk-wrap{
+    position:absolute; top:50%; left:50%;
+    width:min(74vw, 340px); height:min(74vw, 340px);
+    /* transform is driven by JS via CSS variables */
+    transform:
+      translate(-50%,-50%)
+      translateY(var(--sy,0px))
+      rotate(var(--srot,0deg))
+      scale(var(--sscale,1))
+      skewX(var(--sskew,0deg));
+    will-change:transform;
+    z-index:3;
+  }
+  .silk{
+    position:absolute; inset:0;
+    border-radius:var(--sradius,10% 10% 12% 12%);
+    background:linear-gradient(135deg,#e7c9d0,#c98fa0 55%,#7a4a3c);
+    box-shadow:
+      0 30px 60px -24px rgba(122,74,60,.55),
+      inset 0 2px 14px rgba(255,255,255,.28);
+    /* the "fold" happens via a compressed height late in the timeline */
+    transform:scaleY(var(--sfold,1));
+    transform-origin:center;
+  }
+  /* soft drifting sheen laid over the silk */
+  .silk__sheen{
+    position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    mix-blend-mode:screen; opacity:var(--sheenop,.5);
+    background:linear-gradient(
+      var(--sheenang,115deg),
+      transparent 30%,
+      rgba(255,247,240,.55) calc(46% + var(--sheenx,0%)),
+      rgba(255,255,255,.85) calc(50% + var(--sheenx,0%)),
+      transparent 66%
+    );
+  }
+  /* a highlighted "fold crease" line that grows in as it folds */
+  .silk__crease{
+    position:absolute; left:8%; right:8%; top:50%; height:2px;
+    transform:translateY(-50%) scaleX(var(--creasex,0));
+    transform-origin:left center;
+    background:linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+    opacity:var(--creaseop,0);
+    pointer-events:none;
+  }
+  /* the "knot" — a small pinched core that fades in near the end */
+  .silk__knot{
+    position:absolute; left:50%; top:50%;
+    width:34%; height:26%;
+    transform:translate(-50%,-50%) scale(var(--knotsc,.4));
+    border-radius:44% 56% 52% 48%;
+    background:linear-gradient(160deg,#d8a3b0,#a9647a 60%,#5f3830);
+    box-shadow:inset 0 3px 10px rgba(255,255,255,.4), 0 8px 20px -8px rgba(95,56,48,.7);
+    opacity:var(--knotop,0);
+    pointer-events:none;
+  }
+
+  /* soft ground shadow that reacts to scale */
+  .silk-shadow{
+    position:absolute; left:50%; top:calc(50% + min(30vw,140px));
+    width:min(60vw,260px); height:26px; transform:translate(-50%,0) scaleX(var(--shadsc,1));
+    background:radial-gradient(closest-side, rgba(44,44,42,.34), transparent 72%);
+    filter:blur(4px); z-index:2; opacity:var(--shadop,.5);
+  }
+
+  /* ---- Player overlay UI ---- */
+  .player-ui{ position:absolute; inset:0; z-index:7; pointer-events:none; }
+
+  .player-top{
+    position:absolute; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 20px;
+    font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft);
+  }
+  .player-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(250,248,243,.6); backdrop-filter:blur(6px);
+    padding:6px 10px; border-radius:100px; border:1px solid rgba(140,136,120,.28);
+  }
+  .player-badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--olive); }
+  .player-frame{ font-variant-numeric:tabular-nums; letter-spacing:.14em; color:var(--ink); }
+
+  .player-note{
+    position:absolute; top:52px; right:20px;
+    font-size:8px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint);
+    background:rgba(250,248,243,.5); backdrop-filter:blur(4px);
+    padding:4px 8px; border-radius:6px;
+  }
+
+  /* Captions */
+  .captions{ position:absolute; left:0; right:0; bottom:74px; padding:0 26px; z-index:8; }
+  .caption{
+    position:absolute; left:26px; right:26px; bottom:0;
+    opacity:0; transform:translateY(8px);
+    transition:opacity .28s ease, transform .28s ease;
+    pointer-events:none;
+  }
+  .caption--on{ opacity:1; transform:translateY(0); }
+  .caption__eyebrow{
+    font-size:9px; letter-spacing:.34em; text-transform:uppercase; color:var(--olive);
+    margin-bottom:8px;
+  }
+  .caption__text{
+    font-family:var(--font-serif); font-weight:500; font-size:clamp(24px,6.4vw,38px);
+    line-height:1.12; color:var(--ink);
+    text-shadow:0 1px 20px rgba(250,248,243,.7);
+  }
+  .caption--product .caption__text{ font-size:clamp(20px,5.4vw,32px); }
+  .caption__meta{ margin-top:6px; font-size:11px; color:var(--ink-soft); letter-spacing:.04em; }
+  .shop-btn{
+    pointer-events:auto; cursor:pointer;
+    margin-top:16px; display:inline-flex; align-items:center; gap:10px;
+    background:var(--ink); color:var(--cream);
+    border:none; font-family:var(--font-mono); font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; padding:13px 20px; border-radius:100px;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .shop-btn:hover{ transform:translateY(-2px); background:var(--olive); }
+
+  /* Scrubber progress bar */
+  .scrubber{
+    position:absolute; left:20px; right:20px; bottom:26px; z-index:9;
+  }
+  .scrubber__track{
+    position:relative; height:3px; border-radius:100px;
+    background:rgba(140,136,120,.32);
+    overflow:hidden;
+  }
+  .scrubber__fill{
+    position:absolute; left:0; top:0; bottom:0; width:0%;
+    background:linear-gradient(90deg,var(--olive),var(--olive-light));
+    border-radius:100px;
+  }
+  .scrubber__meta{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:9px; font-size:8px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+  }
+  .scrubber__play{ display:inline-flex; align-items:center; gap:7px; color:var(--ink-soft); }
+
+  /* ---- Proto flag ---- */
+  .proto-flag{
+    position:fixed; left:12px; bottom:12px; z-index:95;
+    font-size:9px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint);
+    background:rgba(250,248,243,.62); backdrop-filter:blur(6px);
+    padding:6px 10px; border-radius:100px; border:1px solid rgba(140,136,120,.24);
+  }
+
+  /* ---- Toast ---- */
+  .toast{
+    position:fixed; left:50%; bottom:64px; transform:translate(-50%,20px);
+    z-index:120; background:var(--ink); color:var(--cream);
+    font-size:12px; letter-spacing:.05em; padding:12px 20px; border-radius:100px;
+    opacity:0; pointer-events:none; transition:opacity .3s ease, transform .3s ease;
+    box-shadow:0 12px 30px -12px rgba(44,44,42,.6);
+  }
+  .toast--on{ opacity:1; transform:translate(-50%,0); }
+
+  /* ---- Reduced motion: freeze on a representative frame, show all captions ---- */
+  @media (prefers-reduced-motion:reduce){
+    *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+    .film{ height:auto; }
+    .stage{ position:relative; height:auto; min-height:100svh; padding:80px 0; }
+    .caption{ opacity:1 !important; transform:none !important; position:static; margin-bottom:26px; }
+    .captions{ position:static; padding:40px 26px 0; bottom:auto; }
+    .card__scroll span::after{ display:none; }
+  }
+</style>
+</head>
+
+<body>
+
+  <!-- ============ INTRO TITLE CARD ============ -->
+  <section class="card">
+    <p class="eyebrow">Soie &amp; Forme · No.01</p>
+    <h1 class="card__title">A film,<br><em>in silk.</em></h1>
+    <p class="card__sub">Scroll to scrub. One continuous shot — a single square of silk folded, knotted, and worn. Slow down and watch it settle.</p>
+    <p class="card__scroll"><span></span> Scroll to play</p>
+  </section>
+
+  <!-- ============ THE SCRUBBABLE FILM ============ -->
+  <section class="film" id="film">
+    <div class="stage" id="stage">
+
+      <!-- ground shadow -->
+      <div class="silk-shadow" id="silkShadow"></div>
+
+      <!-- the silk object driven by scroll progress -->
+      <div class="silk-wrap" id="silkWrap">
+        <div class="silk">
+          <div class="silk__sheen"></div>
+          <div class="silk__crease"></div>
+          <div class="silk__knot"></div>
+        </div>
+      </div>
+
+      <!-- Player overlay UI -->
+      <div class="player-ui">
+        <div class="player-top">
+          <span class="player-badge"><span class="dot"></span> <span id="playState">scrubbing</span></span>
+          <span class="player-frame" id="frameCounter">FRAME 000 / 100</span>
+        </div>
+        <div class="player-note">placeholder — real film goes here</div>
+
+        <!-- captions -->
+        <div class="captions">
+          <figure class="caption" data-from="0" data-to="0.16" data-mode="fade">
+            <div class="caption__eyebrow">00 · the square</div>
+            <p class="caption__text">It begins as a single square.</p>
+          </figure>
+
+          <figure class="caption" data-from="0.30" data-to="0.52" data-mode="fade">
+            <div class="caption__eyebrow">01 · the fold</div>
+            <p class="caption__text">Fold, and fold again.</p>
+          </figure>
+
+          <figure class="caption" data-from="0.62" data-to="0.82" data-mode="fade">
+            <div class="caption__eyebrow">02 · the knot</div>
+            <p class="caption__text">A knot at the throat.</p>
+          </figure>
+
+          <figure class="caption caption--product" data-from="0.90" data-to="1.01" data-mode="fade">
+            <div class="caption__eyebrow">03 · the piece</div>
+            <p class="caption__text">Pink Paisley, 55cm.</p>
+            <p class="caption__meta">Twill silk · hand-rolled edge</p>
+            <button class="shop-btn" data-name="Pink Paisley Scarf">Shop this piece · $38 ▸</button>
+          </figure>
+        </div>
+
+        <!-- scrubber -->
+        <div class="scrubber">
+          <div class="scrubber__track"><div class="scrubber__fill" id="scrubFill"></div></div>
+          <div class="scrubber__meta">
+            <span class="scrubber__play">▶ <span id="playLabel">scrubbing</span></span>
+            <span id="timecode">00:00 / 00:10</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ CLOSING CARD ============ -->
+  <section class="card card--closing">
+    <p class="eyebrow">End · reel 01</p>
+    <h2 class="card__title">Made to<br><em>be worn.</em></h2>
+    <p class="card__sub">Every Soie &amp; Forme square is printed on 16-momme twill and finished by hand. This was only the first reel.</p>
+    <p class="card__scroll" style="margin-top:34px;">
+      <button class="shop-btn" data-name="The Full Collection">See the collection ▸</button>
+    </p>
+  </section>
+
+  <!-- proto flag -->
+  <div class="proto-flag">Film · local only</div>
+
+  <!-- toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ---------- small utils ---------- */
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  // linear map from [a,b] to [0,1], clamped
+  const norm = (v, a, b) => clamp((v - a) / (b - a), 0, 1);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  // smoothstep easing for a filmic, non-linear settle
+  const smooth = t => t * t * (3 - 2 * t);
+  const pad3 = n => String(n).padStart(3, '0');
+
+  /* ---------- element lookups (defensive) ---------- */
+  const film        = document.getElementById('film');
+  const stage       = document.getElementById('stage');
+  const silkWrap    = document.getElementById('silkWrap');
+  const silkShadow  = document.getElementById('silkShadow');
+  const scrubFill   = document.getElementById('scrubFill');
+  const frameEl     = document.getElementById('frameCounter');
+  const playState   = document.getElementById('playState');
+  const playLabel   = document.getElementById('playLabel');
+  const timecode    = document.getElementById('timecode');
+  const captions    = Array.from(document.querySelectorAll('.caption'));
+
+  const prefersReduced = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- the "render one frame" function ----------
+     progress: 0 → 1 across the whole scrubbable section.
+     Everything below is a continuous function of progress so the motion
+     reads as ONE cinematic shot, not discrete slides. */
+  function renderFrame(progress){
+    if(!silkWrap) return;
+    const p = clamp(progress, 0, 1);
+
+    // ---- silk transform: drift in from above, rotate, settle, then fold+knot ----
+    // Phase-blended easing so it feels hand-animated.
+    const drift = smooth(norm(p, 0, 0.55));     // enters & settles
+    const foldP = smooth(norm(p, 0.34, 0.66));  // the folding beat
+    const knotP = smooth(norm(p, 0.60, 0.92));  // the knot forms
+    const rest  = smooth(norm(p, 0.88, 1));     // final presentation
+
+    // vertical drift: starts high, drops to center, lifts slightly to present
+    const sy = lerp(-140, 0, drift) + lerp(0, -18, rest);
+    // gentle continuous rotation that eases toward upright
+    const srot = lerp(-14, 4, drift) + lerp(0, -4, rest);
+    // scale grows a touch as it "approaches camera", tightens as it knots
+    const sscale = lerp(0.82, 1.06, drift) - foldP * 0.10 - knotP * 0.16 + rest * 0.06;
+    // skew wobble that relaxes to zero — fabric drift
+    const sskew = lerp(9, 0, drift) - Math.sin(p * Math.PI * 2) * (1 - drift) * 3;
+    // vertical fold compression late in the timeline
+    const sfold = lerp(1, 0.30, foldP) - knotP * 0.12;
+    // corner radius rounds off as it becomes a knotted form
+    const rad = lerp(8, 46, foldP + knotP * 0.5);
+
+    silkWrap.style.setProperty('--sy', sy.toFixed(2) + 'px');
+    silkWrap.style.setProperty('--srot', srot.toFixed(2) + 'deg');
+    silkWrap.style.setProperty('--sscale', sscale.toFixed(3));
+    silkWrap.style.setProperty('--sskew', sskew.toFixed(2) + 'deg');
+
+    const silkEl = silkWrap.querySelector('.silk');
+    if(silkEl){
+      silkEl.style.setProperty('--sfold', clamp(sfold, 0.18, 1).toFixed(3));
+      silkEl.style.setProperty('--sradius', rad.toFixed(0) + '% ' + rad.toFixed(0) + '% ' +
+        (rad+2).toFixed(0) + '% ' + (rad+2).toFixed(0) + '%');
+    }
+
+    // ---- drifting sheen: angle + position sweep continuously across the shot ----
+    const sheenX = (Math.sin(p * Math.PI * 3) * 14).toFixed(2) + '%';
+    const sheenAng = (115 + Math.sin(p * Math.PI * 2) * 28).toFixed(1) + 'deg';
+    silkWrap.style.setProperty('--sheenx', sheenX);
+    silkWrap.style.setProperty('--sheenang', sheenAng);
+    silkWrap.style.setProperty('--sheenop', (0.35 + drift * 0.35).toFixed(3));
+
+    // ---- fold crease grows in during the fold beat ----
+    const crease = silkWrap.querySelector('.silk__crease');
+    if(crease){
+      crease.style.setProperty('--creasex', foldP.toFixed(3));
+      crease.style.setProperty('--creaseop', (foldP * (1 - knotP)).toFixed(3));
+    }
+
+    // ---- knot fades/scales in near the end ----
+    const knot = silkWrap.querySelector('.silk__knot');
+    if(knot){
+      knot.style.setProperty('--knotop', knotP.toFixed(3));
+      knot.style.setProperty('--knotsc', lerp(0.4, 1, knotP).toFixed(3));
+    }
+
+    // ---- ground shadow reacts to scale/height ----
+    if(silkShadow){
+      silkShadow.style.setProperty('--shadsc', (0.7 + drift * 0.5 - knotP * 0.3).toFixed(3));
+      silkShadow.style.setProperty('--shadop', (0.25 + drift * 0.35).toFixed(3));
+    }
+
+    // ---- player UI: scrubber, frame counter, timecode ----
+    const frame = Math.round(p * 100);
+    if(scrubFill) scrubFill.style.width = (p * 100).toFixed(2) + '%';
+    if(frameEl)   frameEl.textContent = 'FRAME ' + pad3(frame) + ' / 100';
+
+    // fake a 10s reel timecode
+    if(timecode){
+      const secs = p * 10;
+      const mm = String(Math.floor(secs / 60)).padStart(2,'0');
+      const ss = String(Math.floor(secs % 60)).padStart(2,'0');
+      timecode.textContent = mm + ':' + ss + ' / 00:10';
+    }
+
+    // play/scrub indicator — "playing" while actively scrubbing, else "paused"
+    const label = scrubbing ? 'scrubbing' : (p >= 0.999 ? 'end' : 'paused');
+    if(playState) playState.textContent = label;
+    if(playLabel) playLabel.textContent = label;
+
+    // ---- captions: opacity keyed to progress windows ----
+    captions.forEach(cap => {
+      const from = parseFloat(cap.dataset.from);
+      const to   = parseFloat(cap.dataset.to);
+      const on = p >= from && p < to;
+      cap.classList.toggle('caption--on', on);
+    });
+  }
+
+  /* ---------- scroll → progress, rAF-throttled ---------- */
+  let ticking = false;
+  let scrubbing = false;
+  let scrubTimer = null;
+
+  function computeProgress(){
+    if(!film) return 0;
+    const rect = film.getBoundingClientRect();
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    // total scrollable distance while the sticky stage is pinned
+    const total = rect.height - vh;
+    if(total <= 0) return 0;
+    // how far we've scrolled into the section (rect.top goes 0 → -total)
+    return clamp(-rect.top / total, 0, 1);
+  }
+
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    // mark as actively scrubbing (flip indicator to "paused" shortly after stop)
+    scrubbing = true;
+    if(scrubTimer) clearTimeout(scrubTimer);
+    scrubTimer = setTimeout(() => { scrubbing = false; renderFrame(computeProgress()); }, 140);
+
+    window.requestAnimationFrame(() => {
+      renderFrame(computeProgress());
+      ticking = false;
+    });
+  }
+
+  /* ---------- init ---------- */
+  if(prefersReduced){
+    // Freeze on a representative mid-shot frame; captions all shown via CSS.
+    renderFrame(0.5);
+  } else {
+    window.addEventListener('scroll', onScroll, { passive:true });
+    window.addEventListener('resize', () => renderFrame(computeProgress()), { passive:true });
+    // first paint
+    renderFrame(computeProgress());
+  }
+
+  /* ---------- mock-shop toast handler ---------- */
+  const toast = document.getElementById('toast');
+  let toastTimer = null;
+  document.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-name]');
+    if(!el || !toast) return;
+    toast.textContent = 'Opening ' + el.getAttribute('data-name') + '…';
+    toast.classList.add('toast--on');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('toast--on'), 1800);
+  });
+
+})();
+</script>
+</body>
+</html>
