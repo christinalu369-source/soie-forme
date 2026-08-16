@@ -71,6 +71,16 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 | About / brand story page | `done` | `done-about-and-contact-pages.md` | Hero, intro (2-col text+image), philosophy, values strip, closing CTA |
 | Contact page | `done` | `done-about-and-contact-pages.md` | Shopify native form, aside info panel, olive submit button |
 
+### Mobile Story Experience — "The Atelier Table"
+
+Strategic pivot toward a mobile-first, content-driven immersive scroll experience with soft (whispered) commerce. Silk pieces glide in/out across a fixed "table" backdrop as you scroll — a private-viewing feel. See `.claude/plans/todo-00-atelier-table-northstar.md`.
+
+| Feature | Status | Plan | Notes |
+|---|---|---|---|
+| Atelier Table — vision / north star | `approved` | `todo-00-atelier-table-northstar.md` | Content-first + soft commerce; blends scrollytelling + magazine + showcase |
+| Atelier Table — static prototype | `approved` | `todo-01-atelier-table-prototype.md` | Throwaway HTML in `prototypes/` to nail the glide-on-scroll interaction |
+| Atelier Table — Liquid port + soft commerce | `idea` | `todo-02-atelier-table-liquid-port.md` | Port approved prototype to a real section + page template; wire real cart. Blocked on prototype approval |
+
 ### Technical
 
 | Feature | Status | Plan | Notes |
