@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Soie &amp; Forme — Silk Panels / Journal (prototype)</title>
+<!--
+  PROTOTYPE B — static mockup, no Shopify, no build. Open directly in a browser.
+  Concept: a fixed background scene (placeholder for hero photography). As you scroll,
+  translucent "silk panels" drape UP into view and settle — no diagonal motion.
+  Each panel is a short journal/blog entry featuring one product (scarf, scrunchie…),
+  with a quiet "shop this" card inside the story.
+  Sibling of atelier-table.html. See .claude/plans/in-progress-01-atelier-table-prototype.md
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  /* ---- Design tokens (mirrored from assets/base.css) ---- */
+  :root {
+    --cream:      #FAF8F3;
+    --cream-mid:  #EDE8DE;
+    --cream-deep: #D4CFC4;
+    --linen:      #C8C2B6;
+    --ink:        #2C2C2A;
+    --ink-soft:   #4A4A48;
+    --ink-faint:  #8C8878;
+    --olive:      #708238;
+    --olive-light:#8A9E45;
+    --olive-dim:  rgba(112, 130, 56, 0.10);
+
+    --font-serif: 'Shippori Mincho', serif;
+    --font-mono:  'DM Mono', monospace;
+
+    --text-display: clamp(40px, 11vw, 92px);
+    --text-heading: clamp(26px, 6.5vw, 44px);
+    --text-subhead: clamp(18px, 4.5vw, 24px);
+    --text-body:    16px;
+    --text-small:   14px;
+    --text-label:   10px;
+
+    --space-sm: 16px;
+    --space-md: 28px;
+    --space-lg: 48px;
+    --space-xl: 80px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-mono);
+    color: var(--ink);
+    background: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ---- Fixed background scene (placeholder for hero photography) ---- */
+  .scene {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    /* soft-focus "draped fabric / atelier light" stand-in — swap for a real photo later */
+    background:
+      radial-gradient(90% 60% at 22% 18%, rgba(255,250,240,0.55), transparent 60%),
+      radial-gradient(80% 70% at 82% 82%, rgba(112,130,56,0.28), transparent 62%),
+      linear-gradient(160deg, #b9a98f 0%, #8f8368 40%, #5f5a49 78%, #37342c 100%);
+  }
+  .scene::before { /* vignette for depth */
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(120% 90% at 50% 40%, transparent 45%, rgba(0,0,0,0.42) 100%);
+  }
+  /* film grain */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: 80;
+    pointer-events: none; opacity: 0.3;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ---- Content flows above the scene ---- */
+  .flow { position: relative; z-index: 10; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--olive);
+    display: inline-flex; align-items: center; gap: 12px;
+  }
+  .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--olive); }
+  .eyebrow--onscene { color: rgba(250,248,243,0.9); }
+  .eyebrow--onscene::before { background: rgba(250,248,243,0.7); }
+
+  /* ---- Opening hero (over the bare scene) ---- */
+  .hero {
+    min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: var(--space-xl) var(--space-md);
+    color: var(--cream);
+  }
+  .hero__mark {
+    font-family: var(--font-serif); font-weight: 700;
+    font-size: var(--text-display); line-height: 0.98; letter-spacing: -0.01em;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.35);
+  }
+  .hero__mark em { font-style: italic; font-weight: 500; }
+  .hero__sub {
+    margin-top: var(--space-md); font-size: var(--text-small); font-weight: 300;
+    color: rgba(250,248,243,0.86); line-height: 1.7; max-width: 32ch;
+    text-shadow: 0 1px 16px rgba(0,0,0,0.3);
+  }
+  .hero__scroll {
+    margin-top: var(--space-xl); font-size: var(--text-label);
+    letter-spacing: 0.32em; text-transform: uppercase; color: rgba(250,248,243,0.8);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .hero__scroll span { font-size: 18px; line-height: 1; }
+  @keyframes bob { 0%,100%{transform:translateY(0);opacity:.7} 50%{transform:translateY(6px);opacity:1} }
+
+  /* ---- Silk panels: translucent sheets that drape up and settle ---- */
+  .panels { padding: 0 var(--space-md) var(--space-xl); }
+
+  .panel {
+    position: relative;
+    width: min(92vw, 640px);
+    margin: 0 auto var(--space-xl);
+    background: rgba(250, 248, 243, 0.82);
+    backdrop-filter: blur(14px) saturate(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+    border-radius: 4px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,0.55);
+    overflow: hidden;
+    /* start state — draped below, translucent, faintly stretched like falling silk */
+    opacity: 0;
+    transform: translateY(90px) scaleY(1.05);
+    transform-origin: top center;
+    filter: blur(3px);
+    transition:
+      opacity 1s ease,
+      transform 1.15s cubic-bezier(0.16, 0.84, 0.30, 1),  /* silky settle */
+      filter 1s ease;
+  }
+  .panel.settled {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    filter: blur(0);
+  }
+  /* top "seam" sheen — light catching the fold of the silk as it settles */
+  .panel::before {
+    content: '';
+    position: absolute; left: 0; right: 0; top: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
+    opacity: 0; transition: opacity 1.2s ease .2s;
+  }
+  .panel.settled::before { opacity: 1; }
+
+  /* featured product image (placeholder gradient) */
+  .panel__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--media-bg, linear-gradient(135deg,#d9c2c9,#b98a97));
+  }
+  .panel__media::after { /* traveling sheen */
+    content:''; position:absolute; top:0; bottom:0; width:55%; left:-70%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.4), transparent);
+    transform: skewX(-16deg); animation: sheen 7s ease-in-out infinite;
+  }
+  @keyframes sheen { 0%{left:-70%} 55%,100%{left:130%} }
+  .panel__cat {
+    position: absolute; left: 14px; top: 14px;
+    font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--cream); background: rgba(44,44,42,0.42); backdrop-filter: blur(4px);
+    padding: 6px 10px; border-radius: 2px;
+  }
+
+  .panel__body { padding: var(--space-md); }
+  .panel__meta {
+    font-size: var(--text-label); letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--ink-faint); margin-bottom: 12px;
+  }
+  .panel__title {
+    font-family: var(--font-serif); font-weight: 600;
+    font-size: var(--text-heading); line-height: 1.08; margin-bottom: 16px;
+  }
+  .panel__text { font-size: var(--text-body); font-weight: 300; line-height: 1.8; color: var(--ink-soft); }
+  .panel__text p + p { margin-top: 14px; }
+  .drop { float: left; font-family: var(--font-serif); font-size: 3.1em; line-height: 0.8; padding: 6px 10px 0 0; color: var(--olive); }
+
+  /* quiet product feature inside the story */
+  .feature {
+    display: flex; align-items: center; gap: 16px;
+    margin-top: var(--space-md); padding: 14px;
+    border: 1px solid var(--linen); border-radius: 4px;
+    background: rgba(255,255,255,0.4);
+  }
+  .feature__thumb {
+    width: 64px; height: 64px; flex: none; border-radius: 3px;
+    background: var(--media-bg, var(--cream-deep));
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .feature__info { flex: 1; min-width: 0; }
+  .feature__name { font-family: var(--font-serif); font-size: var(--text-body); font-weight: 500; }
+  .feature__price { font-size: var(--text-small); color: var(--ink-faint); margin-top: 2px; }
+  .feature__shop {
+    flex: none; font-family: var(--font-mono);
+    font-size: var(--text-label); letter-spacing: 0.2em; text-transform: uppercase; font-weight: 300;
+    color: var(--ink); text-decoration: none;
+    border: 1px solid var(--linen); border-radius: 100px; padding: 11px 16px;
+    transition: border-color .3s ease, background .3s ease, color .3s ease;
+    cursor: pointer; background: none;
+  }
+  .feature__shop:hover { border-color: var(--olive); background: var(--olive); color: var(--cream); }
+
+  /* ---- Closing ---- */
+  .closing {
+    min-height: 70svh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding: var(--space-xl) var(--space-md); color: var(--cream);
+  }
+  .closing__title { font-family: var(--font-serif); font-weight: 500; font-size: var(--text-heading); line-height:1.1; text-shadow: 0 2px 24px rgba(0,0,0,0.35); }
+  .closing__cta {
+    margin-top: var(--space-lg);
+    font-family: var(--font-mono); font-size: var(--text-label);
+    letter-spacing: 0.28em; text-transform: uppercase; font-weight: 300;
+    color: var(--ink); background: var(--cream);
+    border: none; border-radius: 100px; padding: 16px 30px; cursor: pointer;
+    transition: background .3s ease, color .3s ease;
+  }
+  .closing__cta:hover { background: var(--olive); color: var(--cream); }
+
+  .proto-flag {
+    position: fixed; left: 12px; bottom: 12px; z-index: 60;
+    font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--cream); background: rgba(44,44,42,0.5);
+    padding: 5px 9px; border-radius: 3px; backdrop-filter: blur(4px);
+  }
+
+  .toast {
+    position: fixed; z-index: 120; left: 50%; bottom: 34px; transform: translate(-50%, 20px);
+    background: var(--ink); color: var(--cream); font-size: var(--text-small);
+    padding: 13px 22px; border-radius: 100px; opacity: 0; pointer-events: none;
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  /* ---- Reduced motion ---- */
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+    .panel { transition: opacity .4s ease; transform: none; filter: none; }
+    .panel.settled { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- fixed background scene -->
+  <div class="scene" aria-hidden="true"></div>
+
+  <div class="flow">
+
+    <!-- opening hero over the scene -->
+    <section class="hero">
+      <p class="eyebrow eyebrow--onscene">Soie &amp; Forme · Journal</p>
+      <h1 class="hero__mark">Notes on<br><em>silk &amp; form</em></h1>
+      <p class="hero__sub">Short stories about the pieces we make — and the small rituals of wearing them.</p>
+      <div class="hero__scroll">Scroll <span>&#8595;</span></div>
+    </section>
+
+    <!-- silk panels (journal entries) injected by JS -->
+    <div class="panels" id="panels"></div>
+
+    <!-- closing -->
+    <section class="closing">
+      <p class="eyebrow eyebrow--onscene">The Journal</p>
+      <h2 class="closing__title">More stories,<br>every season.</h2>
+      <button class="closing__cta">Read the archive</button>
+    </section>
+
+  </div>
+
+  <div class="toast" id="toast">Added to your selection</div>
+  <span class="proto-flag">Prototype B · local only</span>
+
+<script>
+  // ---- Journal entries, each featuring one product ----
+  const ENTRIES = [
+    {
+      cat: 'Scarves', date: 'Aug 2026', read: '3 min read',
+      title: 'Five knots for a 25-inch square',
+      lead: 'T', leadRest: 'here is a particular kind of morning that asks for a scarf and nothing more.',
+      body: 'We keep coming back to the bandana square — small enough to live in a pocket, large enough to change an outfit. Here are the five ways we tie ours, from the loose Parisian throat-knot to the tight neckerchief that reads a little Western, a little couture.',
+      product: { name: 'Pink Paisley Silk Scarf', price: '$38', sku: 'SF-001' },
+      bg: 'linear-gradient(135deg,#e7c9d0 0%,#c98fa0 55%,#7a4a3c 100%)'
+    },
+    {
+      cat: 'Hair', date: 'Aug 2026', read: '2 min read',
+      title: 'The case for the oversized scrunchie',
+      lead: 'W', leadRest: 'e made the scrunchie we could never find: mulberry silk, and twice the volume.',
+      body: 'Silk is kinder to hair than elastic and cotton — less friction, fewer creases, no 3pm dent. Ours is cut from the same bolts as the scarves, so the colours travel across a whole look. Wear it up, or let it live on your wrist like a bracelet.',
+      product: { name: 'Olive Silk Scrunchie', price: '$18', sku: 'SF-031' },
+      bg: 'linear-gradient(135deg,#c7cba6 0%,#8a9e45 55%,#4c5a24 100%)'
+    },
+    {
+      cat: 'Styling', date: 'Jul 2026', read: '4 min read',
+      title: 'One square, tied to a top-handle bag',
+      lead: 'A', leadRest: ' bag looks finished the moment you knot a scarf to the handle.',
+      body: 'It is the oldest trick in the atelier and still the best. A cognac-bordered square softens hard leather; a bone floral lightens black. We photographed six bags and one scarf to prove the point — the scarf did most of the work.',
+      product: { name: 'Cognac Chain Silk Scarf', price: '$56', sku: 'SF-012' },
+      bg: 'linear-gradient(135deg,#e3c39a 0%,#b6823f 55%,#5c3a1c 100%)'
+    },
+    {
+      cat: 'Material', date: 'Jul 2026', read: '5 min read',
+      title: 'What "momme" actually means',
+      lead: 'S', leadRest: 'ilk is sold by weight, and the number on the label tells you more than you think.',
+      body: 'Momme is to silk what thread count is to cotton — roughly, how much silk is in the cloth. We work in 12–16 momme: fluid enough to knot and drape, substantial enough to hold a fold and catch the light without the cheap shine of thinner weaves.',
+      product: { name: 'Ink & Cream Silk Scarf', price: '$44', sku: 'SF-009' },
+      bg: 'linear-gradient(135deg,#efeadf 0%,#b9b2a1 45%,#2c2c2a 100%)'
+    },
+  ];
+
+  const wrap = document.getElementById('panels');
+
+  ENTRIES.forEach((e) => {
+    const panel = document.createElement('article');
+    panel.className = 'panel';
+    panel.style.setProperty('--media-bg', e.bg);
+    panel.innerHTML = `
+      <div class="panel__media">
+        <span class="panel__cat">Journal · ${e.cat}</span>
+      </div>
+      <div class="panel__body">
+        <p class="panel__meta">${e.date} · ${e.read}</p>
+        <h2 class="panel__title">${e.title}</h2>
+        <div class="panel__text">
+          <p><span class="drop">${e.lead}</span>${e.leadRest}</p>
+          <p>${e.body}</p>
+        </div>
+        <div class="feature">
+          <div class="feature__thumb"></div>
+          <div class="feature__info">
+            <div class="feature__name">${e.product.name}</div>
+            <div class="feature__price">${e.product.price} · ${e.product.sku}</div>
+          </div>
+          <button class="feature__shop" data-name="${e.product.name}">Shop &#8594;</button>
+        </div>
+      </div>`;
+    panel.querySelector('.feature__thumb').style.background = e.bg;
+    wrap.appendChild(panel);
+  });
+
+  // ---- Drape-in on scroll: reveal each panel as it enters, once ----
+  const panels = [...document.querySelectorAll('.panel')];
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((en) => {
+      if (en.isIntersecting) {
+        en.target.classList.add('settled');
+        io.unobserve(en.target); // settle once, then leave it readable
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+  panels.forEach((p) => io.observe(p));
+
+  // ---- Mock "shop" affordance ----
+  const toast = document.getElementById('toast');
+  let toastT;
+  document.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('.feature__shop');
+    if (!btn) return;
+    clearTimeout(toastT);
+    toast.textContent = 'Opening ' + btn.dataset.name + '…';
+    toast.classList.add('show');
+    toastT = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+</script>
+</body>
+</html>

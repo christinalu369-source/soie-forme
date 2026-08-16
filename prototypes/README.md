@@ -21,7 +21,8 @@ Precedent: the design system was originally prototyped in `soie-et-forme-v3.html
 
 | File | Direction | Plan |
 |---|---|---|
-| `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in/out on scroll, soft "shop this" sheet | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+| `atelier-table.html` | The Atelier Table — fixed backdrop, silk pieces glide in from the side / rest / exit on scroll, soft "shop this" sheet | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
+| `silk-panels.html` | Silk Panels / Journal — fixed background scene; translucent silk panels drape *up* into view on scroll; each panel is a blog entry featuring one product (scarf, scrunchie…) | `.claude/plans/in-progress-01-atelier-table-prototype.md` |
 
 ## How to view
 
