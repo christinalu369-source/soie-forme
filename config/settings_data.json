@@ -46,16 +46,15 @@
         "type": "section-silk-story",
         "blocks": {
           "beat-open": {
-            "type": "card",
+            "type": "hero",
             "settings": {
+              "eyebrow": "Soie & Forme",
               "mark": "<p>A story,</p><p>in <em>silk</em></p>",
-              "sub": "Keep scrolling. Each scene fades to the next.",
-              "cta_label": "",
-              "cta_url": "",
-              "link_1_label": "",
-              "link_1_url": "",
-              "link_2_label": "",
-              "link_2_url": ""
+              "sub": "Mulberry silk, made to move. Watch how it drapes, knots, and catches the light.",
+              "cta_label": "Shop the collection",
+              "cta_url": "/collections",
+              "color_from": "#E7C9D0",
+              "color_to": "#7A4A3C"
             }
           },
           "beat-1": {

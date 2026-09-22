@@ -12,8 +12,9 @@ actual products and the cart.
 
 ## What was built
 1. **`sections/section-silk-story.liquid`** — scenes rendered server-side from
-   two block types: `card` (opening/closing beats) and `scene` (chapter, line,
-   caption, photo, optional product). Full `{% schema %}`, `max_blocks: 12`.
+   three block types: `hero` (cinematic cover screen, treatment A from
+   `prototypes/hero-options.html`), `card` (closing beat) and `scene` (chapter,
+   line, caption, photo, optional product). Full `{% schema %}`, `max_blocks: 12`.
 2. **`assets/section-silk-story.css`** — prototype styles with literals replaced
    by `base.css` tokens, BEM naming, reduced-motion handling, editorial split at
    900px. New type-scale tokens (`--text-display` etc.) added to `base.css`.
@@ -33,6 +34,8 @@ actual products and the cart.
 - Single-variant products add straight to cart; multi-variant and sold-out
   products link to the product page so the customer picks the variant.
 - Scenes fall back to a two-colour wash when no photo is set.
+- The cover screen is the Cinematic hero, not a plain title card — drifting
+  silk under a scrim with cream type over it.
 
 ## Open / Follow-up
 - [ ] **Real photography.** Scenes ship with colour washes, not photos. The

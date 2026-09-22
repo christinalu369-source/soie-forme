@@ -23,7 +23,66 @@
   <div class="silk-story__deck">
     {%- for block in section.blocks -%}
 
-      {%- if block.type == 'card' -%}
+      {%- if block.type == 'hero' -%}
+        {%- comment -%}
+          Cover screen: full-bleed silk in motion under a scrim, type over it.
+          Treatment A from prototypes/hero-options.html.
+        {%- endcomment -%}
+        {%- assign hero_from = block.settings.color_from | default: '#E7C9D0' -%}
+        {%- assign hero_to   = block.settings.color_to   | default: '#7A4A3C' -%}
+        {%- assign hero_alt  = block.settings.image.alt  | default: shop.name -%}
+        <div
+          class="silk-story__scene silk-story__scene--hero"
+          style="--scene-from: {{ hero_from }}; --scene-to: {{ hero_to }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="silk-story__hero-media">
+            <div class="silk-story__hero-media-inner">
+              {%- if block.settings.image != blank -%}
+                {{
+                  block.settings.image
+                  | image_url: width: 2400
+                  | image_tag:
+                      class: 'silk-story__image',
+                      loading: 'eager',
+                      fetchpriority: 'high',
+                      sizes: '100vw',
+                      widths: '800, 1200, 1600, 2000, 2400',
+                      alt: hero_alt
+                }}
+              {%- endif -%}
+            </div>
+            <div class="silk-story__sheen" aria-hidden="true"></div>
+          </div>
+          <div class="silk-story__scrim" aria-hidden="true"></div>
+
+          <div class="silk-story__hero-content">
+            {%- if block.settings.eyebrow != blank -%}
+              <p class="silk-story__eyebrow">{{ block.settings.eyebrow }}</p>
+            {%- endif -%}
+
+            <h1 class="silk-story__hero-mark">{{ block.settings.mark }}</h1>
+
+            {%- if block.settings.sub != blank -%}
+              <p class="silk-story__hero-sub">{{ block.settings.sub }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.cta_label != blank -%}
+              <a
+                class="silk-story__pill"
+                href="{{ block.settings.cta_url | default: routes.collections_url }}"
+              >
+                {{ block.settings.cta_label }} <span aria-hidden="true">&#8594;</span>
+              </a>
+            {%- endif -%}
+          </div>
+
+          <div class="silk-story__scroll-hint" aria-hidden="true">
+            Scroll <span>&#8595;</span>
+          </div>
+        </div>
+
+      {%- elsif block.type == 'card' -%}
         {%- comment -%} Opening / closing beats: centred type on a warm field {%- endcomment -%}
         <div
           class="silk-story__scene silk-story__scene--card{% unless forloop.first %} silk-story__scene--closing{% endunless %}"
@@ -189,6 +248,64 @@
     }
   ],
   "blocks": [
+    {
+      "type": "hero",
+      "name": "Cover screen (cinematic)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "Soie & Forme"
+        },
+        {
+          "type": "richtext",
+          "id": "mark",
+          "label": "Headline",
+          "info": "Use italics for the accent word. Two paragraphs give the two-line break.",
+          "default": "<p>A story,</p><p>in <em>silk</em></p>"
+        },
+        {
+          "type": "text",
+          "id": "sub",
+          "label": "Subtitle",
+          "default": "Mulberry silk, made to move. Watch how it drapes, knots, and catches the light."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button label",
+          "default": "Shop the collection"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "Button link"
+        },
+        {
+          "type": "header",
+          "content": "Media"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Cover photo",
+          "info": "Full-bleed behind the type. Recommended 2400px wide. Without one, the colour wash below is used."
+        },
+        {
+          "type": "color",
+          "id": "color_from",
+          "label": "Fallback wash — from",
+          "default": "#E7C9D0"
+        },
+        {
+          "type": "color",
+          "id": "color_to",
+          "label": "Fallback wash — to",
+          "default": "#7A4A3C"
+        }
+      ]
+    },
     {
       "type": "card",
       "name": "Title / closing card",
