@@ -51,52 +51,52 @@
               "eyebrow": "Soie & Forme",
               "mark": "<p>A story,</p><p>in <em>silk</em></p>",
               "sub": "Mulberry silk, made to move. Watch how it drapes, knots, and catches the light.",
-              "cta_label": "Shop the collection",
-              "cta_url": "/collections",
+              "cta_label": "See how to wear it",
+              "cta_action": "scroll",
+              "cta_scene": 2,
+              "cta_url": "",
               "color_from": "#E7C9D0",
               "color_to": "#7A4A3C"
             }
           },
-          "beat-1": {
+          "beat-wear": {
             "type": "scene",
             "settings": {
               "chapter": "Chapter I",
-              "line": "It begins as thread.",
-              "note": "Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.",
+              "line": "A hundred ways to wear it.",
+              "note": "At the throat, over the shoulder, wound around a bag handle, tied back through your hair. One square, folded a different way each morning — no pins, no rules, nothing that takes longer than a minute.",
+              "color_from": "#E7C9D0",
+              "color_to": "#7A4A3C"
+            }
+          },
+          "beat-history": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Chapter II",
+              "line": "It travelled further than we did.",
+              "note": "Silk left China by camel and came back as currency, as treaty, as rumour. For centuries the method was a state secret worth dying over. The road was eventually named for the cloth that moved along it.",
               "color_from": "#EFEADF",
               "color_to": "#A49A80"
             }
           },
-          "beat-2": {
-            "type": "scene",
-            "settings": {
-              "chapter": "Chapter II",
-              "line": "Colour is laid by hand.",
-              "note": "A blush field, deep cognac borders, paisley vines traced in. The print is restrained — timeless on purpose.",
-              "color_from": "#E7C9D0",
-              "color_to": "#7A4A3C",
-              "product": "pink-paisley-silk-scarf"
-            }
-          },
-          "beat-3": {
+          "beat-weaves": {
             "type": "scene",
             "settings": {
               "chapter": "Chapter III",
-              "line": "The hem is rolled by hand.",
-              "note": "Twelve to sixteen momme, hand-rolled edge. The weight catches light without the shine that reads cheap.",
+              "line": "绫 罗 绸 缎",
+              "note": "Four weaves, four characters — together, the old Chinese word for luxury. Líng is a twill that shifts as it turns. Luó is an open gauze, built to breathe. Chóu is the smooth, close weave most people picture. Duàn is satin: all surface, all light.",
               "color_from": "#C7CBA6",
               "color_to": "#4C5A24"
             }
           },
-          "beat-4": {
+          "beat-life": {
             "type": "scene",
             "settings": {
               "chapter": "Chapter IV",
-              "line": "Then it is yours to tie.",
-              "note": "At the throat, on the bag, through the hair. It drapes, holds a knot, and softens with every wearing.",
+              "line": "It moves the way you do.",
+              "note": "Silk answers the room — warm when the air is cold, cool when it isn't. It creases, recovers, catches a draught and settles again. Made to be lived in on an ordinary Tuesday, not saved for an occasion that never comes.",
               "color_from": "#E3C39A",
-              "color_to": "#5C3A1C",
-              "product": "cognac-carriage-wheel-silk-scarf"
+              "color_to": "#5C3A1C"
             }
           },
           "beat-close": {
@@ -115,10 +115,10 @@
         },
         "block_order": [
           "beat-open",
-          "beat-1",
-          "beat-2",
-          "beat-3",
-          "beat-4",
+          "beat-wear",
+          "beat-history",
+          "beat-weaves",
+          "beat-life",
           "beat-close"
         ],
         "settings": {

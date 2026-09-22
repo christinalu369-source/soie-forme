@@ -58,7 +58,8 @@
   background: linear-gradient(135deg, var(--scene-from, var(--cream-mid)) 0%, var(--scene-to, var(--linen)) 100%);
 }
 
-.silk-story__image {
+.silk-story__image,
+.silk-story__video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -143,7 +144,7 @@
 }
 
 .silk-story__line {
-  font-family: var(--font-serif);
+  font-family: var(--font-serif-cjk);
   font-weight: 600;
   font-size: var(--text-heading);
   line-height: 1.05;

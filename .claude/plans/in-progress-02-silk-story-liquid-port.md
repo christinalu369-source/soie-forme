@@ -37,12 +37,26 @@ actual products and the cart.
 - The cover screen is the Cinematic hero, not a plain title card — drifting
   silk under a scrim with cream type over it.
 
+## Story structure (set 2026-09-22)
+| # | Scene | Copy | Media the user is supplying |
+|---|---|---|---|
+| 1 | Cover | "A story, in silk" — CTA scrolls to scene 2 | Cover photo or film |
+| 2 | Ways to wear | "A hundred ways to wear it." | Short video: styling / tying |
+| 3 | History | "It travelled further than we did." | Short video: silk history + Silk Road |
+| 4 | 绫罗绸缎 | The four classical weaves | Short video: the differences between them |
+| 5 | Lifestyle | "It moves the way you do." | Short video: silk moving in the air |
+| 6 | Closing | "Now, your turn." — shop + links | — |
+
+Scene videos are silent, looping, `preload="none"`, and play only while their
+scene is on screen (`setScenePlayback` in the JS). Each scene still has an
+optional product picker if a "Shop this piece" pill is wanted on any of them.
+
 ## Open / Follow-up
-- [ ] **Real photography.** Scenes ship with colour washes, not photos. The
-      experience will not read as finished until images are set per scene.
-- [ ] **Product handles.** Seeded as `pink-paisley-silk-scarf` and
-      `cognac-carriage-wheel-silk-scarf` from the import CSV — unverified
-      against the live catalogue. Confirm in the theme editor.
+- [ ] **Media.** The user is supplying one cover still/film plus four short
+      videos. Until then every scene is a colour wash.
+- [ ] **Products.** Handles were dropped in the content rewrite; scenes are
+      editorial now. Add a product per scene in the theme editor if a shop
+      pill is wanted.
 - [ ] **No global nav on the homepage.** By design (immersive), but the only
       ways out are the shop pills and the closing card's links. Revisit if
       analytics show people getting stuck.

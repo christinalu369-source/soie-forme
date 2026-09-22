@@ -39,6 +39,11 @@
       scene.style.setProperty('--scene-scale', (1 + distance * 0.03).toFixed(3));
       scene.classList.toggle('is-active', isNear);
 
+      /* Only the scene on screen plays. Videos are preload="none", so nothing
+         downloads until its scene is reached — four background videos would
+         otherwise be a punishing mobile page load. */
+      setScenePlayback(scene, isNear);
+
       /* Keep faded-out scenes out of the tab order and the accessibility tree.
          Without this, buttons in invisible scenes are still focusable. */
       if (isNear) {
@@ -60,6 +65,21 @@
         tick.removeAttribute('aria-current');
       }
     });
+  }
+
+  /* Start or stop a scene's video. play() rejects when a browser blocks
+     autoplay; the poster frame simply stays up, so the catch is quiet. */
+  function setScenePlayback(scene, shouldPlay) {
+    const video = scene.querySelector('.silk-story__video');
+    if (!video) return;
+
+    if (shouldPlay) {
+      if (video.paused) {
+        video.play().catch(function () { /* poster frame remains */ });
+      }
+    } else if (!video.paused) {
+      video.pause();
+    }
   }
 
   function onScroll() {

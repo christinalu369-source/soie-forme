@@ -20,6 +20,9 @@
   /* Typography */
   --font-serif: 'Shippori Mincho', serif;
   --font-mono:  'DM Mono', monospace;
+  /* Shippori Mincho carries Japanese kanji but not the simplified Chinese
+     forms (绫罗绸缎), so headline copy falls through to a CJK serif. */
+  --font-serif-cjk: 'Shippori Mincho', 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif;
 
   /* Type scale — fluid display sizes shared by editorial sections */
   --text-hero:    clamp(44px, 11vw, 104px);

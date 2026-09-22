@@ -67,10 +67,21 @@
               <p class="silk-story__hero-sub">{{ block.settings.sub }}</p>
             {%- endif -%}
 
+            {%- comment -%}
+              The cover CTA usually sends people deeper into the story rather
+              than off to the collection, so `scroll` is the default action.
+            {%- endcomment -%}
+            {%- if block.settings.cta_action == 'link' -%}
+              {%- assign hero_cta_href = block.settings.cta_url | default: routes.collections_url -%}
+            {%- else -%}
+              {%- assign target_scene = block.settings.cta_scene | default: 2 -%}
+              {%- assign hero_cta_href = '#silk-story-scene-' | append: target_scene -%}
+            {%- endif -%}
+
             {%- if block.settings.cta_label != blank -%}
               <a
                 class="silk-story__pill"
-                href="{{ block.settings.cta_url | default: routes.collections_url }}"
+                href="{{ hero_cta_href }}"
               >
                 {{ block.settings.cta_label }} <span aria-hidden="true">&#8594;</span>
               </a>
@@ -139,7 +150,29 @@
           {{ block.shopify_attributes }}
         >
           <div class="silk-story__media">
-            {%- if block.settings.image != blank -%}
+            {%- comment -%}
+              Video wins over a still when both are set. Built by hand rather
+              than with `video_tag` so we control preload and playsinline —
+              iOS refuses inline playback without that attribute. Playback is
+              started/stopped by the scroll engine, never autoplayed off-screen.
+            {%- endcomment -%}
+            {%- if block.settings.video != blank -%}
+              <video
+                class="silk-story__video"
+                loop
+                muted
+                playsinline
+                preload="none"
+                {% if block.settings.image != blank %}poster="{{ block.settings.image | image_url: width: 1600 }}"{% elsif block.settings.video.preview_image %}poster="{{ block.settings.video.preview_image | image_url: width: 1600 }}"{% endif %}
+                aria-label="{{ block.settings.line | escape }}"
+              >
+                {%- for source in block.settings.video.sources -%}
+                  {%- if source.format == 'mp4' or source.format == 'webm' -%}
+                    <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                  {%- endif -%}
+                {%- endfor -%}
+              </video>
+            {%- elsif block.settings.image != blank -%}
               {%- comment -%} First scene loads eagerly; the rest wait until near view {%- endcomment -%}
               {%- if forloop.index <= 2 -%}
                 {%- assign loading_mode = 'eager' -%}
@@ -210,7 +243,7 @@
   <!-- ── TRACK: invisible; supplies scroll length and snap points ── -->
   <div class="silk-story__track" aria-hidden="true">
     {%- for block in section.blocks -%}
-      <div class="silk-story__step"></div>
+      <div class="silk-story__step" id="silk-story-scene-{{ forloop.index }}"></div>
     {%- endfor -%}
   </div>
 
@@ -278,9 +311,30 @@
           "default": "Shop the collection"
         },
         {
+          "type": "select",
+          "id": "cta_action",
+          "label": "Button goes to",
+          "options": [
+            { "value": "scroll", "label": "A scene in this story" },
+            { "value": "link", "label": "A link" }
+          ],
+          "default": "scroll"
+        },
+        {
+          "type": "range",
+          "id": "cta_scene",
+          "label": "Scroll to scene number",
+          "info": "Counting the cover as 1. Only used when the button goes to a scene.",
+          "min": 2,
+          "max": 12,
+          "step": 1,
+          "default": 2
+        },
+        {
           "type": "url",
           "id": "cta_url",
-          "label": "Button link"
+          "label": "Button link",
+          "info": "Only used when the button goes to a link."
         },
         {
           "type": "header",
@@ -387,10 +441,16 @@
           "content": "Media"
         },
         {
+          "type": "video",
+          "id": "video",
+          "label": "Scene video",
+          "info": "Silent, looping, full-bleed. Plays only while its scene is on screen. Keep it short (5-15s) — it is decorative, so put nothing essential in it."
+        },
+        {
           "type": "image_picker",
           "id": "image",
           "label": "Scene photo",
-          "info": "Full-bleed. Recommended 2000px wide, portrait or landscape. Without a photo the colour wash below is used."
+          "info": "Used on its own, or as the video's poster frame while it loads. Recommended 2000px wide."
         },
         {
           "type": "color",
