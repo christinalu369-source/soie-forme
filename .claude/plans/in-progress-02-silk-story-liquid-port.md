@@ -1,0 +1,57 @@
+# Plan: A Story in Silk — Liquid Port
+
+**Status:** in-progress
+> Supersedes `todo-02-atelier-table-liquid-port.md`. The approved direction is
+> `prototypes/silk-story.html` ("A Story in Silk"), not the Atelier Table.
+> Decision: it replaces the homepage.
+
+## Goal
+Port the approved "A Story in Silk" prototype into the live Shopify theme as the
+homepage — a real, theme-editable section with the shop affordances wired to
+actual products and the cart.
+
+## What was built
+1. **`sections/section-silk-story.liquid`** — scenes rendered server-side from
+   two block types: `card` (opening/closing beats) and `scene` (chapter, line,
+   caption, photo, optional product). Full `{% schema %}`, `max_blocks: 12`.
+2. **`assets/section-silk-story.css`** — prototype styles with literals replaced
+   by `base.css` tokens, BEM naming, reduced-motion handling, editorial split at
+   900px. New type-scale tokens (`--text-display` etc.) added to `base.css`.
+3. **`assets/section-silk-story.js`** — scroll-driven cross-fade engine,
+   filmstrip navigation, soft add-to-cart reusing the `/cart/add.js` pattern
+   from `section-product-main.js`. Faded scenes get `inert` so hidden controls
+   leave the tab order.
+4. **`layout/story.liquid`** — immersive layout (no nav/footer), modelled on
+   `layout/entry.liquid`. Scopes scroll-snap to this template via `.story-scroll`.
+5. **`templates/index.liquid`** — now renders the story on the story layout.
+6. **`config/settings_data.json`** — seeded with the six story beats.
+
+## Decisions Made
+- Homepage takeover (not a dedicated route) — the user's call.
+- `sections/section-entry.liquid` is kept, not deleted: still referenced in
+  `settings_data.json`, and it is the way back if the story is reverted.
+- Single-variant products add straight to cart; multi-variant and sold-out
+  products link to the product page so the customer picks the variant.
+- Scenes fall back to a two-colour wash when no photo is set.
+
+## Open / Follow-up
+- [ ] **Real photography.** Scenes ship with colour washes, not photos. The
+      experience will not read as finished until images are set per scene.
+- [ ] **Product handles.** Seeded as `pink-paisley-silk-scarf` and
+      `cognac-carriage-wheel-silk-scarf` from the import CSV — unverified
+      against the live catalogue. Confirm in the theme editor.
+- [ ] **No global nav on the homepage.** By design (immersive), but the only
+      ways out are the shop pills and the closing card's links. Revisit if
+      analytics show people getting stuck.
+
+## Testing Plan
+- [x] Section markup renders; schema is valid JSON.
+- [x] Cross-fade engine verified numerically (scroll one step → scene 0 fades
+      out, scene 1 in).
+- [x] Stacked layout: caption band clears the filmstrip.
+- [x] Wide layout (>=900px): editorial split, pill hugs its content.
+- [x] No-JS / pre-JS: opening scene is painted rather than a blank page.
+- [ ] **Dev theme verification** — `shopify theme dev`, real device, theme
+      editor block add/remove/reorder. Not yet done; required before merge.
+- [ ] Add to cart against a real product adds the right variant.
+- [ ] Reduced-motion and keyboard pass on a real browser.

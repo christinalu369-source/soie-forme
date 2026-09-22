@@ -1,0 +1,455 @@
+/* ============================================================
+   SECTION-SILK-STORY.CSS — "A Story in Silk"
+   Full-bleed scenes that cross-fade as you scroll vertically.
+   Ported from prototypes/silk-story.html
+   ============================================================ */
+
+/* ── SCROLL CONTAINER ──
+   The story page sets .story-scroll on <html> so snap behaviour is scoped
+   to this template and never leaks into the rest of the theme. */
+.story-scroll {
+  scroll-snap-type: y mandatory;
+}
+
+.story-scroll body {
+  background: var(--ink);
+}
+
+
+/* ── DECK ──
+   Fixed, full-viewport. Every scene stacks here; JS cross-fades between
+   them from the scroll position. The track below supplies scroll length. */
+.silk-story__deck {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+}
+
+.silk-story__scene {
+  position: absolute;
+  inset: 0;
+  opacity: 0;                      /* JS drives this from scroll position */
+  transform: scale(var(--scene-scale, 1));
+  transition: opacity 0.12s linear; /* smooths the per-frame value */
+  pointer-events: none;
+
+  /* Horizontal division: image band over caption band */
+  display: grid;
+  grid-template-rows: 1fr auto;
+}
+
+.silk-story__scene.is-active {
+  pointer-events: auto;
+}
+
+/* Before JS runs (or if it never does) the opening scene is still readable
+   rather than the page rendering blank. JS sets inline opacity from frame 1. */
+.silk-story__scene:first-child {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+/* ── MEDIA BAND ── */
+.silk-story__media {
+  position: relative;
+  overflow: hidden;
+  /* Fallback wash when the merchant hasn't set a photo yet */
+  background: linear-gradient(135deg, var(--scene-from, var(--cream-mid)) 0%, var(--scene-to, var(--linen)) 100%);
+}
+
+.silk-story__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Woven texture hint — reads as fabric behind the photo or the wash */
+.silk-story__media::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 28% 32%, rgba(255, 255, 255, 0.14) 0 6%, transparent 8%),
+    radial-gradient(circle at 72% 60%, rgba(0, 0, 0, 0.10) 0 5%, transparent 7%);
+  background-size: 90px 90px, 104px 104px;
+  opacity: 0.5;
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/* Slow sheen, only on the scene currently held */
+.silk-story__media::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 55%;
+  left: -70%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-16deg);
+  pointer-events: none;
+}
+
+.silk-story__scene.is-active .silk-story__media::after {
+  animation: silkSheen 7s ease-in-out infinite;
+}
+
+@keyframes silkSheen {
+  0%        { left: -70%; }
+  55%, 100% { left: 130%; }
+}
+
+
+/* ── CAPTION BAND ──
+   The horizontal division that makes each scene read as a story panel. */
+.silk-story__band {
+  position: relative;
+  background: rgba(250, 248, 243, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid var(--linen);
+  padding: var(--space-md) var(--space-md) calc(var(--space-md) + env(safe-area-inset-bottom));
+}
+
+/* When the filmstrip is on, the stacked band needs clearance so the shop
+   pill never sits underneath it. Reset on wide screens, where the band is a
+   vertically-centred side column. */
+.silk-story--has-film .silk-story__band {
+  padding-bottom: calc(var(--space-md) + 44px + env(safe-area-inset-bottom));
+}
+
+.silk-story__chapter {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 300;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--olive);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.silk-story__chapter::before {
+  content: '';
+  width: 26px;
+  height: 1px;
+  background: var(--olive);
+}
+
+.silk-story__line {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--text-heading);
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.silk-story__note {
+  margin-top: 12px;
+  font-size: var(--text-small);
+  font-weight: 300;
+  line-height: 1.7;
+  color: var(--ink-soft);
+  max-width: 52ch;
+}
+
+
+/* ── SHOP AFFORDANCE ──
+   Soft commerce: a pill that never blocks the story. */
+.silk-story__shop {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 300;
+  color: var(--ink);
+  background: none;
+  border: 1px solid var(--linen);
+  border-radius: 100px;
+  padding: 12px 20px;
+  text-decoration: none;
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+.silk-story__shop:hover {
+  background: var(--olive);
+  border-color: var(--olive);
+  color: var(--cream);
+}
+
+.silk-story__shop[disabled] {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.silk-story__arrow {
+  color: var(--olive);
+  font-size: 13px;
+  transition: color 0.3s ease;
+}
+
+.silk-story__shop:hover .silk-story__arrow {
+  color: var(--cream);
+}
+
+
+/* ── CARD SCENES ── (opening + closing beats) */
+.silk-story__scene--card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-xl) var(--space-md);
+}
+
+.silk-story__scene--card .silk-story__media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(100% 70% at 50% 0%, #FFFDF8, var(--cream-mid) 80%, var(--cream-deep));
+}
+
+.silk-story__mark {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--text-display);
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+/* richtext wraps the mark in <p> — keep the display sizing */
+.silk-story__mark p {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.silk-story__mark em {
+  font-style: italic;
+  font-weight: 500;
+  color: var(--olive);
+}
+
+/* Closing card sits a step below the opening one in the hierarchy */
+.silk-story__scene--closing .silk-story__mark {
+  font-size: var(--text-heading);
+}
+
+.silk-story__sub {
+  margin-top: var(--space-md);
+  font-size: var(--text-small);
+  font-weight: 300;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 32ch;
+  margin-inline: auto;
+}
+
+.silk-story__scroll-hint {
+  margin-top: var(--space-xl);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: silkBob 2.4s ease-in-out infinite;
+}
+
+.silk-story__scroll-hint span {
+  font-size: 18px;
+  line-height: 1;
+}
+
+@keyframes silkBob {
+  0%, 100% { transform: translateY(0);   opacity: 0.7; }
+  50%      { transform: translateY(6px); opacity: 1; }
+}
+
+.silk-story__cta {
+  display: inline-block;
+  margin-top: var(--space-lg);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-weight: 300;
+  color: var(--cream);
+  background: var(--olive);
+  border: none;
+  border-radius: 100px;
+  padding: 16px 30px;
+  text-decoration: none;
+  transition: background 0.3s ease;
+}
+
+.silk-story__cta:hover {
+  background: var(--olive-light);
+}
+
+/* Secondary links under the closing CTA */
+.silk-story__links {
+  margin-top: var(--space-md);
+  display: flex;
+  justify-content: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.silk-story__link {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  font-weight: 300;
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 1px solid var(--linen);
+  padding-bottom: 3px;
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.silk-story__link:hover {
+  color: var(--olive);
+  border-color: var(--olive);
+}
+
+
+/* ── TRACK ──
+   Invisible. Exists only to give the page scroll length and snap points. */
+.silk-story__track {
+  position: relative;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.silk-story__step {
+  height: 100svh;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+
+/* ── FILMSTRIP PROGRESS ── */
+.silk-story__film {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(250, 248, 243, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 100px;
+}
+
+.silk-story__tick {
+  width: 22px;
+  height: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--linen);
+  transition: background 0.3s ease, width 0.3s ease;
+}
+
+.silk-story__tick.is-active {
+  background: var(--olive);
+  width: 34px;
+}
+
+
+/* ── TOAST ── (add-to-cart confirmation) */
+.silk-story__toast {
+  position: fixed;
+  z-index: 120;
+  left: 50%;
+  bottom: calc(54px + env(safe-area-inset-bottom));
+  transform: translate(-50%, 20px);
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-mono);
+  font-size: var(--text-small);
+  font-weight: 300;
+  padding: 13px 22px;
+  border-radius: 100px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.silk-story__toast.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+
+/* ── WIDE SCREENS ──
+   Caption band moves beside the image for an editorial split. */
+@media (min-width: 900px) {
+  .silk-story__scene:not(.silk-story__scene--card) {
+    grid-template-rows: none;
+    grid-template-columns: 1.4fr 1fr;
+  }
+
+  .silk-story__band {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-top: none;
+    border-left: 1px solid var(--linen);
+  }
+
+  .silk-story__note {
+    max-width: 40ch;
+  }
+
+  .silk-story--has-film .silk-story__band {
+    padding-bottom: var(--space-md);
+  }
+
+  /* The band is a flex column here, so inline children would stretch to the
+     full column width. Keep the pill and chapter rule hugging their content. */
+  .silk-story__band .silk-story__shop,
+  .silk-story__band .silk-story__chapter {
+    align-self: flex-start;
+  }
+}
+
+
+/* ── REDUCED MOTION ──
+   The cross-fade itself stays (it isn't vestibular), but the Ken-Burns
+   drift, sheen, and bob all stop. */
+@media (prefers-reduced-motion: reduce) {
+  .story-scroll {
+    scroll-behavior: auto;
+  }
+
+  .silk-story__scene {
+    transform: none !important;
+  }
+
+  .silk-story__media::after {
+    display: none !important;
+  }
+
+  .silk-story__scroll-hint {
+    animation: none !important;
+  }
+}

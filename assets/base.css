@@ -21,6 +21,13 @@
   --font-serif: 'Shippori Mincho', serif;
   --font-mono:  'DM Mono', monospace;
 
+  /* Type scale — fluid display sizes shared by editorial sections */
+  --text-display: clamp(38px, 9vw, 82px);
+  --text-heading: clamp(28px, 7vw, 52px);
+  --text-body:    16px;
+  --text-small:   14px;
+  --text-label:   10px;
+
   /* Spacing */
   --space-xs:  8px;
   --space-sm:  16px;
