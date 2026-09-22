@@ -18,6 +18,13 @@
   if (scenes.length === 0) return;
 
 
+  /* Lightbox state lives up here because the engine reads `openGallery`, and
+     frame() runs on load — a `let` declared further down would still be in its
+     temporal dead zone. */
+  let openGallery   = null;
+  let lastFocused   = null;
+  let lockedScrollY = 0;
+
   /* ── CROSS-FADE ENGINE ──
      `frac` is the scroll position measured in steps (a float). Scene i is
      fully opaque when frac === i and fades out over one step either side. */
@@ -25,6 +32,10 @@
 
   function frame() {
     ticking = false;
+
+    /* Pinning the body for the lightbox forces scrollY to 0, which would fade
+       the story back to the cover behind the open panel. Hold position. */
+    if (openGallery) return;
 
     const stepHeight = window.innerHeight || document.documentElement.clientHeight;
     const frac       = window.scrollY / stepHeight;
@@ -154,6 +165,85 @@
         if (label) label.textContent = originalText;
         button.disabled = false;
       });
+  });
+
+
+  /* ── PHOTO COLLAGE LIGHTBOX ── */
+  function showGallery(id) {
+    const gallery = story.querySelector('.silk-story__gallery[data-gallery="' + id + '"]');
+    if (!gallery) return;
+
+    lastFocused = document.activeElement;
+    gallery.hidden = false;
+    /* Next frame, so the transition has a from-state to animate from */
+    requestAnimationFrame(function () { gallery.classList.add('is-open'); });
+    openGallery = gallery;
+
+    /* Scroll position drives the whole story, so it must not move while the
+       lightbox is open. Pin the body rather than just hiding overflow —
+       iOS ignores overflow:hidden on the body. */
+    lockedScrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top      = '-' + lockedScrollY + 'px';
+    document.body.style.width    = '100%';
+
+    const closeBtn = gallery.querySelector('.silk-story__gallery-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function hideGallery() {
+    if (!openGallery) return;
+    const gallery = openGallery;
+    openGallery = null;
+
+    gallery.classList.remove('is-open');
+
+    document.body.style.position = '';
+    document.body.style.top      = '';
+    document.body.style.width    = '';
+    window.scrollTo(0, lockedScrollY);
+
+    /* Wait out the fade before pulling it from the accessibility tree */
+    setTimeout(function () { gallery.hidden = true; }, 400);
+
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
+  story.addEventListener('click', function (event) {
+    const opener = event.target.closest('[data-opens-gallery]');
+    if (opener) {
+      showGallery(opener.getAttribute('data-opens-gallery'));
+      return;
+    }
+    if (event.target.closest('[data-closes-gallery]')) hideGallery();
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (!openGallery) return;
+
+    if (event.key === 'Escape') {
+      hideGallery();
+      return;
+    }
+
+    /* Trap Tab inside the open panel */
+    if (event.key !== 'Tab') return;
+
+    const focusable = Array.from(
+      openGallery.querySelectorAll('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])')
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last  = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 
 

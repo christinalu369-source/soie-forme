@@ -41,11 +41,17 @@ actual products and the cart.
 | # | Scene | Copy | Media the user is supplying |
 |---|---|---|---|
 | 1 | Cover | "A story, in silk" — CTA scrolls to scene 2 | Cover photo or film |
-| 2 | Ways to wear | "A hundred ways to wear it." | Short video: styling / tying |
+| 2 | Ways to wear | "A hundred ways to wear it." | Short video (1-2 ways in motion) + up to 6 stills for the collage lightbox |
 | 3 | History | "It travelled further than we did." | Short video: silk history + Silk Road |
 | 4 | 绫罗绸缎 | The four classical weaves | Short video: the differences between them |
 | 5 | Lifestyle | "It moves the way you do." | Short video: silk moving in the air |
 | 6 | Closing | "Now, your turn." — shop + links | — |
+
+Any scene can also open a photo-collage lightbox from its caption band
+(`gallery_label` + up to six `gallery_N` images with captions). Used on scene 2:
+the video carries a couple of ways in motion, the collage carries the rest.
+The lightbox pins the body while open — scroll position drives the deck, so the
+engine is held via the `openGallery` guard in frame().
 
 Scene videos are silent, looping, `preload="none"`, and play only while their
 scene is on screen (`setScenePlayback` in the JS). Each scene still has an

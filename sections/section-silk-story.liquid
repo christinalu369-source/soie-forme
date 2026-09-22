@@ -204,6 +204,22 @@
             {%- endif -%}
 
             {%- comment -%}
+              Optional photo collage. Opens a lightbox so the scene's video can
+              show one or two ways in motion while the stills carry the rest.
+            {%- endcomment -%}
+            {%- if block.settings.gallery_label != blank and block.settings.gallery_1 != blank -%}
+              <button
+                type="button"
+                class="silk-story__shop silk-story__shop--ghost"
+                data-opens-gallery="{{ block.id }}"
+                aria-haspopup="dialog"
+              >
+                <span class="silk-story__shop-label">{{ block.settings.gallery_label }}</span>
+                <span class="silk-story__arrow" aria-hidden="true">&#8594;</span>
+              </button>
+            {%- endif -%}
+
+            {%- comment -%}
               Soft commerce. A single-variant product adds straight to the cart;
               anything with options (or sold out) links to the product page so
               the customer picks the variant properly.
@@ -260,6 +276,58 @@
       {%- endfor -%}
     </nav>
   {%- endif -%}
+
+
+  <!-- ── PHOTO COLLAGE LIGHTBOXES ──
+       Rendered outside the deck so they are never made inert when their
+       scene fades out. -->
+  {%- for block in section.blocks -%}
+    {%- if block.type == 'scene' and block.settings.gallery_1 != blank -%}
+      <div class="silk-story__gallery" data-gallery="{{ block.id }}" hidden>
+        <div class="silk-story__gallery-scrim" data-closes-gallery></div>
+
+        <div
+          class="silk-story__gallery-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="gallery-title-{{ block.id }}"
+        >
+          <button type="button" class="silk-story__gallery-close" data-closes-gallery aria-label="Close">&times;</button>
+
+          <p class="silk-story__gallery-eyebrow">{{ block.settings.gallery_eyebrow | default: block.settings.chapter }}</p>
+          <h3 class="silk-story__gallery-title" id="gallery-title-{{ block.id }}">
+            {{ block.settings.gallery_title | default: block.settings.line }}
+          </h3>
+
+          <div class="silk-story__collage">
+            {%- for i in (1..6) -%}
+              {%- assign img_key = 'gallery_' | append: i -%}
+              {%- assign cap_key = 'gallery_' | append: i | append: '_caption' -%}
+              {%- assign shot    = block.settings[img_key] -%}
+              {%- assign caption = block.settings[cap_key] -%}
+              {%- if shot != blank -%}
+                <figure class="silk-story__collage-item">
+                  {{
+                    shot
+                    | image_url: width: 900
+                    | image_tag:
+                        class: 'silk-story__collage-image',
+                        loading: 'lazy',
+                        sizes: '(min-width: 700px) 30vw, 45vw',
+                        widths: '300, 500, 700, 900',
+                        alt: caption
+                  }}
+                  {%- if caption != blank -%}
+                    <figcaption class="silk-story__collage-caption">{{ caption }}</figcaption>
+                  {%- endif -%}
+                </figure>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    {%- endif -%}
+  {%- endfor -%}
 
 
   <!-- ── TOAST: add-to-cart confirmation ── -->
@@ -464,6 +532,40 @@
           "label": "Fallback wash — to",
           "default": "#A49A80"
         },
+        {
+          "type": "header",
+          "content": "Photo collage (optional)"
+        },
+        {
+          "type": "text",
+          "id": "gallery_label",
+          "label": "Button label",
+          "info": "Shows a button that opens a lightbox of stills. Leave blank to hide it."
+        },
+        {
+          "type": "text",
+          "id": "gallery_eyebrow",
+          "label": "Lightbox eyebrow",
+          "info": "Defaults to the chapter label."
+        },
+        {
+          "type": "text",
+          "id": "gallery_title",
+          "label": "Lightbox title",
+          "info": "Defaults to the scene headline."
+        },
+        { "type": "image_picker", "id": "gallery_1", "label": "Photo 1" },
+        { "type": "text", "id": "gallery_1_caption", "label": "Photo 1 caption" },
+        { "type": "image_picker", "id": "gallery_2", "label": "Photo 2" },
+        { "type": "text", "id": "gallery_2_caption", "label": "Photo 2 caption" },
+        { "type": "image_picker", "id": "gallery_3", "label": "Photo 3" },
+        { "type": "text", "id": "gallery_3_caption", "label": "Photo 3 caption" },
+        { "type": "image_picker", "id": "gallery_4", "label": "Photo 4" },
+        { "type": "text", "id": "gallery_4_caption", "label": "Photo 4 caption" },
+        { "type": "image_picker", "id": "gallery_5", "label": "Photo 5" },
+        { "type": "text", "id": "gallery_5_caption", "label": "Photo 5 caption" },
+        { "type": "image_picker", "id": "gallery_6", "label": "Photo 6" },
+        { "type": "text", "id": "gallery_6_caption", "label": "Photo 6 caption" },
         {
           "type": "header",
           "content": "Shop this piece"

@@ -644,3 +644,162 @@
     transform: translateX(-50%) !important;
   }
 }
+
+
+/* ============================================================
+   PHOTO COLLAGE LIGHTBOX
+   Opened from a scene's caption band — stills that complement
+   the scene's video.
+   ============================================================ */
+
+.silk-story__gallery {
+  position: fixed;
+  inset: 0;
+  z-index: 200; /* above the toast (120) and filmstrip (60) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+}
+
+.silk-story__gallery[hidden] {
+  display: none;
+}
+
+.silk-story__gallery-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(44, 44, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.silk-story__gallery-panel {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  max-height: 86svh;
+  overflow-y: auto;
+  background: var(--cream);
+  padding: var(--space-lg) var(--space-md) var(--space-md);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.4s ease, transform 0.4s var(--ease-out);
+}
+
+/* Thin olive rule, matching the modals elsewhere in the theme */
+.silk-story__gallery-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--space-md);
+  width: 32px;
+  height: 2px;
+  background: var(--olive);
+}
+
+.silk-story__gallery.is-open .silk-story__gallery-scrim {
+  opacity: 1;
+}
+
+.silk-story__gallery.is-open .silk-story__gallery-panel {
+  opacity: 1;
+  transform: none;
+}
+
+.silk-story__gallery-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--ink-faint);
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.silk-story__gallery-close:hover {
+  color: var(--ink);
+  transform: rotate(90deg);
+}
+
+.silk-story__gallery-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 300;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  color: var(--olive);
+  margin-bottom: 10px;
+}
+
+.silk-story__gallery-title {
+  font-family: var(--font-serif-cjk);
+  font-size: var(--text-heading);
+  font-weight: 600;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: var(--space-md);
+}
+
+/* The collage itself */
+.silk-story__collage {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.silk-story__collage-item {
+  margin: 0;
+}
+
+.silk-story__collage-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+.silk-story__collage-caption {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+@media (min-width: 700px) {
+  .silk-story__collage {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .silk-story__gallery-panel {
+    padding: var(--space-lg);
+  }
+
+  .silk-story__gallery-panel::before {
+    left: var(--space-lg);
+  }
+}
+
+/* Ghost variant of the pill, so the collage button reads as secondary
+   next to a shop action */
+.silk-story__shop--ghost {
+  border-style: dashed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .silk-story__gallery-scrim,
+  .silk-story__gallery-panel {
+    transition: none !important;
+  }
+}
