@@ -1,0 +1,310 @@
+{% comment %}
+  A STORY IN SILK — the homepage story experience.
+
+  Structure (ported from prototypes/silk-story.html):
+  - `deck`  — fixed, full-viewport; every scene stacks here and cross-fades
+  - `track` — invisible; its height is what gives the page scroll length
+  - `film`  — progress ticks, one per scene
+
+  The cross-fade is driven by scroll position in section-silk-story.js.
+  Scenes are rendered server-side (not built in JS) so the copy is real
+  content for search engines and readable with JavaScript disabled.
+{% endcomment %}
+
+{%- comment -%} The filmstrip overlays the bottom of the screen, so the band needs clearance {%- endcomment -%}
+{%- assign has_film = false -%}
+{%- if section.settings.show_filmstrip and section.blocks.size > 1 -%}
+  {%- assign has_film = true -%}
+{%- endif -%}
+
+<div class="silk-story{% if has_film %} silk-story--has-film{% endif %}">
+
+  <!-- ── DECK: all scenes stack and cross-fade here ── -->
+  <div class="silk-story__deck">
+    {%- for block in section.blocks -%}
+
+      {%- if block.type == 'card' -%}
+        {%- comment -%} Opening / closing beats: centred type on a warm field {%- endcomment -%}
+        <div
+          class="silk-story__scene silk-story__scene--card{% unless forloop.first %} silk-story__scene--closing{% endunless %}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="silk-story__media"></div>
+          <div>
+            <div class="silk-story__mark">{{ block.settings.mark }}</div>
+
+            {%- if block.settings.sub != blank -%}
+              <p class="silk-story__sub">{{ block.settings.sub }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.cta_label != blank -%}
+              <a
+                class="silk-story__cta"
+                href="{{ block.settings.cta_url | default: routes.collections_url }}"
+              >
+                {{ block.settings.cta_label }}
+              </a>
+
+              {%- comment -%} Secondary ways out of the story {%- endcomment -%}
+              {%- if block.settings.link_1_label != blank or block.settings.link_2_label != blank -%}
+                <div class="silk-story__links">
+                  {%- if block.settings.link_1_label != blank -%}
+                    <a class="silk-story__link" href="{{ block.settings.link_1_url | default: '/' }}">{{ block.settings.link_1_label }}</a>
+                  {%- endif -%}
+                  {%- if block.settings.link_2_label != blank -%}
+                    <a class="silk-story__link" href="{{ block.settings.link_2_url | default: '/' }}">{{ block.settings.link_2_label }}</a>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {%- else -%}
+              <div class="silk-story__scroll-hint" aria-hidden="true">
+                Scroll <span>&#8595;</span>
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+
+      {%- else -%}
+        {%- comment -%} Story scene: full-bleed media + caption band {%- endcomment -%}
+        {%- assign piece = block.settings.product -%}
+        {%- assign scene_alt = block.settings.image.alt | default: block.settings.line -%}
+        {%- comment -%}
+          Colour fallbacks are inlined with defaults: an empty custom property
+          is invalid at computed-value time and would kill the gradient.
+        {%- endcomment -%}
+        {%- assign wash_from = block.settings.color_from | default: '#EFEADF' -%}
+        {%- assign wash_to   = block.settings.color_to   | default: '#A49A80' -%}
+        <div
+          class="silk-story__scene"
+          style="--scene-from: {{ wash_from }}; --scene-to: {{ wash_to }};"
+          {{ block.shopify_attributes }}
+        >
+          <div class="silk-story__media">
+            {%- if block.settings.image != blank -%}
+              {%- comment -%} First scene loads eagerly; the rest wait until near view {%- endcomment -%}
+              {%- if forloop.index <= 2 -%}
+                {%- assign loading_mode = 'eager' -%}
+              {%- else -%}
+                {%- assign loading_mode = 'lazy' -%}
+              {%- endif -%}
+              {{
+                block.settings.image
+                | image_url: width: 2000
+                | image_tag:
+                    class: 'silk-story__image',
+                    loading: loading_mode,
+                    sizes: '100vw',
+                    widths: '600, 900, 1200, 1600, 2000',
+                    alt: scene_alt
+              }}
+            {%- endif -%}
+          </div>
+
+          <div class="silk-story__band">
+            {%- if block.settings.chapter != blank -%}
+              <span class="silk-story__chapter">{{ block.settings.chapter }}</span>
+            {%- endif -%}
+
+            <h2 class="silk-story__line">{{ block.settings.line }}</h2>
+
+            {%- if block.settings.note != blank -%}
+              <p class="silk-story__note">{{ block.settings.note }}</p>
+            {%- endif -%}
+
+            {%- comment -%}
+              Soft commerce. A single-variant product adds straight to the cart;
+              anything with options (or sold out) links to the product page so
+              the customer picks the variant properly.
+            {%- endcomment -%}
+            {%- if piece != blank -%}
+              {%- if piece.available and piece.variants.size == 1 -%}
+                <button
+                  type="button"
+                  class="silk-story__shop"
+                  data-variant-id="{{ piece.selected_or_first_available_variant.id }}"
+                  data-product-title="{{ piece.title | escape }}"
+                >
+                  <span class="silk-story__shop-label">Shop this piece &middot; {{ piece.price | money }}</span>
+                  <span class="silk-story__arrow" aria-hidden="true">&#8594;</span>
+                </button>
+              {%- else -%}
+                <a class="silk-story__shop" href="{{ piece.url }}">
+                  <span class="silk-story__shop-label">
+                    {%- if piece.available -%}
+                      Shop this piece &middot; {{ piece.price | money }}
+                    {%- else -%}
+                      View this piece
+                    {%- endif -%}
+                  </span>
+                  <span class="silk-story__arrow" aria-hidden="true">&#8594;</span>
+                </a>
+              {%- endif -%}
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+    {%- endfor -%}
+  </div><!-- /deck -->
+
+
+  <!-- ── TRACK: invisible; supplies scroll length and snap points ── -->
+  <div class="silk-story__track" aria-hidden="true">
+    {%- for block in section.blocks -%}
+      <div class="silk-story__step"></div>
+    {%- endfor -%}
+  </div>
+
+
+  <!-- ── FILMSTRIP PROGRESS ── -->
+  {%- if has_film -%}
+    <nav class="silk-story__film" aria-label="Story progress">
+      {%- for block in section.blocks -%}
+        <button
+          type="button"
+          class="silk-story__tick"
+          aria-label="Go to scene {{ forloop.index }} of {{ section.blocks.size }}"
+        ></button>
+      {%- endfor -%}
+    </nav>
+  {%- endif -%}
+
+
+  <!-- ── TOAST: add-to-cart confirmation ── -->
+  <div class="silk-story__toast" role="status" aria-live="polite"></div>
+
+</div><!-- /silk-story -->
+
+
+{% schema %}
+{
+  "name": "Silk Story",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_filmstrip",
+      "label": "Show progress filmstrip",
+      "default": true
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Title / closing card",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "mark",
+          "label": "Headline",
+          "info": "Use italics for the olive accent word.",
+          "default": "<p>A story,</p><p>in <em>silk</em></p>"
+        },
+        {
+          "type": "text",
+          "id": "sub",
+          "label": "Subtitle",
+          "default": "Keep scrolling. Each scene fades to the next."
+        },
+        {
+          "type": "header",
+          "content": "Closing card only"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button label",
+          "info": "Leave blank on the opening card to show the scroll hint instead."
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "Button link"
+        },
+        {
+          "type": "text",
+          "id": "link_1_label",
+          "label": "Secondary link 1 label"
+        },
+        {
+          "type": "url",
+          "id": "link_1_url",
+          "label": "Secondary link 1 URL"
+        },
+        {
+          "type": "text",
+          "id": "link_2_label",
+          "label": "Secondary link 2 label"
+        },
+        {
+          "type": "url",
+          "id": "link_2_url",
+          "label": "Secondary link 2 URL"
+        }
+      ]
+    },
+    {
+      "type": "scene",
+      "name": "Story scene",
+      "settings": [
+        {
+          "type": "text",
+          "id": "chapter",
+          "label": "Chapter label",
+          "default": "Chapter I"
+        },
+        {
+          "type": "text",
+          "id": "line",
+          "label": "Headline",
+          "default": "It begins as thread."
+        },
+        {
+          "type": "textarea",
+          "id": "note",
+          "label": "Caption",
+          "default": "Raw mulberry silk, before it is anything at all."
+        },
+        {
+          "type": "header",
+          "content": "Media"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Scene photo",
+          "info": "Full-bleed. Recommended 2000px wide, portrait or landscape. Without a photo the colour wash below is used."
+        },
+        {
+          "type": "color",
+          "id": "color_from",
+          "label": "Fallback wash — from",
+          "default": "#EFEADF"
+        },
+        {
+          "type": "color",
+          "id": "color_to",
+          "label": "Fallback wash — to",
+          "default": "#A49A80"
+        },
+        {
+          "type": "header",
+          "content": "Shop this piece"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product",
+          "info": "Optional. Single-variant products add straight to the cart; products with options link to their page."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Silk Story"
+    }
+  ]
+}
+{% endschema %}
