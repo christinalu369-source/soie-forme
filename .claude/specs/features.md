@@ -51,7 +51,8 @@ When a feature moves to `approved`, Claude will write a plan for it in `.claude/
 
 | Feature | Status | Plan | Notes |
 |---|---|---|---|
-| Entry page (Dimension-style) | `done` | `done-theme-scaffolding.md` | Full-screen background, animated structural diagram nav (stem → crossbar → drops → boxes), 3 modal panels (Story, Styling Inspo, Contact), Shop links to /collections; silky ~5s build animation |
+| Homepage — A Story in Silk | `in-progress` | `in-progress-02-silk-story-liquid-port.md` | Scroll-driven cross-fade between full-bleed story scenes; card/scene blocks; soft add-to-cart; filmstrip progress; immersive layout with no nav/footer |
+| Entry page (Dimension-style) | `superseded` | `done-theme-scaffolding.md` | Full-screen background, animated structural diagram nav (stem → crossbar → drops → boxes), 3 modal panels (Story, Styling Inspo, Contact), Shop links to /collections; silky ~5s build animation |
 | Featured collection section | `idea` | — | Curated product grid on the homepage — links to collection page |
 | Editorial / material section | `idea` | — | Informational section about silk and fabrics — image + text, fade-in on scroll |
 
@@ -79,7 +80,7 @@ Strategic pivot toward a mobile-first, content-driven immersive scroll experienc
 |---|---|---|---|
 | Atelier Table — vision / north star | `approved` | `todo-00-atelier-table-northstar.md` | Content-first + soft commerce; blends scrollytelling + magazine + showcase |
 | Atelier Table — static prototype | `approved` | `todo-01-atelier-table-prototype.md` | Throwaway HTML in `prototypes/` to nail the glide-on-scroll interaction |
-| Atelier Table — Liquid port + soft commerce | `idea` | `todo-02-atelier-table-liquid-port.md` | Port approved prototype to a real section + page template; wire real cart. Blocked on prototype approval |
+| Silk Story — Liquid port + soft commerce | `in-progress` | `in-progress-02-silk-story-liquid-port.md` | "A Story in Silk" chosen over the Atelier Table and ported as the homepage; awaiting dev-theme verification before merge |
 
 ### Technical
 

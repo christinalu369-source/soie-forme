@@ -13,12 +13,11 @@ A living map of every source file in the project. Claude updates this after comp
 `assets/section-entry.css` — Entry page: full-screen silk-gradient bg, feathered cream scrim behind the logo + cream-filled nav boxes (legibility over photo backgrounds), animated structural diagram nav (stem → crossbar → drops → boxes), modal overlay + panels, numbered styling-methods list, silky transitions, mobile fallback
 `assets/section-entry.js` — Modal open/close, overlay click dismiss, Escape key, focus trap
 
-`layout/entry.liquid` — Minimal full-screen layout for homepage only (no nav/footer); loads entry-specific CSS/JS
+`layout/entry.liquid` — Minimal full-screen layout (no nav/footer); loads entry-specific CSS/JS. No longer the homepage as of v1.3 — kept for the entry section
 `layout/theme.liquid` — Standard layout for all other pages: nav bar, footer, global JS
 
-`sections/section-entry.liquid` — Entry section: logo/tagline, animated diagram nav (Shop → /collections; Story/Styling Inspo/Contact → modals), 3 modal panels (Styling Inspo renders 4 editable how-to methods), full theme-editor schema
+`sections/section-entry.liquid` — Entry section: logo/tagline, animated diagram nav (Shop → /collections; Story/Styling Inspo/Contact → modals), 3 modal panels (Styling Inspo renders 4 editable how-to methods), full theme-editor schema. Superseded as the homepage by Silk Story (v1.3) but kept intact — still referenced in `settings_data.json`
 
-`templates/index.liquid` — Homepage template; declares `layout/entry`, renders `section-entry`
 `templates/404.liquid` — On-brand not-found page with outlined numeral, links back to home
 
 `config/settings_schema.json` — Global theme settings: brand tagline, social links
@@ -26,6 +25,14 @@ A living map of every source file in the project. Claude updates this after comp
 `locales/en.default.json` — Minimal locale stub
 
 `preview.html` — Standalone local preview of the entry page (no Shopify CLI needed); not synced to Shopify
+
+## Homepage — A Story in Silk (v1.3)
+
+`sections/section-silk-story.liquid` — Homepage story: scenes rendered from `card` + `scene` blocks (chapter, headline, caption, photo, optional product); fixed deck + invisible scroll track + filmstrip; full theme-editor schema
+`assets/section-silk-story.css` — Story styles: fixed cross-fading deck, full-bleed media band with sheen, caption band, shop pill, filmstrip, toast; editorial split at 900px; reduced-motion handling
+`assets/section-silk-story.js` — Scroll-driven cross-fade engine (opacity/scale from scroll position), filmstrip navigation, `inert` on faded scenes, soft add-to-cart via `/cart/add.js`
+`layout/story.liquid` — Immersive homepage layout (no nav/footer); scopes scroll-snap via `.story-scroll` on `<html>`
+`templates/index.liquid` — Homepage; declares `layout/story`, renders `section-silk-story`
 
 ## Collection + Product Pages (v1.1)
 
