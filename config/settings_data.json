@@ -41,6 +41,90 @@
           "contact_body": "<p>Whether you have a question about an order, a bespoke enquiry, or simply want to know more about our materials — reach out and we'll get back to you!</p>",
           "contact_email": "christina@soieandforme.com"
         }
+      },
+      "section-silk-story": {
+        "type": "section-silk-story",
+        "blocks": {
+          "beat-open": {
+            "type": "card",
+            "settings": {
+              "mark": "<p>A story,</p><p>in <em>silk</em></p>",
+              "sub": "Keep scrolling. Each scene fades to the next.",
+              "cta_label": "",
+              "cta_url": "",
+              "link_1_label": "",
+              "link_1_url": "",
+              "link_2_label": "",
+              "link_2_url": ""
+            }
+          },
+          "beat-1": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Chapter I",
+              "line": "It begins as thread.",
+              "note": "Raw mulberry silk, before it is anything at all — spun, not woven, soft enough to knot a hundred ways.",
+              "color_from": "#EFEADF",
+              "color_to": "#A49A80"
+            }
+          },
+          "beat-2": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Chapter II",
+              "line": "Colour is laid by hand.",
+              "note": "A blush field, deep cognac borders, paisley vines traced in. The print is restrained — timeless on purpose.",
+              "color_from": "#E7C9D0",
+              "color_to": "#7A4A3C",
+              "product": "pink-paisley-silk-scarf"
+            }
+          },
+          "beat-3": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Chapter III",
+              "line": "The hem is rolled by hand.",
+              "note": "Twelve to sixteen momme, hand-rolled edge. The weight catches light without the shine that reads cheap.",
+              "color_from": "#C7CBA6",
+              "color_to": "#4C5A24"
+            }
+          },
+          "beat-4": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Chapter IV",
+              "line": "Then it is yours to tie.",
+              "note": "At the throat, on the bag, through the hair. It drapes, holds a knot, and softens with every wearing.",
+              "color_from": "#E3C39A",
+              "color_to": "#5C3A1C",
+              "product": "cognac-carriage-wheel-silk-scarf"
+            }
+          },
+          "beat-close": {
+            "type": "card",
+            "settings": {
+              "mark": "<p>Now, your turn.</p>",
+              "sub": "",
+              "cta_label": "Shop the collection",
+              "cta_url": "/collections",
+              "link_1_label": "Our story",
+              "link_1_url": "/pages/about",
+              "link_2_label": "Contact",
+              "link_2_url": "/pages/contact"
+            }
+          }
+        },
+        "block_order": [
+          "beat-open",
+          "beat-1",
+          "beat-2",
+          "beat-3",
+          "beat-4",
+          "beat-close"
+        ],
+        "settings": {
+          "show_filmstrip": true
+        }
       }
     },
     "content_for_index": []
