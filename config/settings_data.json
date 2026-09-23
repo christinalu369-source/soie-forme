@@ -55,16 +55,22 @@
               "cta_action": "gallery",
               "cta_scene": 2,
               "cta_url": "",
-              "color_from": "#E7C9D0",
-              "color_to": "#7A4A3C",
-              "gallery_eyebrow": "How to Wear",
-              "gallery_title": "Ways to wear a square",
-              "gallery_1_caption": "The neck knot",
-              "gallery_2_caption": "The bandeau",
-              "gallery_3_caption": "The handle wrap",
-              "gallery_4_caption": "The shoulder drape",
-              "gallery_5_caption": "The wrist wind",
-              "gallery_6_caption": "Tied back"
+              "color_from": "#e7c9d0",
+              "color_to": "#7a4a3c",
+              "gallery_eyebrow": "Styling Tips",
+              "gallery_title": "Styling",
+              "gallery_1": "shopify://shop_images/40.jpg",
+              "gallery_1_caption": "The Wide Twilie",
+              "gallery_2": "shopify://shop_images/19.jpg",
+              "gallery_2_caption": "The Large Bandana",
+              "gallery_3": "shopify://shop_images/46.jpg",
+              "gallery_3_caption": "The Should Drape",
+              "gallery_4": "shopify://shop_images/53.jpg",
+              "gallery_4_caption": "The Belt",
+              "gallery_5": "shopify://shop_images/37.jpg",
+              "gallery_5_caption": "The Neck Tie",
+              "gallery_6": "shopify://shop_images/58.jpg",
+              "gallery_6_caption": "The Hipster"
             }
           },
           "beat-wear": {
@@ -73,8 +79,8 @@
               "chapter": "Chapter I",
               "line": "A hundred ways to wear it.",
               "note": "The video shows a couple of ways. There are many more — a square of silk is only ever as fixed as the last knot you tied.",
-              "color_from": "#E7C9D0",
-              "color_to": "#7A4A3C",
+              "color_from": "#e7c9d0",
+              "color_to": "#7a4a3c",
               "gallery_label": "",
               "gallery_eyebrow": "How to Wear",
               "gallery_title": "Ways to wear a square",
@@ -83,7 +89,8 @@
               "gallery_3_caption": "The handle wrap",
               "gallery_4_caption": "The shoulder drape",
               "gallery_5_caption": "The wrist wind",
-              "gallery_6_caption": "Tied back"
+              "gallery_6_caption": "Tied back",
+              "product": ""
             }
           },
           "beat-history": {
@@ -92,8 +99,18 @@
               "chapter": "Chapter II",
               "line": "It travelled further than we did.",
               "note": "Silk left China by camel and came back as currency, as treaty, as rumour. For centuries the method was a state secret worth dying over. The road was eventually named for the cloth that moved along it.",
-              "color_from": "#EFEADF",
-              "color_to": "#A49A80"
+              "color_from": "#efeadf",
+              "color_to": "#a49a80",
+              "gallery_label": "",
+              "gallery_eyebrow": "",
+              "gallery_title": "",
+              "gallery_1_caption": "",
+              "gallery_2_caption": "",
+              "gallery_3_caption": "",
+              "gallery_4_caption": "",
+              "gallery_5_caption": "",
+              "gallery_6_caption": "",
+              "product": ""
             }
           },
           "beat-weaves": {
@@ -102,8 +119,18 @@
               "chapter": "Chapter III",
               "line": "绫 罗 绸 缎",
               "note": "Four weaves, four characters — together, the old Chinese word for luxury. Líng is a twill that shifts as it turns. Luó is an open gauze, built to breathe. Chóu is the smooth, close weave most people picture. Duàn is satin: all surface, all light.",
-              "color_from": "#C7CBA6",
-              "color_to": "#4C5A24"
+              "color_from": "#c7cba6",
+              "color_to": "#4c5a24",
+              "gallery_label": "",
+              "gallery_eyebrow": "",
+              "gallery_title": "",
+              "gallery_1_caption": "",
+              "gallery_2_caption": "",
+              "gallery_3_caption": "",
+              "gallery_4_caption": "",
+              "gallery_5_caption": "",
+              "gallery_6_caption": "",
+              "product": ""
             }
           },
           "beat-life": {
@@ -112,8 +139,18 @@
               "chapter": "Chapter IV",
               "line": "It moves the way you do.",
               "note": "Silk answers the room — warm when the air is cold, cool when it isn't. It creases, recovers, catches a draught and settles again. Made to be lived in on an ordinary Tuesday, not saved for an occasion that never comes.",
-              "color_from": "#E3C39A",
-              "color_to": "#5C3A1C"
+              "color_from": "#e3c39a",
+              "color_to": "#5c3a1c",
+              "gallery_label": "",
+              "gallery_eyebrow": "",
+              "gallery_title": "",
+              "gallery_1_caption": "",
+              "gallery_2_caption": "",
+              "gallery_3_caption": "",
+              "gallery_4_caption": "",
+              "gallery_5_caption": "",
+              "gallery_6_caption": "",
+              "product": ""
             }
           },
           "beat-close": {
