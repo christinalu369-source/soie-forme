@@ -40,14 +40,15 @@ actual products and the cart.
 ## Story structure (set 2026-09-22)
 | # | Scene | Copy | Media the user is supplying |
 |---|---|---|---|
-| 1 | Cover | "A story, in silk" — CTA scrolls to scene 2 | Cover photo or film |
-| 2 | Ways to wear | "A hundred ways to wear it." | Short video (1-2 ways in motion) + up to 6 stills for the collage lightbox |
+| 1 | Cover | "A story, in silk" — CTA opens its own photo collage | Cover photo/film + up to 6 styling stills |
+| 2 | Ways to wear | "A hundred ways to wear it." | Short video showing 1-2 ways in motion |
 | 3 | History | "It travelled further than we did." | Short video: silk history + Silk Road |
 | 4 | 绫罗绸缎 | The four classical weaves | Short video: the differences between them |
 | 5 | Lifestyle | "It moves the way you do." | Short video: silk moving in the air |
 | 6 | Closing | "Now, your turn." — shop + links | — |
 
-Any scene can also open a photo-collage lightbox from its caption band
+The cover CTA has three modes (`cta_action`): open its own collage (default),
+scroll to a scene, or follow a link. Any scene can also open a collage from its caption band
 (`gallery_label` + up to six `gallery_N` images with captions). Used on scene 2:
 the video carries a couple of ways in motion, the collage carries the rest.
 The lightbox pins the body while open — scroll position drives the deck, so the

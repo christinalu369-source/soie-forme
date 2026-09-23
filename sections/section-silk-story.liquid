@@ -71,20 +71,28 @@
               The cover CTA usually sends people deeper into the story rather
               than off to the collection, so `scroll` is the default action.
             {%- endcomment -%}
-            {%- if block.settings.cta_action == 'link' -%}
-              {%- assign hero_cta_href = block.settings.cta_url | default: routes.collections_url -%}
-            {%- else -%}
-              {%- assign target_scene = block.settings.cta_scene | default: 2 -%}
-              {%- assign hero_cta_href = '#silk-story-scene-' | append: target_scene -%}
-            {%- endif -%}
-
             {%- if block.settings.cta_label != blank -%}
-              <a
-                class="silk-story__pill"
-                href="{{ hero_cta_href }}"
-              >
-                {{ block.settings.cta_label }} <span aria-hidden="true">&#8594;</span>
-              </a>
+              {%- if block.settings.cta_action == 'gallery' and block.settings.gallery_1 != blank -%}
+                {%- comment -%} Opens the cover's own collage, without leaving the screen {%- endcomment -%}
+                <button
+                  type="button"
+                  class="silk-story__pill"
+                  data-opens-gallery="{{ block.id }}"
+                  aria-haspopup="dialog"
+                >
+                  {{ block.settings.cta_label }} <span aria-hidden="true">&#8594;</span>
+                </button>
+              {%- else -%}
+                {%- if block.settings.cta_action == 'link' -%}
+                  {%- assign hero_cta_href = block.settings.cta_url | default: routes.collections_url -%}
+                {%- else -%}
+                  {%- assign target_scene = block.settings.cta_scene | default: 2 -%}
+                  {%- assign hero_cta_href = '#silk-story-scene-' | append: target_scene -%}
+                {%- endif -%}
+                <a class="silk-story__pill" href="{{ hero_cta_href }}">
+                  {{ block.settings.cta_label }} <span aria-hidden="true">&#8594;</span>
+                </a>
+              {%- endif -%}
             {%- endif -%}
           </div>
 
@@ -282,7 +290,7 @@
        Rendered outside the deck so they are never made inert when their
        scene fades out. -->
   {%- for block in section.blocks -%}
-    {%- if block.type == 'scene' and block.settings.gallery_1 != blank -%}
+    {%- if block.settings.gallery_1 != blank -%}
       <div class="silk-story__gallery" data-gallery="{{ block.id }}" hidden>
         <div class="silk-story__gallery-scrim" data-closes-gallery></div>
 
@@ -294,10 +302,12 @@
         >
           <button type="button" class="silk-story__gallery-close" data-closes-gallery aria-label="Close">&times;</button>
 
-          <p class="silk-story__gallery-eyebrow">{{ block.settings.gallery_eyebrow | default: block.settings.chapter }}</p>
-          <h3 class="silk-story__gallery-title" id="gallery-title-{{ block.id }}">
-            {{ block.settings.gallery_title | default: block.settings.line }}
-          </h3>
+          {%- assign gallery_eyebrow = block.settings.gallery_eyebrow | default: block.settings.chapter -%}
+          {%- assign gallery_title   = block.settings.gallery_title   | default: block.settings.line -%}
+          {%- if gallery_eyebrow != blank -%}
+            <p class="silk-story__gallery-eyebrow">{{ gallery_eyebrow }}</p>
+          {%- endif -%}
+          <h3 class="silk-story__gallery-title" id="gallery-title-{{ block.id }}">{{ gallery_title }}</h3>
 
           <div class="silk-story__collage">
             {%- for i in (1..6) -%}
@@ -381,12 +391,13 @@
         {
           "type": "select",
           "id": "cta_action",
-          "label": "Button goes to",
+          "label": "Button opens",
           "options": [
+            { "value": "gallery", "label": "A photo collage" },
             { "value": "scroll", "label": "A scene in this story" },
             { "value": "link", "label": "A link" }
           ],
-          "default": "scroll"
+          "default": "gallery"
         },
         {
           "type": "range",
@@ -425,7 +436,35 @@
           "id": "color_to",
           "label": "Fallback wash — to",
           "default": "#7A4A3C"
-        }
+        },
+        {
+          "type": "header",
+          "content": "Photo collage"
+        },
+        {
+          "type": "text",
+          "id": "gallery_eyebrow",
+          "label": "Lightbox eyebrow",
+          "default": "How to Wear"
+        },
+        {
+          "type": "text",
+          "id": "gallery_title",
+          "label": "Lightbox title",
+          "default": "Ways to wear a square"
+        },
+        { "type": "image_picker", "id": "gallery_1", "label": "Photo 1" },
+        { "type": "text", "id": "gallery_1_caption", "label": "Photo 1 caption" },
+        { "type": "image_picker", "id": "gallery_2", "label": "Photo 2" },
+        { "type": "text", "id": "gallery_2_caption", "label": "Photo 2 caption" },
+        { "type": "image_picker", "id": "gallery_3", "label": "Photo 3" },
+        { "type": "text", "id": "gallery_3_caption", "label": "Photo 3 caption" },
+        { "type": "image_picker", "id": "gallery_4", "label": "Photo 4" },
+        { "type": "text", "id": "gallery_4_caption", "label": "Photo 4 caption" },
+        { "type": "image_picker", "id": "gallery_5", "label": "Photo 5" },
+        { "type": "text", "id": "gallery_5_caption", "label": "Photo 5 caption" },
+        { "type": "image_picker", "id": "gallery_6", "label": "Photo 6" },
+        { "type": "text", "id": "gallery_6_caption", "label": "Photo 6 caption" }
       ]
     },
     {

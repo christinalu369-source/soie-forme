@@ -52,11 +52,19 @@
               "mark": "<p>A story,</p><p>in <em>silk</em></p>",
               "sub": "Mulberry silk, made to move. Watch how it drapes, knots, and catches the light.",
               "cta_label": "See how to wear it",
-              "cta_action": "scroll",
+              "cta_action": "gallery",
               "cta_scene": 2,
               "cta_url": "",
               "color_from": "#E7C9D0",
-              "color_to": "#7A4A3C"
+              "color_to": "#7A4A3C",
+              "gallery_eyebrow": "How to Wear",
+              "gallery_title": "Ways to wear a square",
+              "gallery_1_caption": "The neck knot",
+              "gallery_2_caption": "The bandeau",
+              "gallery_3_caption": "The handle wrap",
+              "gallery_4_caption": "The shoulder drape",
+              "gallery_5_caption": "The wrist wind",
+              "gallery_6_caption": "Tied back"
             }
           },
           "beat-wear": {
@@ -67,7 +75,7 @@
               "note": "The video shows a couple of ways. There are many more — a square of silk is only ever as fixed as the last knot you tied.",
               "color_from": "#E7C9D0",
               "color_to": "#7A4A3C",
-              "gallery_label": "See the ways",
+              "gallery_label": "",
               "gallery_eyebrow": "How to Wear",
               "gallery_title": "Ways to wear a square",
               "gallery_1_caption": "The neck knot",
