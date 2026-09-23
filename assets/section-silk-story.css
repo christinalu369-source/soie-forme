@@ -761,6 +761,11 @@
 
 .silk-story__collage-image {
   width: 100%;
+  /* image_tag emits width/height attributes, and that height lands as a
+     presentational hint in pixels — with both dimensions definite, the
+     aspect-ratio below is ignored and photos render at full natural height.
+     Forcing height:auto hands control back to aspect-ratio. */
+  height: auto;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   display: block;
