@@ -72,7 +72,7 @@
               than off to the collection, so `scroll` is the default action.
             {%- endcomment -%}
             {%- if block.settings.cta_label != blank -%}
-              {%- if block.settings.cta_action == 'gallery' and block.settings.gallery_1 != blank -%}
+              {%- if block.settings.cta_action == 'gallery' -%}
                 {%- comment -%} Opens the cover's own collage, without leaving the screen {%- endcomment -%}
                 <button
                   type="button"
@@ -290,7 +290,7 @@
        Rendered outside the deck so they are never made inert when their
        scene fades out. -->
   {%- for block in section.blocks -%}
-    {%- if block.settings.gallery_1 != blank -%}
+    {%- if block.settings.gallery_1 != blank or block.settings.cta_action == 'gallery' -%}
       <div class="silk-story__gallery" data-gallery="{{ block.id }}" hidden>
         <div class="silk-story__gallery-scrim" data-closes-gallery></div>
 
@@ -334,6 +334,13 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
+
+          {%- if block.settings.gallery_1 == blank and request.design_mode -%}
+            {%- comment -%} design_mode is true only in the theme editor {%- endcomment -%}
+            <p class="silk-story__gallery-empty">
+              No photos yet — add them under “Photo collage” in this block’s settings.
+            </p>
+          {%- endif -%}
         </div>
       </div>
     {%- endif -%}
