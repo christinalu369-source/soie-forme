@@ -28,9 +28,9 @@ A living map of every source file in the project. Claude updates this after comp
 
 ## Homepage — A Story in Silk (v1.3)
 
-`sections/section-silk-story.liquid` — Homepage story: scenes rendered from `card` + `scene` blocks (chapter, headline, caption, photo, optional product); fixed deck + invisible scroll track + filmstrip; full theme-editor schema
+`sections/section-silk-story.liquid` — Homepage story: `hero` (cinematic cover) + `scene` (chapter, headline, caption, video/photo, optional collage and product) + `card` blocks; fixed deck + invisible scroll track + filmstrip + collage lightboxes; full theme-editor schema
 `assets/section-silk-story.css` — Story styles: fixed cross-fading deck, full-bleed media band with sheen, caption band, shop pill, filmstrip, toast; editorial split at 900px; reduced-motion handling
-`assets/section-silk-story.js` — Scroll-driven cross-fade engine (opacity/scale from scroll position), filmstrip navigation, `inert` on faded scenes, soft add-to-cart via `/cart/add.js`
+`assets/section-silk-story.js` — Scroll-driven cross-fade engine (opacity/scale from scroll position), filmstrip navigation, `inert` on faded scenes, per-scene video play/pause, photo-collage lightbox (scroll lock + focus trap), soft add-to-cart via `/cart/add.js`
 `layout/story.liquid` — Immersive homepage layout (no nav/footer); scopes scroll-snap via `.story-scroll` on `<html>`
 `templates/index.liquid` — Homepage; declares `layout/story`, renders `section-silk-story`
 

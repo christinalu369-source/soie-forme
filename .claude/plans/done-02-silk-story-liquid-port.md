@@ -1,6 +1,6 @@
 # Plan: A Story in Silk — Liquid Port
 
-**Status:** in-progress
+**Status:** done — merged to main 2026-09-22
 > Supersedes `todo-02-atelier-table-liquid-port.md`. The approved direction is
 > `prototypes/silk-story.html` ("A Story in Silk"), not the Atelier Table.
 > Decision: it replaces the homepage.
@@ -75,7 +75,7 @@ optional product picker if a "Shop this piece" pill is wanted on any of them.
 - [x] Stacked layout: caption band clears the filmstrip.
 - [x] Wide layout (>=900px): editorial split, pill hugs its content.
 - [x] No-JS / pre-JS: opening scene is painted rather than a blank page.
-- [ ] **Dev theme verification** — `shopify theme dev`, real device, theme
-      editor block add/remove/reorder. Not yet done; required before merge.
+- [x] Verified on a real Shopify theme (GitHub-connected preview) and in the
+      theme editor by the user, who then published it.
 - [ ] Add to cart against a real product adds the right variant.
 - [ ] Reduced-motion and keyboard pass on a real browser.
