@@ -144,19 +144,19 @@
 
 /* ── FOOTER ── */
 footer {
-  background: var(--ink);
+  background: var(--olive);
   color: var(--cream);
-  padding: var(--space-2xl) 60px var(--space-lg);
+  padding: var(--space-xl) 60px var(--space-lg);
   margin-top: var(--space-2xl);
 }
 
+/* Brand block only — the link columns were removed */
 .footer-inner {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: var(--space-xl);
-  padding-bottom: var(--space-xl);
-  border-bottom: 1px solid rgba(250, 248, 243, 0.1);
-  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  /* Divider lifted from 0.1 to 0.22: olive is far lighter than the ink this
+     footer used to sit on, so the old value was invisible against it. */
+  border-bottom: 1px solid rgba(250, 248, 243, 0.22);
+  margin-bottom: var(--space-md);
 }
 
 /* Brand column */
@@ -170,7 +170,9 @@ footer {
 }
 
 .footer-logo__amp {
-  color: var(--olive-light);
+  /* was --olive-light, which all but disappeared once the background
+     became olive; the italic still sets it apart */
+  color: var(--cream);
   font-style: italic;
   font-weight: 400;
 }
@@ -181,7 +183,7 @@ footer {
   font-weight: 300;
   line-height: 2.0;
   letter-spacing: 0.06em;
-  color: rgba(250, 248, 243, 0.5);
+  color: var(--cream);
   margin-bottom: var(--space-md);
 }
 
@@ -251,7 +253,7 @@ footer {
   font-size: 9px;
   font-weight: 300;
   letter-spacing: 0.24em;
-  color: rgba(250, 248, 243, 0.3);
+  color: rgba(250, 248, 243, 0.85);
 }
 
 /* ── RESPONSIVE ── */
@@ -262,14 +264,6 @@ footer {
     padding-right: 40px;
   }
 
-  .footer-inner {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-lg);
-  }
-
-  .footer-brand {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (max-width: 600px) {
@@ -293,12 +287,4 @@ footer {
     padding: var(--space-xl) 24px var(--space-lg);
   }
 
-  .footer-inner {
-    grid-template-columns: 1fr;
-    gap: var(--space-lg);
-  }
-
-  .footer-brand {
-    grid-column: auto;
-  }
 }

@@ -48,7 +48,7 @@ A living map of every source file in the project. Claude updates this after comp
 `assets/section-product-main.js` — Product page JS: thumbnail gallery switching, variant selection + price update, AJAX add to cart, cart count update, accordion toggle
 `templates/product.json` — Product template; renders section-product-main
 
-`assets/global-nav.css` — Fixed nav bar (logo, links, cart count badge, frosted-glass scroll state) and footer (dark ink background, 4-column grid, social links)
+`assets/global-nav.css` — Fixed nav bar (logo, links, cart count badge, frosted-glass scroll state) and footer (olive background, brand block + copyright only — link columns removed 2026-09-25)
 
 ## Content Pages (v1.2)
 
