@@ -247,6 +247,69 @@
   });
 
 
+  /* ── SIDE SWIPE TO THE SISTER SITE ──
+     A deliberate left swipe follows the side tab's link. Guards, in order:
+     swipes starting within 40px of the edge are left to the browser's own
+     back/forward gesture; the movement must be clearly horizontal rather
+     than a scroll; and nothing fires while the lightbox is open. */
+  const sideTab = story.querySelector('[data-sidetab][data-sidetab-swipe]');
+
+  if (sideTab && window.matchMedia('(hover: none)').matches) {
+    const EDGE_GUARD   = 40;  /* px from the screen edge to ignore */
+    const TRIGGER      = 70;  /* px of travel before it counts */
+    const HORIZONTAL   = 1.6; /* dx must beat dy by this much */
+
+    let startX = 0;
+    let startY = 0;
+    let tracking = false;
+
+    story.addEventListener('touchstart', function (event) {
+      if (openGallery || event.touches.length !== 1) return;
+      const touch = event.touches[0];
+      if (touch.clientX > window.innerWidth - EDGE_GUARD || touch.clientX < EDGE_GUARD) return;
+
+      startX = touch.clientX;
+      startY = touch.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    story.addEventListener('touchmove', function (event) {
+      if (!tracking || openGallery) return;
+
+      const dx = event.touches[0].clientX - startX;
+      const dy = event.touches[0].clientY - startY;
+
+      /* Vertical movement means they're reading the story — let it go */
+      if (Math.abs(dy) > Math.abs(dx)) {
+        tracking = false;
+        sideTab.style.setProperty('--sidetab-pull', '0px');
+        return;
+      }
+
+      /* Drag the tab out a little so the gesture feels answered */
+      if (dx < 0) {
+        const pull = Math.max(dx / 3, -24);
+        sideTab.style.setProperty('--sidetab-pull', pull + 'px');
+      }
+    }, { passive: true });
+
+    story.addEventListener('touchend', function (event) {
+      if (!tracking) return;
+      tracking = false;
+
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+
+      sideTab.style.setProperty('--sidetab-pull', '0px');
+
+      if (dx < -TRIGGER && Math.abs(dx) > Math.abs(dy) * HORIZONTAL) {
+        window.location.href = sideTab.getAttribute('href');
+      }
+    }, { passive: true });
+  }
+
+
   /* Mirror the nav cart badge used elsewhere in the theme, when present */
   function updateCartCount() {
     fetch('/cart.js')

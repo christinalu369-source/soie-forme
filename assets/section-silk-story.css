@@ -431,6 +431,11 @@
   .silk-story__band .silk-story__chapter {
     align-self: flex-start;
   }
+
+  /* Keep caption text from running underneath the side tab */
+  .silk-story--has-sidetab .silk-story__band {
+    padding-right: calc(var(--space-lg) + 46px);
+  }
 }
 
 
@@ -818,4 +823,72 @@
   color: var(--ink-faint);
   padding: var(--space-md) 0;
   text-align: center;
+}
+
+
+/* ============================================================
+   SIDE TAB — the pull across to the sister site
+   Sits on the right edge; a left swipe follows the same link.
+   ============================================================ */
+
+.silk-story__sidetab {
+  position: fixed;
+  z-index: 70; /* above the filmstrip, below the toast and lightbox */
+  right: 0;
+  top: 50%;
+  /* --sidetab-pull is nudged by the swipe handler for drag feedback */
+  transform: translateY(-50%) translateX(calc(var(--sidetab-pull, 0px)));
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 10px;
+
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--cream);
+
+  /* Opaque enough that cream text holds over the cream caption band as
+     well as over a photo — 0.42 measured about 2.6:1 against the band. */
+  background: rgba(44, 44, 42, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(250, 248, 243, 0.22);
+  border-right: none;
+  border-radius: 100px 0 0 100px;
+
+  /* Reads top-to-bottom, so the tab stays narrow against the edge */
+  writing-mode: vertical-rl;
+  transition: background 0.3s ease, border-color 0.3s ease, padding 0.3s ease;
+}
+
+.silk-story__sidetab:hover {
+  background: var(--olive);
+  border-color: var(--olive);
+  padding-right: 14px;
+}
+
+.silk-story__sidetab-arrow {
+  font-size: 13px;
+  line-height: 1;
+  /* The glyph points right in horizontal text; rotate it back upright
+     inside the vertical flow so it still reads as "onward". */
+  transform: rotate(-90deg);
+}
+
+@media (max-width: 600px) {
+  .silk-story__sidetab {
+    padding: 14px 8px;
+    letter-spacing: 0.24em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .silk-story__sidetab {
+    transition: none !important;
+  }
 }
