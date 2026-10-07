@@ -96,6 +96,17 @@
             {%- endif -%}
           </div>
 
+          {%- comment -%}
+            Sideways cue to the sister site, using the section's Sister site
+            link so there is one source of truth with the edge tab.
+          {%- endcomment -%}
+          {%- if block.settings.show_side_hint and section.settings.sidetab_url != blank -%}
+            <a class="silk-story__side-hint" href="{{ section.settings.sidetab_url }}">
+              <span>{{ section.settings.sidetab_label }}</span>
+              <span class="silk-story__side-hint-arrow" aria-hidden="true">&#8594;</span>
+            </a>
+          {%- endif -%}
+
           <div class="silk-story__scroll-hint" aria-hidden="true">
             Scroll <span>&#8595;</span>
           </div>
@@ -482,6 +493,13 @@
           "id": "color_to",
           "label": "Fallback wash — to",
           "default": "#7A4A3C"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_side_hint",
+          "label": "Show the sideways cue to the sister site",
+          "info": "Uses the Sister site link in this section's settings.",
+          "default": true
         },
         {
           "type": "header",

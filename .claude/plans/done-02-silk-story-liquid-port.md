@@ -40,8 +40,8 @@ actual products and the cart.
 ## Story structure (set 2026-09-22)
 | # | Scene | Copy | Media the user is supplying |
 |---|---|---|---|
-| 1 | Cover | "A story, in silk" — CTA opens its own photo collage | Cover photo/film + up to 6 styling stills |
-| 2 | Ways to wear | "A hundred ways to wear it." | Short video showing 1-2 ways in motion |
+| 1 | Cover | "A story, in silk" — sideways cue + edge tab to Forme by Soie | Cover photo/film |
+| 2 | Ways to wear | "A hundred ways to wear it." — "Style types" opens the collage | Video or still + 6 collage stills |
 | 3 | History | "It travelled further than we did." | Short video: silk history + Silk Road |
 | 4 | 绫罗绸缎 | The four classical weaves | Short video: the differences between them |
 | 5 | Lifestyle | "It moves the way you do." | Short video: silk moving in the air |

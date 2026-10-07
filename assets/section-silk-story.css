@@ -892,3 +892,45 @@
     transition: none !important;
   }
 }
+
+
+/* Sideways cue on the cover — the horizontal counterpart to "Scroll ↓" */
+.silk-story__side-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 26px;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 300;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: rgba(250, 248, 243, 0.9);
+  border-bottom: 1px solid rgba(250, 248, 243, 0.35);
+  padding-bottom: 7px;
+  text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
+  transition: color 0.3s ease, border-color 0.3s ease;
+}
+
+.silk-story__side-hint:hover {
+  color: var(--cream);
+  border-color: var(--cream);
+}
+
+.silk-story__side-hint-arrow {
+  font-size: 13px;
+  line-height: 1;
+  animation: silkNudge 2.4s ease-in-out infinite;
+}
+
+@keyframes silkNudge {
+  0%, 100% { transform: translateX(0);   opacity: 0.65; }
+  50%      { transform: translateX(7px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .silk-story__side-hint-arrow {
+    animation: none !important;
+  }
+}
