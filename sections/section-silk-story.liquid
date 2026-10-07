@@ -17,7 +17,7 @@
   {%- assign has_film = true -%}
 {%- endif -%}
 
-<div class="silk-story{% if has_film %} silk-story--has-film{% endif %}">
+<div class="silk-story{% if has_film %} silk-story--has-film{% endif %}{% if section.settings.sidetab_url != blank %} silk-story--has-sidetab{% endif %}">
 
   <!-- ── DECK: all scenes stack and cross-fade here ── -->
   <div class="silk-story__deck">
@@ -286,6 +286,22 @@
   {%- endif -%}
 
 
+  <!-- ── SIDE TAB: sister site ──
+       A pull toward Forme by Soie, sitting on the right edge. The swipe
+       gesture in the JS targets this same href. -->
+  {%- if section.settings.sidetab_url != blank -%}
+    <a
+      class="silk-story__sidetab"
+      href="{{ section.settings.sidetab_url }}"
+      data-sidetab
+      {% if section.settings.sidetab_swipe %}data-sidetab-swipe{% endif %}
+    >
+      <span class="silk-story__sidetab-label">{{ section.settings.sidetab_label }}</span>
+      <span class="silk-story__sidetab-arrow" aria-hidden="true">&#8594;</span>
+    </a>
+  {%- endif -%}
+
+
   <!-- ── PHOTO COLLAGE LIGHTBOXES ──
        Rendered outside the deck so they are never made inert when their
        scene fades out. -->
@@ -362,6 +378,29 @@
       "type": "checkbox",
       "id": "show_filmstrip",
       "label": "Show progress filmstrip",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Sister site"
+    },
+    {
+      "type": "text",
+      "id": "sidetab_label",
+      "label": "Side tab label",
+      "default": "Forme by Soie"
+    },
+    {
+      "type": "url",
+      "id": "sidetab_url",
+      "label": "Side tab link",
+      "info": "Leave blank to hide the tab entirely."
+    },
+    {
+      "type": "checkbox",
+      "id": "sidetab_swipe",
+      "label": "Also open it on a left swipe",
+      "info": "Touch devices only. Swipes starting at the very edge are ignored so the browser's back gesture still works.",
       "default": true
     }
   ],

@@ -181,7 +181,10 @@
           "beat-close"
         ],
         "settings": {
-          "show_filmstrip": true
+          "show_filmstrip": true,
+          "sidetab_label": "Forme by Soie",
+          "sidetab_url": "https://formebysoie.com",
+          "sidetab_swipe": true
         }
       }
     },
