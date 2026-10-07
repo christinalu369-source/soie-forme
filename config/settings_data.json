@@ -176,7 +176,82 @@
         "settings": {
           "show_filmstrip": true,
           "sidetab_label": "Forme by Soie",
-          "sidetab_url": "https://formebysoie.com",
+          "sidetab_url": "/pages/forme",
+          "sidetab_swipe": true,
+          "sidetab_side": "right"
+        }
+      },
+      "section-forme-story": {
+        "type": "section-forme-story",
+        "blocks": {
+          "f-open": {
+            "type": "hero",
+            "settings": {
+              "eyebrow": "Forme by Soie",
+              "mark": "<p>Every print</p><p>starts <em>here</em></p>",
+              "sub": "Not licensed, not bought by the metre. The drawing, the revisions and the final call are ours.",
+              "cta_label": "",
+              "show_side_hint": true,
+              "color_from": "#EFEADF",
+              "color_to": "#8C8878"
+            }
+          },
+          "f-1": {
+            "type": "scene",
+            "settings": {
+              "chapter": "One",
+              "line": "Ours from the first sketch.",
+              "note": "Every print here began with us. Nothing is licensed artwork, nothing is bought from a pattern house. The drawing, the revisions, the final call — all our own.",
+              "color_from": "#EFEADF",
+              "color_to": "#A49A80"
+            }
+          },
+          "f-2": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Two",
+              "line": "A print has to earn the silk.",
+              "note": "Scale, border, colourway, the weight of a line at the hem. Each design goes through many versions before it touches fabric, and most never get there.",
+              "color_from": "#E7C9D0",
+              "color_to": "#7A4A3C"
+            }
+          },
+          "f-3": {
+            "type": "scene",
+            "settings": {
+              "chapter": "Three",
+              "line": "Few of each.",
+              "note": "Because the designs are ours, we can print in small numbers and move on. You are unlikely to pass someone wearing the same square.",
+              "color_from": "#C7CBA6",
+              "color_to": "#4C5A24"
+            }
+          },
+          "f-close": {
+            "type": "card",
+            "settings": {
+              "mark": "<p>The designs live here.</p><p>The silk lives <em>there</em>.</p>",
+              "sub": "",
+              "cta_label": "Shop Soie & Forme",
+              "cta_url": "/collections",
+              "link_1_label": "Back to the story",
+              "link_1_url": "/",
+              "link_2_label": "",
+              "link_2_url": ""
+            }
+          }
+        },
+        "block_order": [
+          "f-open",
+          "f-1",
+          "f-2",
+          "f-3",
+          "f-close"
+        ],
+        "settings": {
+          "show_filmstrip": true,
+          "sidetab_side": "left",
+          "sidetab_label": "Soie & Forme",
+          "sidetab_url": "/",
           "sidetab_swipe": true
         }
       }

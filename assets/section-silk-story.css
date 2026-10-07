@@ -934,3 +934,36 @@
     animation: none !important;
   }
 }
+
+
+/* ── SIDE TAB ON THE LEFT EDGE ──
+   Used on the Forme page, where the tab leads back to Soie & Forme. */
+.silk-story__sidetab--left {
+  right: auto;
+  left: 0;
+  border-radius: 0 100px 100px 0;
+  border-right: 1px solid rgba(250, 248, 243, 0.22);
+  border-left: none;
+  transform: translateY(-50%) translateX(calc(var(--sidetab-pull, 0px) * -1));
+}
+
+.silk-story__sidetab--left:hover {
+  padding-left: 14px;
+  padding-right: 10px;
+}
+
+/* Band clearance flips with the tab */
+@media (min-width: 900px) {
+  .silk-story--has-sidetab-left .silk-story__band {
+    padding-right: var(--space-lg);
+  }
+}
+
+.silk-story__side-hint--left .silk-story__side-hint-arrow {
+  animation-name: silkNudgeBack;
+}
+
+@keyframes silkNudgeBack {
+  0%, 100% { transform: translateX(0);    opacity: 0.65; }
+  50%      { transform: translateX(-7px); opacity: 1; }
+}

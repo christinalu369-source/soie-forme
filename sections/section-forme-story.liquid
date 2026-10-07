@@ -1,13 +1,13 @@
 {% comment %}
-  Homepage story. All markup lives in snippets/silk-story.liquid so the Forme
-  side page can render the same experience with its own content.
+  Forme by Soie — the side page. Renders the same story engine as the homepage
+  via snippets/silk-story.liquid, with its own blocks and its own side tab
+  pointing back to Soie & Forme.
 {% endcomment %}
 {% render 'silk-story', section: section %}
 
-
 {% schema %}
 {
-  "name": "Silk Story",
+  "name": "Forme Story",
   "tag": "div",
   "settings": [
     {
@@ -24,17 +24,23 @@
       "type": "text",
       "id": "sidetab_label",
       "label": "Side tab label",
-      "default": "Forme by Soie"
+      "default": "Soie & Forme"
     },
     {
       "type": "select",
       "id": "sidetab_side",
       "label": "Which edge",
       "options": [
-        { "value": "right", "label": "Right — swipe left to go there" },
-        { "value": "left", "label": "Left — swipe right to go back" }
+        {
+          "value": "right",
+          "label": "Right — swipe left to go there"
+        },
+        {
+          "value": "left",
+          "label": "Left — swipe right to go back"
+        }
       ],
-      "default": "right"
+      "default": "left"
     },
     {
       "type": "url",
@@ -85,9 +91,18 @@
           "id": "cta_action",
           "label": "Button opens",
           "options": [
-            { "value": "gallery", "label": "A photo collage" },
-            { "value": "scroll", "label": "A scene in this story" },
-            { "value": "link", "label": "A link" }
+            {
+              "value": "gallery",
+              "label": "A photo collage"
+            },
+            {
+              "value": "scroll",
+              "label": "A scene in this story"
+            },
+            {
+              "value": "link",
+              "label": "A link"
+            }
           ],
           "default": "gallery"
         },
@@ -152,18 +167,66 @@
           "label": "Lightbox title",
           "default": "Ways to wear a square"
         },
-        { "type": "image_picker", "id": "gallery_1", "label": "Photo 1" },
-        { "type": "text", "id": "gallery_1_caption", "label": "Photo 1 caption" },
-        { "type": "image_picker", "id": "gallery_2", "label": "Photo 2" },
-        { "type": "text", "id": "gallery_2_caption", "label": "Photo 2 caption" },
-        { "type": "image_picker", "id": "gallery_3", "label": "Photo 3" },
-        { "type": "text", "id": "gallery_3_caption", "label": "Photo 3 caption" },
-        { "type": "image_picker", "id": "gallery_4", "label": "Photo 4" },
-        { "type": "text", "id": "gallery_4_caption", "label": "Photo 4 caption" },
-        { "type": "image_picker", "id": "gallery_5", "label": "Photo 5" },
-        { "type": "text", "id": "gallery_5_caption", "label": "Photo 5 caption" },
-        { "type": "image_picker", "id": "gallery_6", "label": "Photo 6" },
-        { "type": "text", "id": "gallery_6_caption", "label": "Photo 6 caption" }
+        {
+          "type": "image_picker",
+          "id": "gallery_1",
+          "label": "Photo 1"
+        },
+        {
+          "type": "text",
+          "id": "gallery_1_caption",
+          "label": "Photo 1 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_2",
+          "label": "Photo 2"
+        },
+        {
+          "type": "text",
+          "id": "gallery_2_caption",
+          "label": "Photo 2 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_3",
+          "label": "Photo 3"
+        },
+        {
+          "type": "text",
+          "id": "gallery_3_caption",
+          "label": "Photo 3 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_4",
+          "label": "Photo 4"
+        },
+        {
+          "type": "text",
+          "id": "gallery_4_caption",
+          "label": "Photo 4 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_5",
+          "label": "Photo 5"
+        },
+        {
+          "type": "text",
+          "id": "gallery_5_caption",
+          "label": "Photo 5 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_6",
+          "label": "Photo 6"
+        },
+        {
+          "type": "text",
+          "id": "gallery_6_caption",
+          "label": "Photo 6 caption"
+        }
       ]
     },
     {
@@ -292,27 +355,65 @@
           "label": "Lightbox title",
           "info": "Defaults to the scene headline."
         },
-        { "type": "image_picker", "id": "gallery_1", "label": "Photo 1" },
-        { "type": "text", "id": "gallery_1_caption", "label": "Photo 1 caption" },
-        { "type": "image_picker", "id": "gallery_2", "label": "Photo 2" },
-        { "type": "text", "id": "gallery_2_caption", "label": "Photo 2 caption" },
-        { "type": "image_picker", "id": "gallery_3", "label": "Photo 3" },
-        { "type": "text", "id": "gallery_3_caption", "label": "Photo 3 caption" },
-        { "type": "image_picker", "id": "gallery_4", "label": "Photo 4" },
-        { "type": "text", "id": "gallery_4_caption", "label": "Photo 4 caption" },
-        { "type": "image_picker", "id": "gallery_5", "label": "Photo 5" },
-        { "type": "text", "id": "gallery_5_caption", "label": "Photo 5 caption" },
-        { "type": "image_picker", "id": "gallery_6", "label": "Photo 6" },
-        { "type": "text", "id": "gallery_6_caption", "label": "Photo 6 caption" },
         {
-          "type": "header",
-          "content": "Shop this piece"
+          "type": "image_picker",
+          "id": "gallery_1",
+          "label": "Photo 1"
         },
         {
-          "type": "product",
-          "id": "product",
-          "label": "Product",
-          "info": "Optional. Single-variant products add straight to the cart; products with options link to their page."
+          "type": "text",
+          "id": "gallery_1_caption",
+          "label": "Photo 1 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_2",
+          "label": "Photo 2"
+        },
+        {
+          "type": "text",
+          "id": "gallery_2_caption",
+          "label": "Photo 2 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_3",
+          "label": "Photo 3"
+        },
+        {
+          "type": "text",
+          "id": "gallery_3_caption",
+          "label": "Photo 3 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_4",
+          "label": "Photo 4"
+        },
+        {
+          "type": "text",
+          "id": "gallery_4_caption",
+          "label": "Photo 4 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_5",
+          "label": "Photo 5"
+        },
+        {
+          "type": "text",
+          "id": "gallery_5_caption",
+          "label": "Photo 5 caption"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_6",
+          "label": "Photo 6"
+        },
+        {
+          "type": "text",
+          "id": "gallery_6_caption",
+          "label": "Photo 6 caption"
         }
       ]
     }
@@ -320,7 +421,7 @@
   "max_blocks": 12,
   "presets": [
     {
-      "name": "Silk Story"
+      "name": "Forme Story"
     }
   ]
 }

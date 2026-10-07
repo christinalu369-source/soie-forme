@@ -259,6 +259,11 @@
     const TRIGGER      = 70;  /* px of travel before it counts */
     const HORIZONTAL   = 1.6; /* dx must beat dy by this much */
 
+    /* Tab on the right: swipe left to go there. Tab on the left (the Forme
+       page, heading back): swipe right. */
+    const tabSide  = sideTab.getAttribute('data-sidetab-side') === 'left' ? 'left' : 'right';
+    const DIRECTION = tabSide === 'left' ? 1 : -1;
+
     let startX = 0;
     let startY = 0;
     let tracking = false;
@@ -287,9 +292,12 @@
       }
 
       /* Drag the tab out a little so the gesture feels answered */
-      if (dx < 0) {
-        const pull = Math.max(dx / 3, -24);
-        sideTab.style.setProperty('--sidetab-pull', pull + 'px');
+      if (Math.sign(dx) === DIRECTION) {
+        /* Always negative: the right-edge tab translates by --sidetab-pull and
+           the left-edge one by its inverse, so a negative value slides each of
+           them outward from its own edge. */
+        const pull = Math.min(Math.abs(dx) / 3, 24);
+        sideTab.style.setProperty('--sidetab-pull', -pull + 'px');
       }
     }, { passive: true });
 
@@ -303,7 +311,8 @@
 
       sideTab.style.setProperty('--sidetab-pull', '0px');
 
-      if (dx < -TRIGGER && Math.abs(dx) > Math.abs(dy) * HORIZONTAL) {
+      const travelled = dx * DIRECTION; /* positive once they swipe the right way */
+      if (travelled > TRIGGER && Math.abs(dx) > Math.abs(dy) * HORIZONTAL) {
         window.location.href = sideTab.getAttribute('href');
       }
     }, { passive: true });
